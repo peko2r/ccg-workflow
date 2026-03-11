@@ -2,13 +2,19 @@
 
 > [根目录](../CLAUDE.md) > **skills-v2**
 
-**Last Updated**: 2026-03-11 (v1.7.79)
+**Last Updated**: 2026-03-11 (v1.7.80)
 
 ---
 
 ## 变更记录 (Changelog)
 
 > 完整变更历史请查看 [CHANGELOG.md](./CHANGELOG.md)
+
+### 2026-03-11 (v1.7.80)
+- ✨ **`/ccg:context` 命令**：第 27 个斜杠命令，`.context/` 目录初始化 + 决策日志 + 压缩归档 + 历史查看
+- ✨ **Context Compress Phase**：`/ccg:commit` 提交时自动压缩 session.log → history/commits.jsonl
+- ✨ **13 个角色提示词 `.context Awareness`**：Codex/Gemini 提示词注入 `.context/prefs/` 读取指令
+- ✨ **Quality Gate Rules**：`~/.claude/rules/ccg-skills.md` 定义质量关卡自动触发规则，安装时自动写入
 
 ### 2026-03-11 (v1.7.79)
 - 🐛 **Binary 下载容错**：3 次重试 + 60s 超时 + 失败醒目告警（红框 + 手动修复指引）+ 不阻塞安装
@@ -96,7 +102,7 @@
 **CCG (Claude + Codex + Gemini)** - 多模型协作系统的核心实现，提供：
 
 1. **多模型协作编排**：固定路由 Gemini（前端）+ Codex（后端）+ Claude（编排）
-2. **26 个斜杠命令**：开发工作流 + Git 工具 + 项目管理 + OPSX + Agent Teams + Codex 执行
+2. **27 个斜杠命令**：开发工作流 + Git 工具 + 项目管理 + OPSX + Agent Teams + Codex 执行
 3. **13 个专家提示词**：Codex 6 个 + Gemini 7 个
 4. **6 个原生 Skills**：质量关卡（verify-security/quality/change/module + gen-docs）+ 多 Agent 协同
 5. **跨平台 CLI 工具**：一键安装（支持 macOS、Linux、Windows）
@@ -159,6 +165,7 @@ npx ccg-workflow menu
 | `/ccg:plan` | 多模型协作规划（Phase 1-2） | Codex ∥ Gemini |
 | `/ccg:execute` | 多模型协作执行（Phase 3-5） | Codex ∥ Gemini + Claude |
 | `/ccg:codex-exec` | Codex 全权执行计划（MCP + 代码 + 测试） | Codex + 多模型审核 |
+| `/ccg:context` | 项目上下文管理（.context 初始化/日志/压缩/历史） | Claude |
 | `/ccg:frontend` | 前端专项（快速模式） | Gemini |
 | `/ccg:backend` | 后端专项（快速模式） | Codex |
 | `/ccg:feat` | 智能功能开发 | 规划 → 实施 |
@@ -201,7 +208,7 @@ v1.7.0 起，以下配置不再支持自定义：
 | 前端模型 | Gemini | 擅长 UI/CSS/组件 |
 | 后端模型 | Codex | 擅长逻辑/算法/调试 |
 | 协作模式 | smart | 最佳实践 |
-| 命令数量 | 26 个 | 全部安装 |
+| 命令数量 | 27 个 | 全部安装 |
 
 ---
 
@@ -260,11 +267,12 @@ src/
 
 ```
 templates/
-├── commands/                  # 26 个斜杠命令
+├── commands/                  # 27 个斜杠命令
 │   ├── workflow.md
 │   ├── plan.md                # 多模型协作规划
 │   ├── execute.md             # 多模型协作执行
 │   ├── codex-exec.md          # Codex 全权执行计划
+│   ├── context.md             # 项目上下文管理（.context）
 │   ├── frontend.md
 │   ├── backend.md
 │   ├── feat.md
@@ -300,6 +308,8 @@ templates/
     │   └── lib/
     └── orchestration/
         └── multi-agent/
+├── rules/                    # 全局规则（→ ~/.claude/rules/）
+│   └── ccg-skills.md         # 质量关卡自动触发规则
 ```
 
 ### 预编译产物
