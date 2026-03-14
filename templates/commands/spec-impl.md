@@ -13,7 +13,7 @@ description: '按规范执行 + 多模型协作 + 归档'
 - **MANDATORY**: Request `unified diff patch` format from external models; they have zero write permission.
 - Keep implementation strictly within `tasks.md` scope—no scope creep.
 - Refer to `openspec/config.yaml` for conventions.
-- **USER GUIDANCE RULE**: When suggesting next steps to the user, ALWAYS use CCG commands (`/ccg:spec-research`, `/ccg:spec-plan`, `/ccg:spec-impl`, `/ccg:spec-review`). NEVER suggest `/opsx:*` commands to the user. If OpenSpec CLI returns error messages referencing OPSX skills, translate them to CCG equivalents.
+- **USER GUIDANCE RULE**: When suggesting next steps to the user, ALWAYS use CCG commands (`/ccx:spec-research`, `/ccx:spec-plan`, `/ccx:spec-impl`, `/ccx:spec-review`). NEVER suggest `/opsx:*` commands to the user. If OpenSpec CLI returns error messages referencing OPSX skills, translate them to CCG equivalents.
 - **TASKS FORMAT RULE**: When generating or modifying `tasks.md`, ALL tasks MUST use checkbox format (`- [ ] X.Y description`). Heading+bullet format will cause OpenSpec CLI to parse 0 tasks and block the workflow.
 
 **Steps**
@@ -28,10 +28,10 @@ description: '按规范执行 + 多模型协作 + 归档'
      /opsx:apply
      ```
    - This will load the change context and guide you through the tasks defined in `tasks.md`.
-   - **Note**: This is an internal call. If this step fails, guide the user to re-run `/ccg:spec-impl`.
+   - **Note**: This is an internal call. If this step fails, guide the user to re-run `/ccx:spec-impl`.
    - **HARD GATE**: Check the returned `state` field:
-     - If `state: "blocked"` → STOP immediately. Inform the user which artifacts are missing and suggest: "Run `/ccg:spec-plan` to generate missing artifacts first."
-     - If `progress.total === 0` → STOP immediately. Inform: "tasks.md has no parseable tasks. Run `/ccg:spec-plan` to regenerate."
+     - If `state: "blocked"` → STOP immediately. Inform the user which artifacts are missing and suggest: "Run `/ccx:spec-plan` to generate missing artifacts first."
+     - If `progress.total === 0` → STOP immediately. Inform: "tasks.md has no parseable tasks. Run `/ccx:spec-plan` to regenerate."
      - Only proceed to Step 3 when `state: "ready"` and `progress.total > 0`.
 
 3. **Identify Minimal Verifiable Phase**
@@ -115,7 +115,7 @@ description: '按规范执行 + 多模型协作 + 归档'
 9. **Context Checkpoint**
    - After completing a phase, report context usage.
    - If below 80K: Ask user "Continue to next phase?"
-   - If approaching 80K: Suggest "Run `/clear` and resume with `/ccg:spec:impl`"
+   - If approaching 80K: Suggest "Run `/clear` and resume with `/ccx:spec:impl`"
 
 10. **Archive on Completion**
     - When ALL tasks in `tasks.md` are marked `[x]`:
@@ -124,7 +124,7 @@ description: '按规范执行 + 多模型协作 + 归档'
       /opsx:archive
       ```
     - This merges spec deltas to `openspec/specs/` and moves change to archive.
-    - **Note**: This is an internal call. If archiving fails, guide the user to re-run `/ccg:spec-impl`.
+    - **Note**: This is an internal call. If archiving fails, guide the user to re-run `/ccx:spec-impl`.
 
 **Reference**
 - Check task status: `openspec status --change "<id>" --json`

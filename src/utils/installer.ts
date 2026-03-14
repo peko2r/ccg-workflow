@@ -67,17 +67,16 @@ interface InstallContext {
 // Binary download
 // ═══════════════════════════════════════════════════════
 
-const GITHUB_REPO = 'fengshao1227/ccg-workflow'
+const GITHUB_REPO = 'fengshao1227/claude-code-ex'
 const RELEASE_TAG = 'preset'
 const BINARY_DOWNLOAD_URL = `https://github.com/${GITHUB_REPO}/releases/download/${RELEASE_TAG}`
 const BRIDGE_COMPAT_SHIMS = [
-  { name: 'ccb', targetArgs: ['bridge'] },
   { name: 'ask', targetArgs: ['ask'] },
-  { name: 'ccb-ping', targetArgs: ['ping'] },
   { name: 'pend', targetArgs: ['pend'] },
-  { name: 'ccb-mounted', targetArgs: ['mounted'] },
-  { name: 'ccb-cleanup', targetArgs: ['cleanup'] },
+  { name: 'maild', targetArgs: ['maild'] },
 ] as const
+const BRIDGE_SEMANTIC_COMMANDS = BRIDGE_COMPAT_SHIMS.map(({ name }) => name)
+const LEGACY_BRIDGE_COMPAT_SHIMS = ['ccb', 'ccb-ping', 'ccb-mounted', 'ccb-cleanup'] as const
 
 /**
  * Download codeagent-wrapper binary from GitHub Release.
@@ -158,20 +157,20 @@ async function copyMdTemplates(
 }
 
 function getBridgeResourceDir(installDir: string): string {
-  return join(installDir, '.ccg', 'bridge')
+  return join(installDir, '.ccx', 'bridge')
 }
 
 function buildBridgePowerShellLauncher(): string {
   const mapping = BRIDGE_COMPAT_SHIMS
     .map(({ name, targetArgs }) => `  '${name}' = @(${targetArgs.map(arg => `'${arg}'`).join(', ')})`)
-    .join('\r\n')
+    .join('\n')
 
   return `param(
   [Parameter(Mandatory = $true, Position = 0)]
-  [string] $ShimName,
+  [string]$ShimName,
 
   [Parameter(ValueFromRemainingArguments = $true)]
-  [string[]] $RemainingArgs
+  [string[]]$RemainingArgs
 )
 
 $commandMap = @{
@@ -179,24 +178,24 @@ ${mapping}
 }
 
 if (-not $commandMap.ContainsKey($ShimName)) {
-  Write-Error "Unknown CCG bridge compatibility shim: $ShimName"
+  Write-Error "Unknown CCX bridge command: $ShimName"
   exit 64
 }
 
 $resolvedArgs = @($commandMap[$ShimName] + $RemainingArgs)
-$ccgCommand = Get-Command 'ccg' -ErrorAction SilentlyContinue
-if ($null -ne $ccgCommand) {
-  & $ccgCommand.Source @resolvedArgs
+$ccxCommand = Get-Command 'ccx' -ErrorAction SilentlyContinue
+if ($null -ne $ccxCommand) {
+  & $ccxCommand.Source @resolvedArgs
   exit $LASTEXITCODE
 }
 
 $npxCommand = Get-Command 'npx' -ErrorAction SilentlyContinue
 if ($null -ne $npxCommand) {
-  & $npxCommand.Source '--yes' 'ccg-workflow' @resolvedArgs
+  & $npxCommand.Source '--yes' 'claude-code-ex' @resolvedArgs
   exit $LASTEXITCODE
 }
 
-Write-Error "Unable to locate 'ccg' or 'npx'. Install ccg-workflow globally or run 'npx ccg-workflow init' again."
+Write-Error "Unable to locate 'ccx' or 'npx'. Install claude-code-ex globally or run 'npx claude-code-ex init' again."
 exit 127
 `
 }
@@ -204,7 +203,7 @@ exit 127
 function buildBridgeCmdShim(): string {
   return `@echo off
 setlocal
-set "LAUNCHER=%~dp0..\\.ccg\\bridge\\compat-launcher.ps1"
+set "LAUNCHER=%~dp0..\\.ccx\\bridge\\compat-launcher.ps1"
 where pwsh.exe >nul 2>nul
 if %ERRORLEVEL% EQU 0 (
   pwsh.exe -NoLogo -NoProfile -ExecutionPolicy Bypass -File "%LAUNCHER%" "%~n0" %*
@@ -216,7 +215,7 @@ exit /b %ERRORLEVEL%
 }
 
 function buildBridgePowerShellShim(name: string): string {
-  return `& "$PSScriptRoot\\..\\.ccg\\bridge\\compat-launcher.ps1" '${name}' @args
+  return `& "$PSScriptRoot\\..\\.ccx\\bridge\\compat-launcher.ps1" '${name}' @args
 exit $LASTEXITCODE
 `
 }
@@ -241,43 +240,46 @@ async function removeManagedTextFile(filePath: string, expectedContent: string):
 
 function buildBridgePosixLauncher(): string {
   const mapping = BRIDGE_COMPAT_SHIMS
-    .map(({ name, targetArgs }) => `  ${name}) set -- ${targetArgs.join(' ')} "$@" ;;`)
+    .map(({ name, targetArgs }) => `${name})
+    set -- ${targetArgs.map(arg => `'${arg}'`).join(' ')} "$@"
+    ;;`)
     .join('\n')
 
-  return `#!/usr/bin/env sh
-set -eu
+  return `#!/usr/bin/env bash
+set -euo pipefail
 
-shim_name=$1
-shift
+shim_name="${'$'}{1:-}"
+if [ -z "${'$'}shim_name" ]; then
+  printf '%s\n' 'Missing shim name' >&2
+  exit 64
+fi
+shift || true
 
-case "$shim_name" in
+case "${'$'}shim_name" in
 ${mapping}
   *)
-    printf '%s\n' "Unknown CCG bridge compatibility shim: $shim_name" >&2
+    printf '%s\n' "Unknown CCX bridge command: ${'$'}shim_name" >&2
     exit 64
     ;;
 esac
 
-if command -v ccg >/dev/null 2>&1; then
-  exec ccg "$@"
+if command -v ccx >/dev/null 2>&1; then
+  exec ccx "$@"
 fi
 
 if command -v npx >/dev/null 2>&1; then
-  exec npx --yes ccg-workflow "$@"
+  exec npx --yes claude-code-ex "$@"
 fi
 
-printf '%s\n' "Unable to locate 'ccg' or 'npx'. Install ccg-workflow globally or run 'npx ccg-workflow init' again." >&2
+printf '%s\n' "Unable to locate 'ccx' or 'npx'. Install claude-code-ex globally or run 'npx claude-code-ex init' again." >&2
 exit 127
 `
 }
 
 function buildBridgePosixShim(): string {
-  return `#!/usr/bin/env sh
-set -eu
-
-SCRIPT_DIR=$(CDPATH= cd -- "$(dirname "$0")" && pwd)
-SHIM_NAME=$(basename "$0")
-exec "$SCRIPT_DIR/../.ccg/bridge/compat-launcher.sh" "$SHIM_NAME" "$@"
+  return `#!/usr/bin/env bash
+set -euo pipefail
+exec "${'$'}{0%/*}/../.ccx/bridge/compat-launcher.sh" "${'$'}{0##*/}" "$@"
 `
 }
 
@@ -300,7 +302,7 @@ async function writeTextFileIfNeeded(filePath: string, content: string, force: b
  * Install slash command .md files from templates/commands/
  */
 async function installCommandFiles(ctx: InstallContext, workflowIds: string[]): Promise<void> {
-  const commandsDir = join(ctx.installDir, 'commands', 'ccg')
+  const commandsDir = join(ctx.installDir, 'commands', 'ccx')
 
   for (const workflowId of workflowIds) {
     const workflow = getWorkflowById(workflowId)
@@ -328,7 +330,7 @@ async function installCommandFiles(ctx: InstallContext, workflowIds: string[]): 
 description: "${workflow.descriptionEn}"
 ---
 
-# /ccg:${cmd}
+# /ccx:${cmd}
 
 ${workflow.description}
 
@@ -354,7 +356,7 @@ async function installAgentFiles(ctx: InstallContext): Promise<void> {
     await copyMdTemplates(
       ctx,
       join(ctx.templateDir, 'commands', 'agents'),
-      join(ctx.installDir, 'agents', 'ccg'),
+      join(ctx.installDir, 'agents', 'ccx'),
       { inject: true },
     )
   }
@@ -369,7 +371,7 @@ async function installAgentFiles(ctx: InstallContext): Promise<void> {
  */
 async function installPromptFiles(ctx: InstallContext): Promise<void> {
   const promptsTemplateDir = join(ctx.templateDir, 'prompts')
-  const promptsDir = join(ctx.installDir, '.ccg', 'prompts')
+  const promptsDir = join(ctx.installDir, '.ccx', 'prompts')
   if (!(await fs.pathExists(promptsTemplateDir))) return
 
   for (const model of ['codex', 'gemini', 'claude']) {
@@ -423,23 +425,23 @@ async function removeDirCollectMdNames(dir: string): Promise<string[]> {
 }
 
 /**
- * Install skill files from templates/skills/ → ~/.claude/skills/ccg/
+ * Install skill files from templates/skills/ → ~/.claude/skills/ccx/
  * Includes v1.7.73 legacy layout migration.
  */
 async function installSkillFiles(ctx: InstallContext): Promise<void> {
   const skillsTemplateDir = join(ctx.templateDir, 'skills')
-  const skillsDestDir = join(ctx.installDir, 'skills', 'ccg')
+  const skillsDestDir = join(ctx.installDir, 'skills', 'ccx')
   if (!(await fs.pathExists(skillsTemplateDir))) return
 
   try {
-    // Migration: move old v1.7.73 layout into skills/ccg/ namespace
+    // Migration: move old v1.7.73 layout into skills/ccx/ namespace
     const oldSkillsRoot = join(ctx.installDir, 'skills')
-    const ccgLegacyItems = ['tools', 'orchestration', 'SKILL.md', 'run_skill.js']
+    const ccxLegacyItems = ['tools', 'orchestration', 'SKILL.md', 'run_skill.js']
     const needsMigration = !await fs.pathExists(skillsDestDir)
       && await fs.pathExists(join(oldSkillsRoot, 'tools'))
     if (needsMigration) {
       await fs.ensureDir(skillsDestDir)
-      for (const item of ccgLegacyItems) {
+      for (const item of ccxLegacyItems) {
         const oldPath = join(oldSkillsRoot, item)
         const newPath = join(skillsDestDir, item)
         if (await fs.pathExists(oldPath)) {
@@ -499,34 +501,43 @@ async function installRuleFiles(ctx: InstallContext): Promise<void> {
 }
 
 async function installBridgeCompatFiles(ctx: InstallContext): Promise<void> {
-  const resourceDir = getBridgeResourceDir(ctx.installDir)
-  const binDir = join(ctx.installDir, 'bin')
-
   try {
-    await fs.ensureDir(resourceDir)
+    const bridgeResourceDir = getBridgeResourceDir(ctx.installDir)
+    const binDir = join(ctx.installDir, 'bin')
+    await fs.ensureDir(bridgeResourceDir)
     await fs.ensureDir(binDir)
 
-    if (process.platform === 'win32') {
-      await writeTextFileIfNeeded(join(resourceDir, 'compat-launcher.ps1'), buildBridgePowerShellLauncher(), ctx.force)
+    for (const legacyName of LEGACY_BRIDGE_COMPAT_SHIMS) {
+      if (process.platform === 'win32') {
+        await fs.remove(join(binDir, `${legacyName}.cmd`))
+        await fs.remove(join(binDir, `${legacyName}.ps1`))
+      }
+      else {
+        await fs.remove(join(binDir, legacyName))
+      }
+    }
 
-      for (const shim of BRIDGE_COMPAT_SHIMS) {
-        await writeTextFileIfNeeded(join(binDir, `${shim.name}.cmd`), buildBridgeCmdShim(), ctx.force)
-        await writeTextFileIfNeeded(join(binDir, `${shim.name}.ps1`), buildBridgePowerShellShim(shim.name), ctx.force)
+    if (process.platform === 'win32') {
+      await writeTextFileIfNeeded(join(bridgeResourceDir, 'compat-launcher.ps1'), buildBridgePowerShellLauncher(), ctx.force)
+      const cmdShim = buildBridgeCmdShim()
+      for (const { name } of BRIDGE_COMPAT_SHIMS) {
+        await writeTextFileIfNeeded(join(binDir, `${name}.cmd`), cmdShim, ctx.force)
+        await writeTextFileIfNeeded(join(binDir, `${name}.ps1`), buildBridgePowerShellShim(name), ctx.force)
       }
     }
     else {
-      await writeTextFileIfNeeded(join(resourceDir, 'compat-launcher.sh'), buildBridgePosixLauncher(), ctx.force, 0o755)
-
-      for (const _shim of BRIDGE_COMPAT_SHIMS) {
-        await writeTextFileIfNeeded(join(binDir, _shim.name), buildBridgePosixShim(), ctx.force, 0o755)
+      await writeTextFileIfNeeded(join(bridgeResourceDir, 'compat-launcher.sh'), buildBridgePosixLauncher(), ctx.force, 0o755)
+      const posixShim = buildBridgePosixShim()
+      for (const { name } of BRIDGE_COMPAT_SHIMS) {
+        await writeTextFileIfNeeded(join(binDir, name), posixShim, ctx.force, 0o755)
       }
     }
 
-    ctx.result.installedBridgeShims = BRIDGE_COMPAT_SHIMS.map(({ name }) => name)
-    ctx.result.bridgeResourcePath = resourceDir
+    ctx.result.installedBridgeShims = [...BRIDGE_SEMANTIC_COMMANDS]
+    ctx.result.bridgeResourcePath = bridgeResourceDir
   }
   catch (error) {
-    ctx.result.errors.push(`Failed to install bridge compatibility shims: ${error}`)
+    ctx.result.errors.push(`Failed to install semantic bridge commands: ${error}`)
     ctx.result.success = false
   }
 }
@@ -622,9 +633,9 @@ export async function installWorkflows(
   }
 
   // Ensure base directories
-  await fs.ensureDir(join(installDir, 'commands', 'ccg'))
-  await fs.ensureDir(join(installDir, '.ccg'))
-  await fs.ensureDir(join(installDir, '.ccg', 'prompts'))
+  await fs.ensureDir(join(installDir, 'commands', 'ccx'))
+  await fs.ensureDir(join(installDir, '.ccx'))
+  await fs.ensureDir(join(installDir, '.ccx', 'prompts'))
 
   // Execute each install step
   await installCommandFiles(ctx, workflowIds)
@@ -635,7 +646,7 @@ export async function installWorkflows(
   await installBridgeCompatFiles(ctx)
   await installBinaryFile(ctx)
 
-  ctx.result.configPath = join(installDir, 'commands', 'ccg')
+  ctx.result.configPath = join(installDir, 'commands', 'ccx')
   return ctx.result
 }
 
@@ -671,14 +682,15 @@ export async function uninstallWorkflows(installDir: string): Promise<UninstallR
     errors: [],
   }
 
-  const commandsDir = join(installDir, 'commands', 'ccg')
-  const agentsDir = join(installDir, 'agents', 'ccg')
-  const skillsDir = join(installDir, 'skills', 'ccg')
+  const commandsDir = join(installDir, 'commands', 'ccx')
+  const agentsDir = join(installDir, 'agents', 'ccx')
+  const skillsDir = join(installDir, 'skills', 'ccx')
   const rulesDir = join(installDir, 'rules')
   const binDir = join(installDir, 'bin')
-  const ccgConfigDir = join(installDir, '.ccg')
+  const ccxConfigDir = join(installDir, '.ccx')
+  const bridgeResourceDir = getBridgeResourceDir(installDir)
 
-  // Remove CCG commands directory
+  // Remove CCX commands directory
   try {
     result.removedCommands = await removeDirCollectMdNames(commandsDir)
   }
@@ -696,7 +708,7 @@ export async function uninstallWorkflows(installDir: string): Promise<UninstallR
     result.success = false
   }
 
-  // Remove CCG skills directory only (skills/ccg/) — preserves user's own skills
+  // Remove CCG skills directory only (skills/ccx/) — preserves user's own skills
   if (await fs.pathExists(skillsDir)) {
     try {
       result.removedSkills = await collectSkillNames(skillsDir)
@@ -711,7 +723,7 @@ export async function uninstallWorkflows(installDir: string): Promise<UninstallR
   // Remove CCG rules files
   if (await fs.pathExists(rulesDir)) {
     try {
-      for (const ruleFile of ['ccg-skills.md', 'ccg-grok-search.md']) {
+      for (const ruleFile of ['ccg-skills.md', 'ccg-grok-search.md', 'ccx-skills.md', 'ccx-grok-search.md']) {
         const rulePath = join(rulesDir, ruleFile)
         if (await fs.pathExists(rulePath)) {
           await fs.remove(rulePath)
@@ -724,31 +736,47 @@ export async function uninstallWorkflows(installDir: string): Promise<UninstallR
     }
   }
 
-  // Remove bridge compatibility shims from bin/
+  // Remove semantic helper commands from bin/
   if (await fs.pathExists(binDir)) {
     try {
-      for (const shim of BRIDGE_COMPAT_SHIMS) {
-        const managedFiles = process.platform === 'win32'
-          ? [
-              { path: join(binDir, `${shim.name}.cmd`), content: buildBridgeCmdShim() },
-              { path: join(binDir, `${shim.name}.ps1`), content: buildBridgePowerShellShim(shim.name) },
-            ]
-          : [
-              { path: join(binDir, shim.name), content: buildBridgePosixShim() },
-            ]
-
-        let removedAny = false
-        for (const file of managedFiles) {
-          removedAny = await removeManagedTextFile(file.path, file.content) || removedAny
+      for (const { name } of BRIDGE_COMPAT_SHIMS) {
+        if (process.platform === 'win32') {
+          const removedCmd = await removeManagedTextFile(join(binDir, `${name}.cmd`), buildBridgeCmdShim())
+          const removedPs1 = await removeManagedTextFile(join(binDir, `${name}.ps1`), buildBridgePowerShellShim(name))
+          if ((removedCmd || removedPs1) && !result.removedBridgeShims.includes(name)) {
+            result.removedBridgeShims.push(name)
+          }
         }
+        else {
+          const removedPosix = await removeManagedTextFile(join(binDir, name), buildBridgePosixShim())
+          if (removedPosix && !result.removedBridgeShims.includes(name)) {
+            result.removedBridgeShims.push(name)
+          }
+        }
+      }
 
-        if (removedAny && !result.removedBridgeShims.includes(shim.name)) {
-          result.removedBridgeShims.push(shim.name)
+      for (const legacyName of LEGACY_BRIDGE_COMPAT_SHIMS) {
+        if (process.platform === 'win32') {
+          await fs.remove(join(binDir, `${legacyName}.cmd`))
+          await fs.remove(join(binDir, `${legacyName}.ps1`))
+        }
+        else {
+          await fs.remove(join(binDir, legacyName))
         }
       }
     }
     catch (error) {
-      result.errors.push(`Failed to remove bridge shims: ${error}`)
+      result.errors.push(`Failed to remove semantic bridge commands: ${error}`)
+      result.success = false
+    }
+  }
+
+  if (await fs.pathExists(bridgeResourceDir)) {
+    try {
+      await fs.remove(bridgeResourceDir)
+    }
+    catch (error) {
+      result.errors.push(`Failed to remove bridge resources: ${error}`)
       result.success = false
     }
   }
@@ -770,9 +798,9 @@ export async function uninstallWorkflows(installDir: string): Promise<UninstallR
   }
 
   // Remove .ccg config directory
-  if (await fs.pathExists(ccgConfigDir)) {
+  if (await fs.pathExists(ccxConfigDir)) {
     try {
-      await fs.remove(ccgConfigDir)
+      await fs.remove(ccxConfigDir)
       result.removedPrompts.push('ALL_PROMPTS_AND_CONFIGS')
     }
     catch (error) {

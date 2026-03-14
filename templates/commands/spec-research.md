@@ -15,13 +15,13 @@ description: '需求 → 约束集（并行探索 + OPSX 提案）'
 - Each subagent context must be self-contained with independent output.
 - Use `{{MCP_SEARCH_TOOL}}` to minimize grep/find operations.
 - Do not make architectural decisions—surface constraints that guide decisions.
-- **USER GUIDANCE RULE**: When suggesting next steps to the user, ALWAYS use CCG commands (`/ccg:spec-research`, `/ccg:spec-plan`, `/ccg:spec-impl`, `/ccg:spec-review`). NEVER suggest `/opsx:*` commands to the user. If OpenSpec CLI returns error messages referencing OPSX skills, translate them to CCG equivalents.
-- **PHASE BOUNDARY**: This phase ONLY generates the OPSX proposal artifact. Do NOT modify any source code. Do NOT proceed to planning or implementation. After the proposal is generated, STOP and inform the user: "Research complete. Run `/ccg:spec-plan` to continue."
+- **USER GUIDANCE RULE**: When suggesting next steps to the user, ALWAYS use CCG commands (`/ccx:spec-research`, `/ccx:spec-plan`, `/ccx:spec-impl`, `/ccx:spec-review`). NEVER suggest `/opsx:*` commands to the user. If OpenSpec CLI returns error messages referencing OPSX skills, translate them to CCG equivalents.
+- **PHASE BOUNDARY**: This phase ONLY generates the OPSX proposal artifact. Do NOT modify any source code. Do NOT proceed to planning or implementation. After the proposal is generated, STOP and inform the user: "Research complete. Run `/ccx:spec-plan` to continue."
 
 **Steps**
 0. **MANDATORY: Enhance Requirement FIRST**
    - **DO THIS IMMEDIATELY. DO NOT SKIP.**
-   - **Prompt 增强**（按 `/ccg:enhance` 的逻辑执行）：分析 $ARGUMENTS 的意图、缺失信息、隐含假设，补全为结构化需求（明确目标、技术约束、范围边界、验收标准）。
+   - **Prompt 增强**（按 `/ccx:enhance` 的逻辑执行）：分析 $ARGUMENTS 的意图、缺失信息、隐含假设，补全为结构化需求（明确目标、技术约束、范围边界、验收标准）。
    - Use enhanced prompt for ALL subsequent steps.
 
 1. **Generate OPSX Change**
@@ -137,14 +137,14 @@ description: '需求 → 约束集（并行探索 + OPSX 提案）'
      /opsx:continue
      ```
    - The OPSX skill will use the above summary to write proposal.md.
-   - **Note**: This is an internal call. If this step fails, guide the user to re-run `/ccg:spec-research`.
+   - **Note**: This is an internal call. If this step fails, guide the user to re-run `/ccx:spec-research`.
    - **STOP**: After proposal is generated, verify it exists and inform user:
-     "Research phase complete. Proposal generated. Run `/ccg:spec-plan` to continue planning."
+     "Research phase complete. Proposal generated. Run `/ccx:spec-plan` to continue planning."
      Do NOT proceed to planning or implementation.
 
 8. **Context Checkpoint**
    - Report current context usage.
-   - If approaching 80K tokens, suggest: "Run `/clear` and continue with `/ccg:spec-plan`"
+   - If approaching 80K tokens, suggest: "Run `/clear` and continue with `/ccx:spec-plan`"
 
 **Reference**
 - OPSX CLI: `openspec status --change "<id>" --json`, `openspec list --json`

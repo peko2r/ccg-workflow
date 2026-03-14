@@ -90,8 +90,8 @@ describe('wezterm launch planning', () => {
   })
 
   it('parses wezterm pane lists', () => {
-    const panes = listWezTermPanes((() => '[{"pane_id":12,"title":"ccg:codex"}]') as any)
-    expect(panes).toEqual([{ pane_id: 12, title: 'ccg:codex' }])
+    const panes = listWezTermPanes((() => '[{"pane_id":12,"title":"ccx:codex"}]') as any)
+    expect(panes).toEqual([{ pane_id: 12, title: 'ccx:codex' }])
     expect(ensureWezTermPaneAlive('12', (() => '[{"pane_id":12}]') as any)).toEqual({ pane_id: 12 })
     expect(ensureWezTermPaneAlive('13', (() => '[{"pane_id":12}]') as any)).toBeNull()
   })
@@ -105,10 +105,10 @@ describe('wezterm launch planning', () => {
       launchedAt: '2026-03-14T00:00:00.000Z',
       shellExecutable: 'pwsh',
       providerCommand: 'pwsh -NoLogo -NoProfile -Command & \'codex\'',
-    }, (() => '[{"pane_id":12,"cwd":"project-root","title":"ccg:codex"}]') as any)).toEqual({
+    }, (() => '[{"pane_id":12,"cwd":"project-root","title":"ccx:codex"}]') as any)).toEqual({
       pane_id: 12,
       cwd: 'project-root',
-      title: 'ccg:codex',
+      title: 'ccx:codex',
     })
 
     expect(getValidatedWezTermPane({
@@ -119,7 +119,7 @@ describe('wezterm launch planning', () => {
       launchedAt: '2026-03-14T00:00:00.000Z',
       shellExecutable: 'pwsh',
       providerCommand: 'pwsh -NoLogo -NoProfile -Command & \'codex\'',
-    }, (() => '[{"pane_id":12,"cwd":"other-root","title":"ccg:codex"}]') as any)).toBeNull()
+    }, (() => '[{"pane_id":12,"cwd":"other-root","title":"ccx:codex"}]') as any)).toBeNull()
   })
 })
 
@@ -146,7 +146,7 @@ describe('bridge runtime persistence', () => {
         return 'pane-101\n'
       }
       if (args.includes('list')) {
-        return '[{"pane_id":"pane-101","title":"ccg:codex"}]'
+        return '[{"pane_id":"pane-101","title":"ccx:codex"}]'
       }
       throw new Error(`Unexpected args: ${args.join(' ')}`)
     }) as any
@@ -314,7 +314,7 @@ describe('bridge runtime persistence', () => {
       status: 'queued',
     })
 
-    writeFileSync(join(rootDir, '.ccb', 'run', 'codex', 'broken.json'), '{not-json', 'utf-8')
+    writeFileSync(join(rootDir, '.ccx-bridge', 'run', 'codex', 'broken.json'), '{not-json', 'utf-8')
 
     const pending = listBridgeRequests(runtime, 'codex', 10)
     expect(pending.map(item => item.requestId)).toEqual(['codex-good'])
@@ -325,13 +325,13 @@ describe('bridge runtime persistence', () => {
   it('treats malformed session files as missing state', () => {
     const rootDir = createTempRuntimeRoot()
     const runtime = getBridgeRuntime(rootDir)
-    mkdirSync(join(rootDir, '.ccb', 'sessions'), { recursive: true })
-    writeFileSync(join(rootDir, '.ccb', 'sessions', 'codex.json'), '{broken-json', 'utf-8')
+    mkdirSync(join(rootDir, '.ccx-bridge', 'sessions'), { recursive: true })
+    writeFileSync(join(rootDir, '.ccx-bridge', 'sessions', 'codex.json'), '{broken-json', 'utf-8')
 
     expect(readProviderSession(runtime, 'codex')).toBeNull()
     expect(getProviderRuntimeStatus(runtime, 'codex')).toEqual({
       provider: 'codex',
-      sessionFile: join(rootDir, '.ccb', 'sessions', 'codex.json'),
+      sessionFile: join(rootDir, '.ccx-bridge', 'sessions', 'codex.json'),
       mounted: false,
       paneId: undefined,
       backend: undefined,
@@ -467,7 +467,7 @@ describe('bridge runtime persistence', () => {
     const status = getProviderRuntimeStatus(runtime, 'gemini')
     expect(status).toEqual({
       provider: 'gemini',
-      sessionFile: join(rootDir, '.ccb', 'sessions', 'gemini.json'),
+      sessionFile: join(rootDir, '.ccx-bridge', 'sessions', 'gemini.json'),
       mounted: true,
       paneId: 'pane-202',
       backend: 'wezterm',
@@ -505,8 +505,8 @@ describe('bridge runtime persistence', () => {
     expect(cleanup.dryRun).toBe(false)
     expect(cleanup.cleaned).toBe(2)
     expect(cleanup.removed).toHaveLength(2)
-    expect(existsSync(join(rootDir, '.ccb', 'sessions', 'claude.json'))).toBe(false)
-    expect(existsSync(join(rootDir, '.ccb', 'run', 'claude'))).toBe(false)
+    expect(existsSync(join(rootDir, '.ccx-bridge', 'sessions', 'claude.json'))).toBe(false)
+    expect(existsSync(join(rootDir, '.ccx-bridge', 'run', 'claude'))).toBe(false)
 
     rmSync(rootDir, { recursive: true, force: true })
   })

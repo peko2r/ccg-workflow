@@ -35,7 +35,7 @@ Claude 综合分析结果，写入代码 ← 你能看到每一行改动
 ## 装上
 
 ```bash
-npx ccg-workflow
+npx claude-code-ex
 ```
 
 第一次跑会让你选语言，选完就不问了。
@@ -67,7 +67,7 @@ scoop install jq
 ### Claude Code 怎么装
 
 ```bash
-npx ccg-workflow menu  # 里面有「安装 Claude Code」选项
+npx claude-code-ex menu  # 里面有「安装 Claude Code」选项
 ```
 
 npm、homebrew、curl、powershell、cmd 都支持。
@@ -77,7 +77,7 @@ npm、homebrew、curl、powershell、cmd 都支持。
 装完后，在 Claude Code 里输入：
 
 ```
-/ccg:frontend 给登录页加个暗色模式切换按钮
+/ccx:frontend 给登录页加个暗色模式切换按钮
 ```
 
 看到 Gemini 被调用，说明一切正常。
@@ -86,10 +86,10 @@ npm、homebrew、curl、powershell、cmd 都支持。
 
 ```bash
 # 更新
-npx ccg-workflow@latest
+npx claude-code-ex@latest
 
 # 卸载
-npx ccg-workflow  # 选「卸载工作流」
+npx claude-code-ex  # 选「卸载工作流」
 ```
 
 ## 然后呢

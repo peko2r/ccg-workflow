@@ -1,4 +1,4 @@
-import type { CcgConfig, CollaborationMode, SupportedLang } from '../types'
+import type { CcxConfig, CollaborationMode, SupportedLang } from '../types'
 
 export interface CliOptions {
   lang?: SupportedLang
@@ -12,4 +12,4 @@ export interface CliOptions {
   installDir?: string
 }
 
-export type { CcgConfig, CollaborationMode, SupportedLang }
+export type { CcxConfig, CollaborationMode, SupportedLang }

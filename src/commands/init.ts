@@ -6,7 +6,7 @@ import ora from 'ora'
 import { homedir } from 'node:os'
 import { join } from 'pathe'
 import { i18n, initI18n } from '../i18n'
-import { createDefaultConfig, ensureCcgDir, getCcgDir, readCcgConfig, writeCcgConfig } from '../utils/config'
+import { createDefaultConfig, ensureCcxDir, getCcxDir, readCcxConfig, writeCcxConfig } from '../utils/config'
 import { getAllCommandIds, installAceTool, installAceToolRs, installContextWeaver, installFastContext, installMcpServer, installWorkflows, syncMcpToCodex, syncMcpToGemini, writeFastContextPrompt } from '../utils/installer'
 import { isWindows } from '../utils/platform'
 import { migrateToV1_4_0, needsMigration } from '../utils/migration'
@@ -205,7 +205,7 @@ async function installGrokSearchMcp(keys: {
 
 export async function init(options: InitOptions = {}): Promise<void> {
   console.log()
-  console.log(ansis.cyan.bold(`  CCG - Claude + Codex + Gemini`))
+  console.log(ansis.cyan.bold(`  Claude Code Ex (CCX)`))
   console.log(ansis.gray(`  Multi-Model Collaboration Workflow`))
   console.log()
 
@@ -216,7 +216,7 @@ export async function init(options: InitOptions = {}): Promise<void> {
 
   if (!options.skipPrompt) {
     // Check if user already has a language preference
-    const existingConfig = await readCcgConfig()
+    const existingConfig = await readCcxConfig()
     const savedLang = existingConfig?.general?.language
 
     if (savedLang) {
@@ -352,7 +352,7 @@ export async function init(options: InitOptions = {}): Promise<void> {
         console.log()
         console.log(ansis.yellow(`  ℹ️  ${i18n.t('init:mcp.tokenSkipped')}`))
         console.log(ansis.gray(`     • ${toolName} MCP ${i18n.t('init:mcp.notInstalled')}`))
-        console.log(ansis.gray(`     • ${i18n.t('init:mcp.configLater', { cmd: ansis.cyan('npx ccg config mcp') })}`))
+        console.log(ansis.gray(`     • ${i18n.t('init:mcp.configLater', { cmd: ansis.cyan('npx ccx config mcp') })}`))
         console.log()
       }
     }
@@ -438,7 +438,7 @@ export async function init(options: InitOptions = {}): Promise<void> {
         console.log()
         console.log(ansis.yellow(`  ℹ️  ${i18n.t('init:mcp.keySkipped')}`))
         console.log(ansis.gray(`     • ContextWeaver MCP ${i18n.t('init:mcp.notInstalled')}`))
-        console.log(ansis.gray(`     • ${i18n.t('init:mcp.configLater', { cmd: ansis.cyan('npx ccg config mcp') })}`))
+        console.log(ansis.gray(`     • ${i18n.t('init:mcp.configLater', { cmd: ansis.cyan('npx ccx config mcp') })}`))
         console.log()
       }
     }
@@ -536,7 +536,7 @@ export async function init(options: InitOptions = {}): Promise<void> {
   // Performance mode selection (always ask unless skipPrompt is true)
   if (!options.skipPrompt) {
     // Read existing config to show current setting
-    const existingConfig = await readCcgConfig()
+    const existingConfig = await readCcxConfig()
     const currentLiteMode = existingConfig?.performance?.liteMode || false
 
     console.log()
@@ -551,7 +551,7 @@ export async function init(options: InitOptions = {}): Promise<void> {
   }
   else {
     // In non-interactive mode (update), preserve existing liteMode setting
-    const existingConfig = await readCcgConfig()
+    const existingConfig = await readCcxConfig()
     if (existingConfig?.performance?.liteMode !== undefined) {
       liteMode = existingConfig.performance.liteMode
     }
@@ -648,7 +648,7 @@ export async function init(options: InitOptions = {}): Promise<void> {
       }
     }
 
-    await ensureCcgDir()
+    await ensureCcxDir()
 
     // Create config
     const config = createDefaultConfig({
@@ -660,7 +660,7 @@ export async function init(options: InitOptions = {}): Promise<void> {
     })
 
     // Save config FIRST - ensure it's created even if installation fails
-    await writeCcgConfig(config)
+    await writeCcxConfig(config)
 
     // Install workflows and commands
     const installDir = options.installDir || join(homedir(), '.claude')
@@ -734,14 +734,14 @@ export async function init(options: InitOptions = {}): Promise<void> {
       spinner.succeed(ansis.green(i18n.t('init:installSuccess')))
       console.log()
       console.log(`    ${ansis.yellow('⚠')} ContextWeaver MCP ${i18n.t('init:mcp.notInstalled')} ${ansis.gray(`(${i18n.t('init:mcp.keyNotProvided')})`)}`)
-      console.log(`    ${ansis.gray('→')} ${i18n.t('init:mcp.configLater', { cmd: ansis.cyan('npx ccg config mcp') })}`)
+      console.log(`    ${ansis.gray('→')} ${i18n.t('init:mcp.configLater', { cmd: ansis.cyan('npx ccx config mcp') })}`)
     }
     else if ((mcpProvider === 'ace-tool' || mcpProvider === 'ace-tool-rs') && !aceToolToken) {
       const toolName = mcpProvider === 'ace-tool-rs' ? 'ace-tool-rs' : 'ace-tool'
       spinner.succeed(ansis.green(i18n.t('init:installSuccess')))
       console.log()
       console.log(`    ${ansis.yellow('⚠')} ${toolName} MCP ${i18n.t('init:mcp.notInstalled')} ${ansis.gray(`(${i18n.t('init:mcp.tokenNotProvided')})`)}`)
-      console.log(`    ${ansis.gray('→')} ${i18n.t('init:mcp.configLater', { cmd: ansis.cyan('npx ccg config mcp') })}`)
+      console.log(`    ${ansis.gray('→')} ${i18n.t('init:mcp.configLater', { cmd: ansis.cyan('npx ccx config mcp') })}`)
     }
     else {
       spinner.succeed(ansis.green(i18n.t('init:installSuccess')))
@@ -840,7 +840,7 @@ export async function init(options: InitOptions = {}): Promise<void> {
 
       // ═══════════════════════════════════════════════════════
       // Sync MCP servers to Codex (~/.codex/config.toml)
-      // Enables /ccg:codex-exec to use MCP tools (grok-search, context7, etc.)
+      // Enables /ccx:codex-exec to use MCP tools (grok-search, context7, etc.)
       // ═══════════════════════════════════════════════════════
       const codexSyncResult = await syncMcpToCodex()
       if (codexSyncResult.success && codexSyncResult.synced.length > 0) {
@@ -885,7 +885,7 @@ export async function init(options: InitOptions = {}): Promise<void> {
     console.log()
     console.log(ansis.cyan(`  ${i18n.t('init:installedCommands')}`))
     result.installedCommands.forEach((cmd) => {
-      console.log(`    ${ansis.green('✓')} /ccg:${cmd}`)
+      console.log(`    ${ansis.green('✓')} /ccx:${cmd}`)
     })
 
     // Show installed prompts
@@ -933,7 +933,7 @@ export async function init(options: InitOptions = {}): Promise<void> {
         console.log(`    ${ansis.green('✓')} ${i18n.t('init:bridge.powershellReady')}`)
         if (await checkWezTermAvailable()) {
           console.log(`    ${ansis.green('✓')} ${i18n.t('init:bridge.weztermDetected')}`)
-          console.log(ansis.gray(`       ${i18n.t('init:bridge.weztermTryCommand', { command: 'ccb codex,gemini' })}`))
+          console.log(ansis.gray(`       ${i18n.t('init:bridge.weztermTryCommand', { command: 'ccx codex,gemini' })}`))
         }
         else {
           console.log(`    ${ansis.yellow('⚠')} ${i18n.t('init:bridge.weztermMissing')}`)
@@ -1028,7 +1028,7 @@ export async function init(options: InitOptions = {}): Promise<void> {
           : (process.arch === 'arm64' ? 'windows-arm64' : 'windows-amd64')
       const binaryFileName = `codeagent-wrapper-${platformLabel}${binaryExt}`
       const destFileName = `codeagent-wrapper${binaryExt}`
-      const releaseUrl = `https://github.com/fengshao1227/ccg-workflow/releases/tag/preset`
+      const releaseUrl = `https://github.com/fengshao1227/claude-code-ex/releases/tag/preset`
 
       console.log()
       console.log(ansis.red.bold(`  ╔════════════════════════════════════════════════════════════╗`))
@@ -1036,7 +1036,7 @@ export async function init(options: InitOptions = {}): Promise<void> {
       console.log(ansis.red.bold(`  ║     Binary download failed (network issue)                 ║`))
       console.log(ansis.red.bold(`  ╚════════════════════════════════════════════════════════════╝`))
       console.log()
-      console.log(ansis.yellow(`  多模型协作命令 (/ccg:workflow, /ccg:plan 等) 需要此文件才能工作。`))
+      console.log(ansis.yellow(`  多模型协作命令 (/ccx:workflow, /ccx:plan 等) 需要此文件才能工作。`))
       console.log(ansis.yellow(`  Multi-model commands require this binary to work.`))
       console.log()
       console.log(ansis.cyan(`  手动修复 / Manual fix:`))
@@ -1054,7 +1054,7 @@ export async function init(options: InitOptions = {}): Promise<void> {
         console.log()
       }
       console.log(ansis.white(`    或重新安装 / Or re-install:`))
-      console.log(ansis.cyan(`       npx ccg-workflow@latest`))
+      console.log(ansis.cyan(`       npx claude-code-ex@latest`))
       console.log()
     }
 

@@ -11,7 +11,7 @@ import { version } from '../../package.json'
 import { configMcp } from './config-mcp'
 import { i18n } from '../i18n'
 import { uninstallWorkflows } from '../utils/installer'
-import { readCcgConfig } from '../utils/config'
+import { readCcxConfig } from '../utils/config'
 import { init } from './init'
 import { update } from './update'
 import { isWindows } from '../utils/platform'
@@ -128,7 +128,7 @@ function groupSep(label: string): InstanceType<typeof inquirer.Separator> {
 export async function showMainMenu(): Promise<void> {
   while (true) {
     // Read config for status display
-    const config = await readCcgConfig()
+    const config = await readCcxConfig()
     const cmdCount = config?.workflows?.installed?.length || 0
     const lang = config?.general?.language || 'zh-CN'
     const mcpProvider = config?.mcp?.provider || '—'
@@ -172,7 +172,7 @@ export async function showMainMenu(): Promise<void> {
 
         groupSep('CCG'),
         item('H', i18n.t('menu:options.help'), isZh ? '查看全部斜杠命令' : 'View all slash commands'),
-        item('-', i18n.t('menu:options.uninstall'), isZh ? '移除 CCG 配置' : 'Remove CCG config'),
+        item('-', i18n.t('menu:options.uninstall'), isZh ? '移除 CCX 配置' : 'Remove CCG config'),
 
         new inquirer.Separator(ansis.gray('─'.repeat(42))),
         { name: `  ${ansis.red('Q.')} ${i18n.t('menu:options.exit')}`, value: 'Q' },
@@ -231,7 +231,7 @@ export async function showMainMenu(): Promise<void> {
 // ═══════════════════════════════════════════════════════
 
 function showHelp(): void {
-  const config = readCcgConfigSync()
+  const config = readCcxConfigSync()
   const isZh = (config?.general?.language || 'zh-CN') === 'zh-CN'
 
   console.log()
@@ -244,48 +244,48 @@ function showHelp(): void {
 
   // Development Workflows
   section(i18n.t('menu:help.sections.devWorkflow'))
-  cmd('/ccg:workflow', i18n.t('menu:help.descriptions.workflow'))
-  cmd('/ccg:plan', i18n.t('menu:help.descriptions.plan'))
-  cmd('/ccg:execute', i18n.t('menu:help.descriptions.execute'))
-  cmd('/ccg:frontend', i18n.t('menu:help.descriptions.frontend'))
-  cmd('/ccg:backend', i18n.t('menu:help.descriptions.backend'))
-  cmd('/ccg:feat', i18n.t('menu:help.descriptions.feat'))
-  cmd('/ccg:analyze', i18n.t('menu:help.descriptions.analyze'))
-  cmd('/ccg:debug', i18n.t('menu:help.descriptions.debug'))
-  cmd('/ccg:optimize', i18n.t('menu:help.descriptions.optimize'))
-  cmd('/ccg:test', i18n.t('menu:help.descriptions.test'))
-  cmd('/ccg:review', i18n.t('menu:help.descriptions.review'))
+  cmd('/ccx:workflow', i18n.t('menu:help.descriptions.workflow'))
+  cmd('/ccx:plan', i18n.t('menu:help.descriptions.plan'))
+  cmd('/ccx:execute', i18n.t('menu:help.descriptions.execute'))
+  cmd('/ccx:frontend', i18n.t('menu:help.descriptions.frontend'))
+  cmd('/ccx:backend', i18n.t('menu:help.descriptions.backend'))
+  cmd('/ccx:feat', i18n.t('menu:help.descriptions.feat'))
+  cmd('/ccx:analyze', i18n.t('menu:help.descriptions.analyze'))
+  cmd('/ccx:debug', i18n.t('menu:help.descriptions.debug'))
+  cmd('/ccx:optimize', i18n.t('menu:help.descriptions.optimize'))
+  cmd('/ccx:test', i18n.t('menu:help.descriptions.test'))
+  cmd('/ccx:review', i18n.t('menu:help.descriptions.review'))
   console.log()
 
   // Agent Teams
   section(isZh ? 'Agent Teams 并行实施:' : 'Agent Teams Parallel:')
-  cmd('/ccg:team-research', isZh ? '需求 → 约束集' : 'Requirements → Constraints')
-  cmd('/ccg:team-plan', isZh ? '约束 → 并行计划' : 'Constraints → Parallel plan')
-  cmd('/ccg:team-exec', isZh ? '并行实施' : 'Parallel execution')
-  cmd('/ccg:team-review', isZh ? '双模型审查' : 'Dual-model review')
+  cmd('/ccx:team-research', isZh ? '需求 → 约束集' : 'Requirements → Constraints')
+  cmd('/ccx:team-plan', isZh ? '约束 → 并行计划' : 'Constraints → Parallel plan')
+  cmd('/ccx:team-exec', isZh ? '并行实施' : 'Parallel execution')
+  cmd('/ccx:team-review', isZh ? '双模型审查' : 'Dual-model review')
   console.log()
 
   // OpenSpec Workflows
   section(i18n.t('menu:help.sections.opsx'))
-  cmd('/ccg:spec-init', i18n.t('menu:help.descriptions.specInit'))
-  cmd('/ccg:spec-research', i18n.t('menu:help.descriptions.specResearch'))
-  cmd('/ccg:spec-plan', i18n.t('menu:help.descriptions.specPlan'))
-  cmd('/ccg:spec-impl', i18n.t('menu:help.descriptions.specImpl'))
-  cmd('/ccg:spec-review', i18n.t('menu:help.descriptions.specReview'))
+  cmd('/ccx:spec-init', i18n.t('menu:help.descriptions.specInit'))
+  cmd('/ccx:spec-research', i18n.t('menu:help.descriptions.specResearch'))
+  cmd('/ccx:spec-plan', i18n.t('menu:help.descriptions.specPlan'))
+  cmd('/ccx:spec-impl', i18n.t('menu:help.descriptions.specImpl'))
+  cmd('/ccx:spec-review', i18n.t('menu:help.descriptions.specReview'))
   console.log()
 
   // Git Tools
   section(i18n.t('menu:help.sections.gitTools'))
-  cmd('/ccg:commit', i18n.t('menu:help.descriptions.commit'))
-  cmd('/ccg:rollback', i18n.t('menu:help.descriptions.rollback'))
-  cmd('/ccg:clean-branches', i18n.t('menu:help.descriptions.cleanBranches'))
-  cmd('/ccg:worktree', i18n.t('menu:help.descriptions.worktree'))
+  cmd('/ccx:commit', i18n.t('menu:help.descriptions.commit'))
+  cmd('/ccx:rollback', i18n.t('menu:help.descriptions.rollback'))
+  cmd('/ccx:clean-branches', i18n.t('menu:help.descriptions.cleanBranches'))
+  cmd('/ccx:worktree', i18n.t('menu:help.descriptions.worktree'))
   console.log()
 
   // Project Init
   section(i18n.t('menu:help.sections.projectMgmt'))
-  cmd('/ccg:init', i18n.t('menu:help.descriptions.init'))
-  cmd('/ccg:enhance', isZh ? 'Prompt 增强' : 'Prompt enhancement')
+  cmd('/ccx:init', i18n.t('menu:help.descriptions.init'))
+  cmd('/ccx:enhance', isZh ? 'Prompt 增强' : 'Prompt enhancement')
   console.log()
 
   console.log(ansis.gray(`  ${i18n.t('menu:help.hint')}`))
@@ -295,9 +295,9 @@ function showHelp(): void {
 /**
  * Synchronous config read for non-async contexts (help display)
  */
-function readCcgConfigSync(): any {
+function readCcxConfigSync(): any {
   try {
-    const configPath = join(homedir(), '.claude', '.ccg', 'config.toml')
+    const configPath = join(homedir(), '.claude', '.ccx', 'config.toml')
     if (fs.pathExistsSync(configPath)) {
       return parseTOML(fs.readFileSync(configPath, 'utf-8'))
     }
@@ -585,8 +585,8 @@ async function handleInstallClaude(): Promise<void> {
  */
 async function checkIfGlobalInstall(): Promise<boolean> {
   try {
-    const { stdout } = await execAsync('npm list -g ccg-workflow --depth=0', { timeout: 5000 })
-    return stdout.includes('ccg-workflow@')
+    const { stdout } = await execAsync('npm list -g claude-code-ex --depth=0', { timeout: 5000 })
+    return stdout.includes('claude-code-ex@')
   }
   catch {
     return false
@@ -635,7 +635,7 @@ async function uninstall(): Promise<void> {
       console.log()
       console.log(ansis.cyan(`  ${i18n.t('menu:uninstall.removedCommands')}`))
       for (const cmd of result.removedCommands) {
-        console.log(`    ${ansis.gray('•')} /ccg:${cmd}`)
+        console.log(`    ${ansis.gray('•')} /ccx:${cmd}`)
       }
     }
 
@@ -666,7 +666,7 @@ async function uninstall(): Promise<void> {
       console.log()
       console.log(`  ${i18n.t('menu:uninstall.runInNewTerminal')}`)
       console.log()
-      console.log(ansis.cyan.bold('    npm uninstall -g ccg-workflow'))
+      console.log(ansis.cyan.bold('    npm uninstall -g claude-code-ex'))
       console.log()
       console.log(ansis.gray(`  (${i18n.t('menu:uninstall.afterDone')})`))
     }

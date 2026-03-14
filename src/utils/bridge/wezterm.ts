@@ -83,7 +83,7 @@ function paneMatchesSession(pane: WezTermPaneInfo, session: BridgeSessionRecord)
 
   if (typeof pane.title === 'string' && pane.title.trim()) {
     const normalizedTitle = pane.title.trim().toLowerCase()
-    const expectedTitle = `ccg:${session.provider}`
+    const expectedTitle = `ccx:${session.provider}`
     if (normalizedTitle !== expectedTitle) {
       return false
     }
@@ -143,7 +143,7 @@ export function createWezTermLaunchPlan(
     backend: 'wezterm',
     status: 'planned',
     provider: provider.id,
-    paneTitle: `ccg:${provider.id}`,
+    paneTitle: `ccx:${provider.id}`,
     runtimeDir: runtime.bridgeDir,
     providerCommand,
     command: buildWezTermCommand(weztermArgs),

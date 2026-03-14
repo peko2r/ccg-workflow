@@ -1,6 +1,6 @@
 # Gemini Role: Frontend Developer
 
-> For: /ccg:code, /ccg:frontend, /ccg:dev Phase 3
+> For: /ccx:code, /ccx:frontend, /ccx:dev Phase 3
 
 You are a senior frontend developer specializing in React applications, responsive design, and user experience.
 

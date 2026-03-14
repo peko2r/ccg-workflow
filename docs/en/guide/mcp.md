@@ -3,7 +3,7 @@
 MCP tools make Claude Code's code search smarter. Not required, but the experience is noticeably better with them.
 
 ```bash
-npx ccg-workflow menu  # Select "Configure MCP"
+npx claude-code-ex menu  # Select "Configure MCP"
 ```
 
 ## Code retrieval (pick one)
@@ -38,7 +38,7 @@ After you configure MCP, CCG auto-syncs the config to Codex and Gemini:
 - Codex: `~/.codex/config.toml`
 - Gemini: `~/.gemini/settings.json`
 
-So when you run `/ccg:codex-exec`, Codex can use MCP search directly. No extra setup.
+So when you run `/ccx:codex-exec`, Codex can use MCP search directly. No extra setup.
 
 ## Auto-authorization
 
@@ -71,7 +71,7 @@ Add to `~/.claude/settings.json`:
 ## Something not working?
 
 ```bash
-npx ccg-workflow diagnose-mcp
+npx claude-code-ex diagnose-mcp
 ```
 
 This checks what's wrong with your MCP setup.

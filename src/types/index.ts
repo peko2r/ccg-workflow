@@ -29,8 +29,8 @@ export interface ModelRouting {
   mode: CollaborationMode
 }
 
-// CCG 配置
-export interface CcgConfig {
+// CCX 配置
+export interface CcxConfig {
   general: {
     version: string
     language: SupportedLang

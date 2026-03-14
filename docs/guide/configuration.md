@@ -4,18 +4,39 @@
 
 ```
 ~/.claude/
-├── commands/ccg/       # 28 个命令模板
-├── agents/ccg/         # 4 个子智能体
-├── skills/ccg/         # 质量检查 + 多 Agent 协同
+├── commands/ccx/       # 28 个命令模板
+├── agents/ccx/         # 4 个子智能体
+├── skills/ccx/         # 质量检查 + 多 Agent 协同
 ├── bin/codeagent-wrapper
-└── .ccg/
-    ├── config.toml     # CCG 配置文件
+└── .ccx/
+    ├── config.toml     # CCX 配置文件
     └── prompts/
         ├── codex/      # 6 个 Codex 角色提示词
         └── gemini/     # 7 个 Gemini 角色提示词
 ```
 
-## 环境变量
+## Mail 守护进程配置
+
+`maild` 的用户配置保存在：
+
+```text
+~/.claude/.ccx/mail/config.json
+```
+
+仓库内模板位于：
+
+```text
+config/mail/config.template.json
+```
+
+常见流程：
+
+```bash
+maild setup
+maild test
+maild start
+maild status
+```
 
 在 `~/.claude/settings.json` 的 `"env"` 里配：
 
@@ -54,7 +75,7 @@ v1.7.0 之后这些写死了：
 ## 实用工具
 
 ```bash
-npx ccg-workflow menu  # 选「实用工具」
+npx claude-code-ex menu  # 选「实用工具」
 ```
 
 - **ccusage** — 看看你的 Claude Code 花了多少钱
@@ -72,7 +93,7 @@ npx ccg-workflow menu  # 选「实用工具」
 
 **MCP 工具没反应**
 
-跑一下 `npx ccg-workflow diagnose-mcp`。
+跑一下 `npx claude-code-ex diagnose-mcp`。
 
 **Agent Teams 命令找不到**
 

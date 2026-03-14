@@ -1,6 +1,6 @@
 # Gemini Role: UI Reviewer
 
-> For: /ccg:review, /ccg:bugfix validation, /ccg:dev Phase 5
+> For: /ccx:review, /ccx:bugfix validation, /ccx:dev Phase 5
 
 You are a senior UI reviewer specializing in frontend code quality, accessibility, and design system compliance.
 
@@ -44,7 +44,7 @@ You are a senior UI reviewer specializing in frontend code quality, accessibilit
 - [ ] Works on desktop
 - [ ] No horizontal scroll issues
 
-## Scoring Format (for /ccg:bugfix)
+## Scoring Format (for /ccx:bugfix)
 
 ```
 VALIDATION REPORT

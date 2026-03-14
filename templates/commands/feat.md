@@ -57,10 +57,10 @@ EOF",
 
 | 阶段 | Codex | Gemini |
 |------|-------|--------|
-| 分析 | `~/.claude/.ccg/prompts/codex/analyzer.md` | `~/.claude/.ccg/prompts/gemini/analyzer.md` |
-| 规划 | `~/.claude/.ccg/prompts/codex/architect.md` | `~/.claude/.ccg/prompts/gemini/architect.md` |
-| 实施 | `~/.claude/.ccg/prompts/codex/architect.md` | `~/.claude/.ccg/prompts/gemini/frontend.md` |
-| 审查 | `~/.claude/.ccg/prompts/codex/reviewer.md` | `~/.claude/.ccg/prompts/gemini/reviewer.md` |
+| 分析 | `~/.claude/.ccx/prompts/codex/analyzer.md` | `~/.claude/.ccx/prompts/gemini/analyzer.md` |
+| 规划 | `~/.claude/.ccx/prompts/codex/architect.md` | `~/.claude/.ccx/prompts/gemini/architect.md` |
+| 实施 | `~/.claude/.ccx/prompts/codex/architect.md` | `~/.claude/.ccx/prompts/gemini/frontend.md` |
+| 审查 | `~/.claude/.ccx/prompts/codex/reviewer.md` | `~/.claude/.ccx/prompts/gemini/reviewer.md` |
 
 **会话复用**：每次调用返回 `SESSION_ID: xxx`，后续阶段用 `resume xxx` 复用上下文。
 
@@ -103,7 +103,7 @@ TaskOutput({ task_id: "<task_id>", block: true, timeout: 600000 })
 
 #### 2.0 Prompt 增强
 
-**Prompt 增强**（按 `/ccg:enhance` 的逻辑执行）：分析 $ARGUMENTS 的意图、缺失信息、隐含假设，补全为结构化需求（明确目标、技术约束、范围边界、验收标准），**用增强结果替代原始 $ARGUMENTS，后续调用 Codex/Gemini 时传入增强后的需求**
+**Prompt 增强**（按 `/ccx:enhance` 的逻辑执行）：分析 $ARGUMENTS 的意图、缺失信息、隐含假设，补全为结构化需求（明确目标、技术约束、范围边界、验收标准），**用增强结果替代原始 $ARGUMENTS，后续调用 Codex/Gemini 时传入增强后的需求**
 
 #### 2.1 上下文检索
 
@@ -121,14 +121,14 @@ TaskOutput({ task_id: "<task_id>", block: true, timeout: 600000 })
 
 **前端/全栈任务**：先调用 `ui-ux-designer` agent
 ```
-执行 agent: ~/.claude/agents/ccg/ui-ux-designer.md
+执行 agent: ~/.claude/agents/ccx/ui-ux-designer.md
 输入: 项目上下文 + 用户需求 + 技术栈
 输出: UI/UX 设计方案
 ```
 
 **所有任务**：调用 `planner` agent
 ```
-执行 agent: ~/.claude/agents/ccg/planner.md
+执行 agent: ~/.claude/agents/ccx/planner.md
 输入: 项目上下文 + UI设计方案(如有) + 用户需求
 输出: 功能规划文档
 ```
@@ -178,7 +178,7 @@ git status --short
 git diff --name-status
 ```
 
-询问用户是否运行代码审查（`/ccg:review`）。
+询问用户是否运行代码审查（`/ccx:review`）。
 
 ---
 

@@ -286,7 +286,7 @@ export async function uninstallMcpServer(id: string): Promise<{ success: boolean
 // ═══════════════════════════════════════════════════════
 
 /** MCP server IDs that CCG manages and should sync to Codex/Gemini */
-const CCG_MCP_IDS = new Set([
+const CCX_MCP_IDS = new Set([
   'grok-search',
   'context7',
   'ace-tool',
@@ -306,7 +306,7 @@ async function getCcgMcpServersFromClaude(): Promise<Record<string, any>> {
 
   const serversToSync: Record<string, any> = {}
   for (const [id, config] of Object.entries(claudeMcpServers)) {
-    if (CCG_MCP_IDS.has(id) && config) {
+    if (CCX_MCP_IDS.has(id) && config) {
       serversToSync[id] = config
     }
   }
@@ -317,7 +317,7 @@ async function getCcgMcpServersFromClaude(): Promise<Record<string, any>> {
  * Apply mirror logic: add/update servers from Claude, remove stale CCG servers.
  * Returns { synced, removed } arrays. Mutates targetServers in place.
  */
-function mirrorCcgServers(
+function mirrorCcxServers(
   serversToSync: Record<string, any>,
   targetServers: Record<string, any>,
 ): { synced: string[], removed: string[] } {
@@ -331,7 +331,7 @@ function mirrorCcgServers(
   }
 
   // Remove CCG servers that no longer exist in Claude
-  for (const id of CCG_MCP_IDS) {
+  for (const id of CCX_MCP_IDS) {
     if (!serversToSync[id] && targetServers[id]) {
       delete targetServers[id]
       removed.push(id)
@@ -355,7 +355,7 @@ function formatSyncMessage(target: string, synced: string[], removed: string[]):
  * Sync (mirror) CCG-managed MCP servers from Claude's ~/.claude.json
  * to Codex's ~/.codex/config.toml
  *
- * - Only touches servers in CCG_MCP_IDS — user's custom servers untouched.
+ * - Only touches servers in CCX_MCP_IDS — user's custom servers untouched.
  * - Uses atomic write (temp file + rename) to prevent corruption.
  */
 export async function syncMcpToCodex(): Promise<SyncResult> {
@@ -389,7 +389,7 @@ export async function syncMcpToCodex(): Promise<SyncResult> {
       codexServersToSync[id] = entry
     }
 
-    const { synced, removed } = mirrorCcgServers(codexServersToSync, codexConfig.mcp_servers)
+    const { synced, removed } = mirrorCcxServers(codexServersToSync, codexConfig.mcp_servers)
 
     if (synced.length === 0 && removed.length === 0) {
       return { success: true, message: 'No CCG MCP servers to sync or remove', synced: [], removed: [] }
@@ -429,7 +429,7 @@ export async function syncMcpToGemini(): Promise<SyncResult> {
       geminiSettings.mcpServers = {}
     }
 
-    const { synced, removed } = mirrorCcgServers(serversToSync, geminiSettings.mcpServers)
+    const { synced, removed } = mirrorCcxServers(serversToSync, geminiSettings.mcpServers)
 
     if (synced.length === 0 && removed.length === 0) {
       return { success: true, message: 'No CCG MCP servers to sync to Gemini', synced: [], removed: [] }

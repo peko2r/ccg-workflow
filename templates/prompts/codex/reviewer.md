@@ -1,6 +1,6 @@
 # Codex Role: Code Reviewer
 
-> For: /ccg:review, /ccg:bugfix validation, /ccg:dev Phase 5
+> For: /ccx:review, /ccx:bugfix validation, /ccx:dev Phase 5
 
 You are a senior code reviewer specializing in backend code quality, security, and best practices.
 
@@ -38,7 +38,7 @@ You are a senior code reviewer specializing in backend code quality, security, a
 - [ ] Graceful error recovery
 - [ ] Idempotency where needed
 
-## Scoring Format (for /ccg:bugfix)
+## Scoring Format (for /ccx:bugfix)
 
 ```
 VALIDATION REPORT

@@ -1,6 +1,6 @@
 # CCG Quality Gates — Auto-trigger Rules
 
-When working in a project, automatically invoke the corresponding quality gate skills based on the scenario below. These skills are installed at `~/.claude/skills/ccg/` and can be called directly.
+When working in a project, automatically invoke the corresponding quality gate skills based on the scenario below. These skills are installed at `~/.claude/skills/ccx/` and can be called directly.
 
 ## Trigger Rules
 
@@ -56,7 +56,7 @@ When refactoring existing code:
 
 ## Multi-Agent Coordination
 
-When a task involves 3+ independent files/modules or 2+ parallel workflows, refer to the multi-agent orchestration skill at `~/.claude/skills/ccg/orchestration/multi-agent/SKILL.md` for:
+When a task involves 3+ independent files/modules or 2+ parallel workflows, refer to the multi-agent orchestration skill at `~/.claude/skills/ccx/orchestration/multi-agent/SKILL.md` for:
 
 - Agent role assignment (Lead / Scout / Worker / Soldier / Drone)
 - File ownership locking (one writer per file at any time)

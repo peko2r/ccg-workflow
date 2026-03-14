@@ -1,12 +1,12 @@
 ---
-name: ccg-skills
-description: CCG Skills - Quality gates, documentation generator, and multi-agent orchestration. Auto-installed by CCG workflow system.
+name: ccx-skills
+description: CCX Skills - Quality gates, documentation generator, and multi-agent orchestration. Auto-installed by Claude Code Ex.
 license: MIT
 user-invocable: false
 disable-model-invocation: false
 ---
 
-# CCG Skills
+# CCX Skills
 
 ## Directory Structure
 
@@ -88,5 +88,5 @@ Provides:
 
 ## Installed by CCG
 
-These skills are automatically installed during `npx ccg-workflow` initialization.
-To update: run `npx ccg-workflow update` or `npx ccg-workflow` again.
+These skills are automatically installed during `npx claude-code-ex` initialization.
+To update: run `npx claude-code-ex update` or `npx claude-code-ex` again.

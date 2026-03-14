@@ -17,7 +17,7 @@ hero:
       link: /guide/commands
     - theme: alt
       text: GitHub
-      link: https://github.com/fengshao1227/ccg-workflow
+      link: https://github.com/fengshao1227/claude-code-ex
 
 features:
   - icon: 🔀
@@ -34,7 +34,7 @@ features:
     details: Agent Teams 模式下，多个 Builder 同时写不同模块的代码，完了还有双模型交叉审查。
   - icon: ⚡
     title: 一行装完，开箱即用
-    details: npx ccg-workflow，28 个命令直接可用。macOS、Linux、Windows 都行。
+    details: npx claude-code-ex，28 个命令直接可用。macOS、Linux、Windows 都行。
   - icon: 🧩
     title: MCP 生态打通
     details: ace-tool、fast-context、Context7 等 MCP 工具一键配置，Codex 和 Gemini 自动同步。

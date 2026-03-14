@@ -1,8 +1,8 @@
-# CCG - Claude + Codex + Gemini Multi-Model Collaboration
+# Claude Code Ex (CCX) Multi-Model Collaboration
 
 <div align="center">
 
-[![npm version](https://img.shields.io/npm/v/ccg-workflow.svg)](https://www.npmjs.com/package/ccg-workflow)
+[![npm version](https://img.shields.io/npm/v/claude-code-ex.svg)](https://www.npmjs.com/package/claude-code-ex)
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](https://opensource.org/licenses/MIT)
 [![Claude Code](https://img.shields.io/badge/Claude%20Code-Compatible-green.svg)](https://claude.ai/code)
 [![Tests](https://img.shields.io/badge/Tests-134%20passed-brightgreen.svg)]()
@@ -17,7 +17,7 @@ A multi-model collaboration development system where Claude Code orchestrates Co
 
 - **Zero-config model routing** — Frontend tasks automatically go to Gemini, backend tasks to Codex. No manual switching.
 - **Security by design** — External models have no write access. They return patches; Claude reviews before applying.
-- **27 slash commands** — From planning to execution, git workflow to code review, all accessible via `/ccg:*`.
+- **27 slash commands** — From planning to execution, git workflow to code review, all accessible via `/ccx:*`.
 - **Spec-driven development** — Integrates [OPSX](https://github.com/fission-ai/opsx) to turn vague requirements into verifiable constraints, eliminating AI improvisation.
 
 ## Architecture
@@ -52,7 +52,7 @@ External models have no write access — they only return patches, which Claude 
 ### Installation
 
 ```bash
-npx ccg-workflow
+npx claude-code-ex
 ```
 
 On first run, CCG prompts you to select a language (English / Chinese). This preference is saved for all future sessions.
@@ -76,34 +76,61 @@ choco install jq   # or: scoop install jq
 ### Install Claude Code
 
 ```bash
-npx ccg-workflow menu  # Select "Install Claude Code"
+npx claude-code-ex menu  # Select "Install Claude Code"
 ```
 
 Supports: npm, homebrew, curl, powershell, cmd.
 
-### Bridge CLI (Windows PowerShell + WezTerm)
+### Mail Daemon (`maild`)
 
-After `npx ccg-workflow init`, CCG installs compatibility bridge shims into `~/.claude/bin`:
+CCX bundles a Python-based mail daemon for ASK-by-email workflows.
 
-- `ccb`
-- `ask`
-- `ccb-ping`
-- `pend`
-- `ccb-mounted`
-- `ccb-cleanup`
+**Runtime requirements**
+- Python 3 must be available as `python` (Windows) or `python3` (macOS/Linux)
+- The `maild` entrypoint is exposed both as `maild ...` and `ccx maild ...`
 
-These shims reuse the main `ccg` bridge implementation. Typical usage:
+**Config locations**
+- Config template in repo: `config/mail/config.template.json`
+- Active user config: `~/.claude/.ccx/mail/config.json`
+- Override config directory with env: `CCB_MAIL_CONFIG_DIR`
 
-```powershell
-ccb codex,gemini
-ask codex "summarize the repository"
-ccb-ping codex
-pend codex 5
-ccb-mounted
-ccb-cleanup
+**Core commands**
+```bash
+maild setup              # interactive setup wizard
+maild config             # print effective configuration
+maild test               # test IMAP/SMTP connectivity
+maild start              # start daemon in background
+maild start -f           # start in foreground
+maild status             # show daemon status
+maild stop               # stop daemon
+
+# equivalent CLI entry
+ccx maild status
 ```
 
-`ccg codex gemini` remains the primary entrypoint. WezTerm is required for pane launch commands, and per-project bridge runtime state lives under `.ccb/` while project decision context continues to live under `.context/`.
+**Minimal setup flow**
+1. Copy values from `config/mail/config.template.json`
+2. Run `maild setup`
+3. Configure a service mailbox (`service_account`) and target mailbox (`target_email`)
+4. Choose a default provider such as `claude`, `codex`, or `gemini`
+5. Run `maild test` until both IMAP and SMTP succeed
+6. Run `maild start` and verify with `maild status`
+
+**What the daemon does**
+- Polls IMAP inboxes and supports IMAP IDLE when available
+- Sends replies over SMTP
+- Routes ASK-style requests into the configured provider workflow
+- Uses `default_provider` and `default_work_dir` when the email does not override them
+
+**Email routing notes**
+- Provider prefixes in the email body are supported, e.g. `CLAUDE: ...` or `CODEX: ...`
+- The default provider falls back to the configured `default_provider`
+
+**Recommended testing order**
+1. Use a dedicated test mailbox, not a production mailbox
+2. Verify provider-side IMAP/SMTP enablement first
+3. Use app passwords / authorization codes where required (QQ / Gmail / Outlook, etc.)
+4. Run real send/receive validation only after `maild test` passes
 
 ## Commands
 
@@ -111,43 +138,43 @@ ccb-cleanup
 
 | Command | Description | Model |
 |---------|-------------|-------|
-| `/ccg:workflow` | Full 6-phase development workflow | Codex + Gemini |
-| `/ccg:plan` | Multi-model collaborative planning (Phase 1-2) | Codex + Gemini |
-| `/ccg:execute` | Multi-model collaborative execution (Phase 3-5) | Codex + Gemini + Claude |
-| `/ccg:codex-exec` | Codex full execution (plan → code → review) | Codex + multi-model review |
-| `/ccg:feat` | Smart feature development | Auto-routed |
-| `/ccg:frontend` | Frontend tasks (fast mode) | Gemini |
-| `/ccg:backend` | Backend tasks (fast mode) | Codex |
+| `/ccx:workflow` | Full 6-phase development workflow | Codex + Gemini |
+| `/ccx:plan` | Multi-model collaborative planning (Phase 1-2) | Codex + Gemini |
+| `/ccx:execute` | Multi-model collaborative execution (Phase 3-5) | Codex + Gemini + Claude |
+| `/ccx:codex-exec` | Codex full execution (plan → code → review) | Codex + multi-model review |
+| `/ccx:feat` | Smart feature development | Auto-routed |
+| `/ccx:frontend` | Frontend tasks (fast mode) | Gemini |
+| `/ccx:backend` | Backend tasks (fast mode) | Codex |
 
 ### Analysis & Quality
 
 | Command | Description | Model |
 |---------|-------------|-------|
-| `/ccg:analyze` | Technical analysis | Codex + Gemini |
-| `/ccg:debug` | Problem diagnosis + fix | Codex + Gemini |
-| `/ccg:optimize` | Performance optimization | Codex + Gemini |
-| `/ccg:test` | Test generation | Auto-routed |
-| `/ccg:review` | Code review (auto git diff) | Codex + Gemini |
-| `/ccg:enhance` | Prompt enhancement | Built-in |
+| `/ccx:analyze` | Technical analysis | Codex + Gemini |
+| `/ccx:debug` | Problem diagnosis + fix | Codex + Gemini |
+| `/ccx:optimize` | Performance optimization | Codex + Gemini |
+| `/ccx:test` | Test generation | Auto-routed |
+| `/ccx:review` | Code review (auto git diff) | Codex + Gemini |
+| `/ccx:enhance` | Prompt enhancement | Built-in |
 
 ### OPSX Spec-Driven
 
 | Command | Description |
 |---------|-------------|
-| `/ccg:spec-init` | Initialize OPSX environment |
-| `/ccg:spec-research` | Requirements → Constraints |
-| `/ccg:spec-plan` | Constraints → Zero-decision plan |
-| `/ccg:spec-impl` | Execute plan + archive |
-| `/ccg:spec-review` | Dual-model cross-review |
+| `/ccx:spec-init` | Initialize OPSX environment |
+| `/ccx:spec-research` | Requirements → Constraints |
+| `/ccx:spec-plan` | Constraints → Zero-decision plan |
+| `/ccx:spec-impl` | Execute plan + archive |
+| `/ccx:spec-review` | Dual-model cross-review |
 
 ### Agent Teams (v1.7.60+)
 
 | Command | Description |
 |---------|-------------|
-| `/ccg:team-research` | Requirements → constraints (parallel exploration) |
-| `/ccg:team-plan` | Constraints → parallel implementation plan |
-| `/ccg:team-exec` | Spawn Builder teammates for parallel coding |
-| `/ccg:team-review` | Dual-model cross-review |
+| `/ccx:team-research` | Requirements → constraints (parallel exploration) |
+| `/ccx:team-plan` | Constraints → parallel implementation plan |
+| `/ccx:team-exec` | Spawn Builder teammates for parallel coding |
+| `/ccx:team-review` | Dual-model cross-review |
 
 > **Prerequisite**: Enable Agent Teams in `settings.json`: `CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS=1`
 
@@ -155,17 +182,17 @@ ccb-cleanup
 
 | Command | Description |
 |---------|-------------|
-| `/ccg:commit` | Smart commit (conventional commit format) |
-| `/ccg:rollback` | Interactive rollback |
-| `/ccg:clean-branches` | Clean merged branches |
-| `/ccg:worktree` | Worktree management |
+| `/ccx:commit` | Smart commit (conventional commit format) |
+| `/ccx:rollback` | Interactive rollback |
+| `/ccx:clean-branches` | Clean merged branches |
+| `/ccx:worktree` | Worktree management |
 
 ### Project Setup
 
 | Command | Description |
 |---------|-------------|
-| `/ccg:init` | Initialize project CLAUDE.md |
-| `/ccg:context` | Project context management (.context/ init, log, compress, history) |
+| `/ccx:init` | Initialize project CLAUDE.md |
+| `/ccx:context` | Project context management (.context/ init, log, compress, history) |
 
 ## Workflow Guides
 
@@ -173,16 +200,16 @@ ccb-cleanup
 
 ```bash
 # 1. Generate implementation plan
-/ccg:plan implement user authentication
+/ccx:plan implement user authentication
 
 # 2. Review the plan (editable)
 # Plan saved to .claude/plan/user-auth.md
 
 # 3a. Execute (Claude refactors) — fine-grained control
-/ccg:execute .claude/plan/user-auth.md
+/ccx:execute .claude/plan/user-auth.md
 
 # 3b. Execute (Codex does everything) — efficient, low Claude token usage
-/ccg:codex-exec .claude/plan/user-auth.md
+/ccx:codex-exec .claude/plan/user-auth.md
 ```
 
 ### OPSX Spec-Driven Workflow
@@ -190,27 +217,27 @@ ccb-cleanup
 Integrates [OPSX architecture](https://github.com/fission-ai/opsx) to turn requirements into constraints, eliminating AI improvisation:
 
 ```bash
-/ccg:spec-init                          # Initialize OPSX environment
-/ccg:spec-research implement user auth  # Research → constraints
-/ccg:spec-plan                          # Parallel analysis → zero-decision plan
-/ccg:spec-impl                          # Execute the plan
-/ccg:spec-review                        # Independent review (anytime)
+/ccx:spec-init                          # Initialize OPSX environment
+/ccx:spec-research implement user auth  # Research → constraints
+/ccx:spec-plan                          # Parallel analysis → zero-decision plan
+/ccx:spec-impl                          # Execute the plan
+/ccx:spec-review                        # Independent review (anytime)
 ```
 
-> **Tip**: `/ccg:spec-*` commands internally call `/opsx:*`. You can `/clear` between phases — state is persisted in the `openspec/` directory.
+> **Tip**: `/ccx:spec-*` commands internally call `/opsx:*`. You can `/clear` between phases — state is persisted in the `openspec/` directory.
 
 ### Agent Teams Parallel Workflow
 
 Leverage Claude Code Agent Teams to spawn multiple Builder teammates for parallel coding:
 
 ```bash
-/ccg:team-research implement kanban API  # 1. Requirements → constraints
+/ccx:team-research implement kanban API  # 1. Requirements → constraints
 # /clear
-/ccg:team-plan kanban-api               # 2. Plan → parallel tasks
+/ccx:team-plan kanban-api               # 2. Plan → parallel tasks
 # /clear
-/ccg:team-exec                          # 3. Builders code in parallel
+/ccx:team-exec                          # 3. Builders code in parallel
 # /clear
-/ccg:team-review                        # 4. Dual-model cross-review
+/ccx:team-review                        # 4. Dual-model cross-review
 ```
 
 > **vs Traditional Workflow**: Team series uses `/clear` between steps to isolate context, passing state through files. Ideal for tasks decomposable into 3+ independent modules.
@@ -221,18 +248,18 @@ Leverage Claude Code Agent Teams to spawn multiple Builder teammates for paralle
 
 ```
 ~/.claude/
-├── commands/ccg/       # 26 slash commands
-├── agents/ccg/         # Sub-agents
-├── skills/ccg/         # Quality gates + multi-agent orchestration
+├── commands/ccx/       # 26 slash commands
+├── agents/ccx/         # Sub-agents
+├── skills/ccx/         # Quality gates + multi-agent orchestration
 ├── bin/codeagent-wrapper
-└── .ccg/
-    ├── config.toml     # CCG configuration
+└── .ccx/
+    ├── config.toml     # CCX configuration
     └── prompts/
         ├── codex/      # 6 Codex expert prompts
         └── gemini/     # 7 Gemini expert prompts
 ```
 
-On Windows installs, `~/.claude/bin` also contains `ccb`, `ask`, `ccb-ping`, `pend`, `ccb-mounted`, and `ccb-cleanup` compatibility shims, and `~/.claude/.ccg/bridge/` stores the shared shim launcher resources.
+On Windows installs, `~/.claude/bin` also contains the managed helper commands `ask`, `pend`, and `maild`, and `~/.claude/.ccx/bridge/` stores the shared launcher resources.
 
 ### Environment Variables
 
@@ -264,7 +291,7 @@ Configure in `~/.claude/settings.json` under `"env"`:
 ### MCP Configuration
 
 ```bash
-npx ccg-workflow menu  # Select "Configure MCP"
+npx claude-code-ex menu  # Select "Configure MCP"
 ```
 
 **Code retrieval** (choose one):
@@ -311,7 +338,7 @@ Add to `~/.claude/settings.json`:
 ## Utilities
 
 ```bash
-npx ccg-workflow menu  # Select "Tools"
+npx claude-code-ex menu  # Select "Tools"
 ```
 
 - **ccusage** — Claude Code usage analytics
@@ -321,12 +348,12 @@ npx ccg-workflow menu  # Select "Tools"
 
 ```bash
 # Update
-npx ccg-workflow@latest            # npx users
-npm install -g ccg-workflow@latest  # npm global users
+npx claude-code-ex@latest            # npx users
+npm install -g claude-code-ex@latest  # npm global users
 
 # Uninstall
-npx ccg-workflow  # Select "Uninstall"
-npm uninstall -g ccg-workflow  # npm global users need this extra step
+npx claude-code-ex  # Select "Uninstall"
+npm uninstall -g claude-code-ex  # npm global users need this extra step
 ```
 
 ## FAQ
@@ -341,7 +368,7 @@ In `--json` mode, Codex does not automatically exit after output completion.
 
 We welcome contributions! See [CONTRIBUTING.md](./CONTRIBUTING.md) for guidelines.
 
-Looking for a place to start? Check out issues labeled [`good first issue`](https://github.com/fengshao1227/ccg-workflow/labels/good%20first%20issue).
+Looking for a place to start? Check out issues labeled [`good first issue`](https://github.com/fengshao1227/claude-code-ex/labels/good%20first%20issue).
 
 ## Contributors
 
@@ -366,13 +393,13 @@ Looking for a place to start? Check out issues labeled [`good first issue`](http
 
 ## Star History
 
-[![Star History Chart](https://api.star-history.com/svg?repos=fengshao1227/ccg-workflow&type=timeline&legend=top-left)](https://www.star-history.com/#fengshao1227/ccg-workflow&type=timeline&legend=top-left)
+[![Star History Chart](https://api.star-history.com/svg?repos=fengshao1227/claude-code-ex&type=timeline&legend=top-left)](https://www.star-history.com/#fengshao1227/claude-code-ex&type=timeline&legend=top-left)
 
 ## Contact
 
 - **Email**: [fengshao1227@gmail.com](mailto:fengshao1227@gmail.com) — Sponsorship, collaboration, or development ideas
-- **Issues**: [GitHub Issues](https://github.com/fengshao1227/ccg-workflow/issues) — Bug reports and feature requests
-- **Discussions**: [GitHub Discussions](https://github.com/fengshao1227/ccg-workflow/discussions) — Questions and community chat
+- **Issues**: [GitHub Issues](https://github.com/fengshao1227/claude-code-ex/issues) — Bug reports and feature requests
+- **Discussions**: [GitHub Discussions](https://github.com/fengshao1227/claude-code-ex/discussions) — Questions and community chat
 
 ## License
 
@@ -380,4 +407,4 @@ MIT
 
 ---
 
-v1.7.83 | [Issues](https://github.com/fengshao1227/ccg-workflow/issues) | [Contributing](./CONTRIBUTING.md)
+v1.7.83 | [Issues](https://github.com/fengshao1227/claude-code-ex/issues) | [Contributing](./CONTRIBUTING.md)

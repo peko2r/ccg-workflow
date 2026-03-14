@@ -13,7 +13,7 @@ function rewriteBridgeArgv(argv: string[]): string[] {
 }
 
 async function main(): Promise<void> {
-  const cli = cac('ccg')
+  const cli = cac('ccx')
   await setupCommands(cli)
   cli.parse(rewriteBridgeArgv(process.argv))
 }

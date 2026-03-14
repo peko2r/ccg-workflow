@@ -85,7 +85,7 @@ export interface BridgeCleanupStatus {
 }
 
 export function getBridgeRuntime(rootDir: string = process.cwd()): BridgeRuntime {
-  const bridgeDir = join(rootDir, '.ccb')
+  const bridgeDir = join(rootDir, '.ccx-bridge')
   return {
     rootDir,
     bridgeDir,

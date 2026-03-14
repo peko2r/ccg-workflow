@@ -1,31 +1,30 @@
-import type { CcgConfig, ModelRouting, SupportedLang } from '../types'
+import type { CcxConfig, ModelRouting, SupportedLang } from '../types'
 import fs from 'fs-extra'
 import { homedir } from 'node:os'
 import { join } from 'pathe'
 import { parse, stringify } from 'smol-toml'
 import { version as packageVersion } from '../../package.json'
 
-// v1.4.0: 配置目录统一到 ~/.claude/.ccg/
-const CCG_DIR = join(homedir(), '.claude', '.ccg')
-const CONFIG_FILE = join(CCG_DIR, 'config.toml')
+const CCX_DIR = join(homedir(), '.claude', '.ccx')
+const CONFIG_FILE = join(CCX_DIR, 'config.toml')
 
-export function getCcgDir(): string {
-  return CCG_DIR
+export function getCcxDir(): string {
+  return CCX_DIR
 }
 
 export function getConfigPath(): string {
   return CONFIG_FILE
 }
 
-export async function ensureCcgDir(): Promise<void> {
-  await fs.ensureDir(CCG_DIR)
+export async function ensureCcxDir(): Promise<void> {
+  await fs.ensureDir(CCX_DIR)
 }
 
-export async function readCcgConfig(): Promise<CcgConfig | null> {
+export async function readCcxConfig(): Promise<CcxConfig | null> {
   try {
     if (await fs.pathExists(CONFIG_FILE)) {
       const content = await fs.readFile(CONFIG_FILE, 'utf-8')
-      return parse(content) as unknown as CcgConfig
+      return parse(content) as unknown as CcxConfig
     }
   }
   catch {
@@ -34,8 +33,8 @@ export async function readCcgConfig(): Promise<CcgConfig | null> {
   return null
 }
 
-export async function writeCcgConfig(config: CcgConfig): Promise<void> {
-  await ensureCcgDir()
+export async function writeCcxConfig(config: CcxConfig): Promise<void> {
+  await ensureCcxDir()
   const content = stringify(config as any)
   await fs.writeFile(CONFIG_FILE, content, 'utf-8')
 }
@@ -46,7 +45,7 @@ export function createDefaultConfig(options: {
   installedWorkflows: string[]
   mcpProvider?: string
   liteMode?: boolean
-}): CcgConfig {
+}): CcxConfig {
   return {
     general: {
       version: packageVersion,
@@ -58,9 +57,9 @@ export function createDefaultConfig(options: {
       installed: options.installedWorkflows,
     },
     paths: {
-      commands: join(homedir(), '.claude', 'commands', 'ccg'),
-      prompts: join(CCG_DIR, 'prompts'), // v1.4.0: 移到配置目录
-      backup: join(CCG_DIR, 'backup'),
+      commands: join(homedir(), '.claude', 'commands', 'ccx'),
+      prompts: join(CCX_DIR, 'prompts'),
+      backup: join(CCX_DIR, 'backup'),
     },
     mcp: {
       provider: options.mcpProvider || 'ace-tool',

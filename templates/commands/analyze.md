@@ -55,8 +55,8 @@ EOF",
 
 | 模型 | 提示词 |
 |------|--------|
-| Codex | `~/.claude/.ccg/prompts/codex/analyzer.md` |
-| Gemini | `~/.claude/.ccg/prompts/gemini/analyzer.md` |
+| Codex | `~/.claude/.ccx/prompts/codex/analyzer.md` |
+| Gemini | `~/.claude/.ccx/prompts/gemini/analyzer.md` |
 
 **并行调用**：使用 `run_in_background: true` 启动，用 `TaskOutput` 等待结果。**必须等所有模型返回后才能进入下一阶段**。
 
@@ -79,7 +79,7 @@ TaskOutput({ task_id: "<task_id>", block: true, timeout: 600000 })
 
 ### 🔍 阶段 0：Prompt 增强（可选）
 
-`[模式：准备]` - **Prompt 增强**（按 `/ccg:enhance` 的逻辑执行）：分析 $ARGUMENTS 的意图、缺失信息、隐含假设，补全为结构化需求（明确目标、技术约束、范围边界、验收标准），**用增强结果替代原始 $ARGUMENTS，后续调用 Codex/Gemini 时传入增强后的需求**
+`[模式：准备]` - **Prompt 增强**（按 `/ccx:enhance` 的逻辑执行）：分析 $ARGUMENTS 的意图、缺失信息、隐含假设，补全为结构化需求（明确目标、技术约束、范围边界、验收标准），**用增强结果替代原始 $ARGUMENTS，后续调用 Codex/Gemini 时传入增强后的需求**
 
 ### 🔍 阶段 1：上下文检索
 
@@ -96,11 +96,11 @@ TaskOutput({ task_id: "<task_id>", block: true, timeout: 600000 })
 **⚠️ 必须发起两个并行 Bash 调用**（参照上方调用规范）：
 
 1. **Codex 后端分析**：`Bash({ command: "...--backend codex...", run_in_background: true })`
-   - ROLE_FILE: `~/.claude/.ccg/prompts/codex/analyzer.md`
+   - ROLE_FILE: `~/.claude/.ccx/prompts/codex/analyzer.md`
    - OUTPUT：技术可行性、架构影响、性能考量
 
 2. **Gemini 前端分析**：`Bash({ command: "...--backend gemini...", run_in_background: true })`
-   - ROLE_FILE: `~/.claude/.ccg/prompts/gemini/analyzer.md`
+   - ROLE_FILE: `~/.claude/.ccx/prompts/gemini/analyzer.md`
    - OUTPUT：UI/UX 影响、用户体验、视觉设计考量
 
 用 `TaskOutput` 等待两个模型的完整结果。**必须等所有模型返回后才能进入下一阶段**。

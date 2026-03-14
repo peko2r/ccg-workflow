@@ -51,10 +51,10 @@ EOF",
 
 | 阶段 | Codex | Gemini |
 |------|-------|--------|
-| 分析 | `~/.claude/.ccg/prompts/codex/analyzer.md` | `~/.claude/.ccg/prompts/gemini/analyzer.md` |
-| 规划 | `~/.claude/.ccg/prompts/codex/architect.md` | `~/.claude/.ccg/prompts/gemini/architect.md` |
+| 分析 | `~/.claude/.ccx/prompts/codex/analyzer.md` | `~/.claude/.ccx/prompts/gemini/analyzer.md` |
+| 规划 | `~/.claude/.ccx/prompts/codex/architect.md` | `~/.claude/.ccx/prompts/gemini/architect.md` |
 
-**会话复用**：每次调用返回 `SESSION_ID: xxx`（通常由 wrapper 输出），**必须保存**以供后续 `/ccg:execute` 使用。
+**会话复用**：每次调用返回 `SESSION_ID: xxx`（通常由 wrapper 输出），**必须保存**以供后续 `/ccx:execute` 使用。
 
 **等待后台任务**（最大超时 600000ms = 10 分钟）：
 
@@ -79,7 +79,7 @@ TaskOutput({ task_id: "<task_id>", block: true, timeout: 600000 })
 
 #### 1.1 Prompt 增强（必须首先执行）
 
-**Prompt 增强**（按 `/ccg:enhance` 的逻辑执行）：分析 $ARGUMENTS 的意图、缺失信息、隐含假设，补全为结构化需求（明确目标、技术约束、范围边界、验收标准），**用增强结果替代原始 $ARGUMENTS** 用于后续所有阶段。
+**Prompt 增强**（按 `/ccx:enhance` 的逻辑执行）：分析 $ARGUMENTS 的意图、缺失信息、隐含假设，补全为结构化需求（明确目标、技术约束、范围边界、验收标准），**用增强结果替代原始 $ARGUMENTS** 用于后续所有阶段。
 
 #### 1.2 上下文检索
 
@@ -118,12 +118,12 @@ TaskOutput({ task_id: "<task_id>", block: true, timeout: 600000 })
 将**原始需求**（不带预设观点）分发给两个模型：
 
 1. **Codex 后端分析**：
-   - ROLE_FILE: `~/.claude/.ccg/prompts/codex/analyzer.md`
+   - ROLE_FILE: `~/.claude/.ccx/prompts/codex/analyzer.md`
    - 关注：技术可行性、架构影响、性能考量、潜在风险
    - OUTPUT: 多角度解决方案 + 优劣势分析
 
 2. **Gemini 前端分析**：
-   - ROLE_FILE: `~/.claude/.ccg/prompts/gemini/analyzer.md`
+   - ROLE_FILE: `~/.claude/.ccx/prompts/gemini/analyzer.md`
    - 关注：UI/UX 影响、用户体验、视觉设计
    - OUTPUT: 多角度解决方案 + 优劣势分析
 
@@ -143,11 +143,11 @@ TaskOutput({ task_id: "<task_id>", block: true, timeout: 600000 })
 为降低 Claude 合成计划的遗漏风险，可并行让两个模型输出“计划草案”（仍然**不允许**修改文件）：
 
 1. **Codex 计划草案**（后端权威）：
-   - ROLE_FILE: `~/.claude/.ccg/prompts/codex/architect.md`
+   - ROLE_FILE: `~/.claude/.ccx/prompts/codex/architect.md`
    - OUTPUT: Step-by-step plan + pseudo-code（重点：数据流/边界条件/错误处理/测试策略）
 
 2. **Gemini 计划草案**（前端权威）：
-   - ROLE_FILE: `~/.claude/.ccg/prompts/gemini/architect.md`
+   - ROLE_FILE: `~/.claude/.ccx/prompts/gemini/architect.md`
    - OUTPUT: Step-by-step plan + pseudo-code（重点：信息架构/交互/可访问性/视觉一致性）
 
 用 `TaskOutput` 等待两个模型的完整结果，并记录其建议的关键差异点。
@@ -181,14 +181,14 @@ TaskOutput({ task_id: "<task_id>", block: true, timeout: 600000 })
 | 风险 | 缓解措施 |
 |------|----------|
 
-### SESSION_ID（供 /ccg:execute 使用）
+### SESSION_ID（供 /ccx:execute 使用）
 - CODEX_SESSION: <session_id>
 - GEMINI_SESSION: <session_id>
 ```
 
 ### ⛔ Phase 2 结束：计划交付（非执行）
 
-**`/ccg:plan` 的职责到此结束，必须执行以下动作**：
+**`/ccx:plan` 的职责到此结束，必须执行以下动作**：
 
 1. 向用户展示完整实施计划（含伪代码）
 2. 将计划保存至 `.claude/plan/<功能名>.md`（功能名从需求中提取，如 `user-auth`、`payment-module` 等）
@@ -202,7 +202,7 @@ TaskOutput({ task_id: "<task_id>", block: true, timeout: 600000 })
    - ▶️ **执行计划**：复制以下命令到新会话执行
 
    ```
-   /ccg:execute .claude/plan/实际功能名.md
+   /ccx:execute .claude/plan/实际功能名.md
    ```
    ---
 
@@ -211,9 +211,9 @@ TaskOutput({ task_id: "<task_id>", block: true, timeout: 600000 })
 4. **立即终止当前回复**（Stop here. No more tool calls.）
 
 **⚠️ 绝对禁止**：
-- ❌ 问用户 "Y/N" 然后自动执行（执行是 `/ccg:execute` 的职责）
+- ❌ 问用户 "Y/N" 然后自动执行（执行是 `/ccx:execute` 的职责）
 - ❌ 对产品代码进行任何写操作
-- ❌ 自动调用 `/ccg:execute` 或任何实施动作
+- ❌ 自动调用 `/ccx:execute` 或任何实施动作
 - ❌ 在用户未明确要求修改时继续触发模型调用
 
 ---
@@ -245,7 +245,7 @@ TaskOutput({ task_id: "<task_id>", block: true, timeout: 600000 })
 用户审查满意后，**手动**执行：
 
 ```bash
-/ccg:execute .claude/plan/<功能名>.md
+/ccx:execute .claude/plan/<功能名>.md
 ```
 
 ---
@@ -256,4 +256,4 @@ TaskOutput({ task_id: "<task_id>", block: true, timeout: 600000 })
 2. **不问 Y/N** – 只展示计划，让用户决定下一步
 3. **信任规则** – 后端以 Codex 为准，前端以 Gemini 为准
 4. 外部模型对文件系统**零写入权限**
-5. **SESSION_ID 交接** – 计划末尾必须包含 `CODEX_SESSION` / `GEMINI_SESSION`（供 `/ccg:execute resume <SESSION_ID>` 使用）
+5. **SESSION_ID 交接** – 计划末尾必须包含 `CODEX_SESSION` / `GEMINI_SESSION`（供 `/ccx:execute resume <SESSION_ID>` 使用）

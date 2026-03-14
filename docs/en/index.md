@@ -17,7 +17,7 @@ hero:
       link: /en/guide/commands
     - theme: alt
       text: GitHub
-      link: https://github.com/fengshao1227/ccg-workflow
+      link: https://github.com/fengshao1227/claude-code-ex
 
 features:
   - icon: 🔀
@@ -34,7 +34,7 @@ features:
     details: Multiple Builders write different modules simultaneously, then dual-model cross-review catches what humans might miss.
   - icon: ⚡
     title: One line, ready to go
-    details: npx ccg-workflow — 28 commands, works on macOS, Linux, and Windows.
+    details: npx claude-code-ex — 28 commands, works on macOS, Linux, and Windows.
   - icon: 🧩
     title: MCP ecosystem built in
     details: ace-tool, fast-context, Context7 and more — one-click setup, auto-synced to Codex and Gemini.

@@ -48,7 +48,7 @@ const WORKFLOW_CONFIGS: WorkflowConfig[] = [
   cmd('team-exec', 1.9, 'development', 'Agent Teams 并行实施', 'Agent Teams Parallel Execution', '读取计划文件，spawn Builder teammates 并行写代码，需启用 Agent Teams', 'Read plan file, spawn Builder teammates for parallel implementation'),
   cmd('team-review', 1.95, 'development', 'Agent Teams 审查', 'Agent Teams Review', '双模型交叉审查并行实施产出，分级处理 Critical/Warning/Info', 'Dual-model cross-review with severity classification'),
   cmd('frontend', 2, 'development', '前端专项', 'Frontend Tasks', '前端专项任务（Gemini主导，更快更精准）', 'Frontend tasks (Gemini-led, faster)'),
-  cmd('codex-exec', 2.5, 'development', 'Codex 执行计划', 'Codex Plan Executor', '读取 /ccg:plan 计划文件，Codex 全权执行 + 多模型审核', 'Read plan file from /ccg:plan, Codex executes + multi-model review'),
+  cmd('codex-exec', 2.5, 'development', 'Codex 执行计划', 'Codex Plan Executor', '读取 /ccx:plan 计划文件，Codex 全权执行 + 多模型审核', 'Read plan file from /ccx:plan, Codex executes + multi-model review'),
   cmd('context', 2.6, 'development', '项目上下文管理', 'Project Context Manager', '初始化 .context 目录、记录决策日志、压缩归档、查看历史', 'Init .context dir, log decisions, compress, view history'),
   cmd('backend', 3, 'development', '后端专项', 'Backend Tasks', '后端专项任务（Codex主导，更快更精准）', 'Backend tasks (Codex-led, faster)'),
   cmd('feat', 4, 'development', '智能功能开发', 'Smart Feature Development', '智能功能开发 - 自动规划、设计、实施', 'Smart feature development - auto plan, design, implement'),

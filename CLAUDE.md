@@ -19,14 +19,14 @@
 - ✨ **Gemini MCP 同步**：`syncMcpToGemini()` 镜像 MCP 到 `~/.gemini/settings.json`
 
 ### 2026-03-11 (v1.7.81)
-- 🔄 **`/ccg:commit` Context 自动归档**：从 git diff 自动生成 ContextEntry，不再依赖手动 session.log
-- 🔄 **`/ccg:context log` 降为可选**：init 一次 → 正常开发 → commit 全自动
+- 🔄 **`/ccx:commit` Context 自动归档**：从 git diff 自动生成 ContextEntry，不再依赖手动 session.log
+- 🔄 **`/ccx:context log` 降为可选**：init 一次 → 正常开发 → commit 全自动
 
 ### 2026-03-11 (v1.7.80)
-- ✨ **`/ccg:context` 命令**：第 27 个斜杠命令，`.context/` 目录初始化 + 决策日志 + 压缩归档 + 历史查看
-- ✨ **Context Compress Phase**：`/ccg:commit` 提交时自动压缩 session.log → history/commits.jsonl
+- ✨ **`/ccx:context` 命令**：第 27 个斜杠命令，`.context/` 目录初始化 + 决策日志 + 压缩归档 + 历史查看
+- ✨ **Context Compress Phase**：`/ccx:commit` 提交时自动压缩 session.log → history/commits.jsonl
 - ✨ **13 个角色提示词 `.context Awareness`**：Codex/Gemini 提示词注入 `.context/prefs/` 读取指令
-- ✨ **Quality Gate Rules**：`~/.claude/rules/ccg-skills.md` 定义质量关卡自动触发规则，安装时自动写入
+- ✨ **Quality Gate Rules**：`~/.claude/rules/ccx-skills.md` 定义质量关卡自动触发规则，安装时自动写入
 
 ### 2026-03-11 (v1.7.79)
 - 🐛 **Binary 下载容错**：3 次重试 + 60s 超时 + 失败醒目告警（红框 + 手动修复指引）+ 不阻塞安装
@@ -42,15 +42,15 @@
 - 📝 **README 重构**：命令分组（7 类）、新增 Why CCG? + CONTRIBUTING.md + Issue 模板 x3、配置章节去重折叠
 
 ### 2026-03-10 (v1.7.75)
-- 🐛 **Skills 命名空间隔离**：`skills/` → `skills/ccg/`，卸载不再误删用户自建 skill + 旧版自动迁移
+- 🐛 **Skills 命名空间隔离**：`skills/` → `skills/ccx/`，卸载不再误删用户自建 skill + 旧版自动迁移
 
 ### 2026-03-09 (v1.7.74)
-- 🔄 **spec 模板 guardrail**：`spec-research`/`spec-plan`/`spec-impl` 添加 USER GUIDANCE RULE + TASKS FORMAT RULE，内部 `/opsx:*` 调用标注 internal，失败引导至 `/ccg:spec-*`
+- 🔄 **spec 模板 guardrail**：`spec-research`/`spec-plan`/`spec-impl` 添加 USER GUIDANCE RULE + TASKS FORMAT RULE，内部 `/opsx:*` 调用标注 internal，失败引导至 `/ccx:spec-*`
 - 🐛 **Gemini CLI `.env` 隔离**：`cmd.Dir=$HOME` + `--include-directories` 避免项目 `.env` 覆盖全局 API Key
 - 🐛 **Codex 测试修正**：环境变量名 `CODEX_BYPASS_SANDBOX` → `CODEX_REQUIRE_APPROVAL`
 
 ### 2026-03-09 (v1.7.73)
-- ✨ **`/ccg:codex-exec` 命令**：第 26 个斜杠命令，Codex 全权执行 + 多模型审核，Claude token 极低消耗
+- ✨ **`/ccx:codex-exec` 命令**：第 26 个斜杠命令，Codex 全权执行 + 多模型审核，Claude token 极低消耗
 - ✨ **Skills 体系**：6 个原生 skill（verify-security/quality/change/module + gen-docs + multi-agent）
 - ✨ **context7 MCP 自动安装**：免费库文档查询，无需 API Key
 - ✨ **Codex MCP 同步**：`syncMcpToCodex()` 镜像同步到 `~/.codex/config.toml`
@@ -87,7 +87,7 @@
 - ✨ **Agent Teams 系列**：新增 4 个独立命令（`team-research`/`team-plan`/`team-exec`/`team-review`）
 - 🏗️ **并行实施**：利用 Claude Code Agent Teams spawn Builder teammates 并行写代码
 - 📋 **完整链路**：需求→约束 → 消除歧义→计划 → 并行实施 → 双模型审查
-- 🔒 **完全独立**：Team 系列不依赖现有 ccg 命令，自成体系
+- 🔒 **完全独立**：Team 系列不依赖现有 CCX 命令，自成体系
 
 ### 2026-02-08 (v1.7.57)
 - ✨ **MCP 工具扩展**：新增 ContextWeaver（推荐）+ 辅助工具（Context7/Playwright/DeepWiki/Exa）
@@ -129,15 +129,15 @@
 
 ```bash
 # 一键安装（推荐）
-npx ccg-workflow
+npx claude-code-ex
 
 # 交互式菜单
-npx ccg-workflow menu
+npx claude-code-ex menu
 ```
 
 ### CLI 入口点
 
-- **主入口**：`bin/ccg.mjs` → `src/cli.ts`
+- **主入口**：`bin/ccx.mjs` → `src/cli.ts`
 - **核心命令**：
   - `init` - 初始化工作流（`src/commands/init.ts`）
   - `update` - 更新工作流（`src/commands/update.ts`）
@@ -163,50 +163,50 @@ npx ccg-workflow menu
 
 | 命令 | 用途 |
 |------|------|
-| `npx ccg-workflow` | 一键安装/菜单 |
-| `npx ccg-workflow menu` | 交互式菜单 |
-| `npx ccg-workflow update` | 更新到最新版本 |
-| `npx ccg-workflow diagnose-mcp` | 诊断 MCP 配置 |
+| `npx claude-code-ex` | 一键安装/菜单 |
+| `npx claude-code-ex menu` | 交互式菜单 |
+| `npx claude-code-ex update` | 更新到最新版本 |
+| `npx claude-code-ex diagnose-mcp` | 诊断 MCP 配置 |
 
 ### Slash Commands 接口（17 个）
 
 **开发工作流**：
 | 命令 | 用途 | 模型 |
 |------|------|------|
-| `/ccg:workflow` | 完整 6 阶段工作流 | Codex ∥ Gemini |
-| `/ccg:plan` | 多模型协作规划（Phase 1-2） | Codex ∥ Gemini |
-| `/ccg:execute` | 多模型协作执行（Phase 3-5） | Codex ∥ Gemini + Claude |
-| `/ccg:codex-exec` | Codex 全权执行计划（MCP + 代码 + 测试） | Codex + 多模型审核 |
-| `/ccg:context` | 项目上下文管理（.context 初始化/日志/压缩/历史） | Claude |
-| `/ccg:frontend` | 前端专项（快速模式） | Gemini |
-| `/ccg:backend` | 后端专项（快速模式） | Codex |
-| `/ccg:feat` | 智能功能开发 | 规划 → 实施 |
-| `/ccg:analyze` | 技术分析（仅分析） | Codex ∥ Gemini |
-| `/ccg:debug` | 问题诊断 + 修复 | Codex ∥ Gemini |
-| `/ccg:optimize` | 性能优化 | Codex ∥ Gemini |
-| `/ccg:test` | 测试生成 | 智能路由 |
-| `/ccg:review` | 代码审查（自动 git diff） | Codex ∥ Gemini |
+| `/ccx:workflow` | 完整 6 阶段工作流 | Codex ∥ Gemini |
+| `/ccx:plan` | 多模型协作规划（Phase 1-2） | Codex ∥ Gemini |
+| `/ccx:execute` | 多模型协作执行（Phase 3-5） | Codex ∥ Gemini + Claude |
+| `/ccx:codex-exec` | Codex 全权执行计划（MCP + 代码 + 测试） | Codex + 多模型审核 |
+| `/ccx:context` | 项目上下文管理（.context 初始化/日志/压缩/历史） | Claude |
+| `/ccx:frontend` | 前端专项（快速模式） | Gemini |
+| `/ccx:backend` | 后端专项（快速模式） | Codex |
+| `/ccx:feat` | 智能功能开发 | 规划 → 实施 |
+| `/ccx:analyze` | 技术分析（仅分析） | Codex ∥ Gemini |
+| `/ccx:debug` | 问题诊断 + 修复 | Codex ∥ Gemini |
+| `/ccx:optimize` | 性能优化 | Codex ∥ Gemini |
+| `/ccx:test` | 测试生成 | 智能路由 |
+| `/ccx:review` | 代码审查（自动 git diff） | Codex ∥ Gemini |
 
 **项目管理**：
 | 命令 | 用途 |
 |------|------|
-| `/ccg:init` | 初始化项目 CLAUDE.md |
+| `/ccx:init` | 初始化项目 CLAUDE.md |
 
 **Git 工具**：
 | 命令 | 用途 |
 |------|------|
-| `/ccg:commit` | 智能提交（conventional commit） |
-| `/ccg:rollback` | 交互式回滚 |
-| `/ccg:clean-branches` | 清理已合并分支 |
-| `/ccg:worktree` | Worktree 管理 |
+| `/ccx:commit` | 智能提交（conventional commit） |
+| `/ccx:rollback` | 交互式回滚 |
+| `/ccx:clean-branches` | 清理已合并分支 |
+| `/ccx:worktree` | Worktree 管理 |
 
 **Agent Teams 并行实施**（v1.7.60+，需启用 `CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS=1`）：
 | 命令 | 用途 | 说明 |
 |------|------|------|
-| `/ccg:team-research` | 需求 → 约束集 | 并行探索代码库，Codex + Gemini 双模型分析 |
-| `/ccg:team-plan` | 约束 → 并行计划 | 消除歧义，拆分为文件范围隔离的独立子任务 |
-| `/ccg:team-exec` | 并行实施 | spawn Builder teammates（Sonnet）并行写代码 |
-| `/ccg:team-review` | 双模型审查 | Codex + Gemini 交叉审查，分级处理 Critical/Warning/Info |
+| `/ccx:team-research` | 需求 → 约束集 | 并行探索代码库，Codex + Gemini 双模型分析 |
+| `/ccx:team-plan` | 约束 → 并行计划 | 消除歧义，拆分为文件范围隔离的独立子任务 |
+| `/ccx:team-exec` | 并行实施 | spawn Builder teammates（Sonnet）并行写代码 |
+| `/ccx:team-review` | 双模型审查 | Codex + Gemini 交叉审查，分级处理 Critical/Warning/Info |
 
 ---
 
@@ -248,7 +248,7 @@ v1.7.0 起，以下配置不再支持自定义：
 ### 配置文件
 
 **用户配置**：
-- `~/.claude/.ccg/config.toml` - CCG 主配置
+- `~/.claude/.ccx/config.toml` - CCG 主配置
 
 **MCP 配置**：
 - `~/.claude.json` - Claude Code MCP 服务配置
@@ -321,14 +321,14 @@ templates/
     └── orchestration/
         └── multi-agent/
 ├── rules/                    # 全局规则（→ ~/.claude/rules/）
-│   └── ccg-skills.md         # 质量关卡自动触发规则
+│   └── ccx-skills.md         # 质量关卡自动触发规则
 ```
 
 ### 预编译产物
 
 ```
 bin/
-├── ccg.mjs                           # CLI 入口脚本
+├── ccx.mjs                           # CLI 入口脚本
 ├── codeagent-wrapper-darwin-amd64    # macOS Intel
 ├── codeagent-wrapper-darwin-arm64    # macOS Apple Silicon
 ├── codeagent-wrapper-linux-amd64     # Linux x64
@@ -343,17 +343,17 @@ bin/
 
 ```mermaid
 graph TD
-    User["用户"] --> CLI["npx ccg-workflow"]
+    User["用户"] --> CLI["npx claude-code-ex"]
     CLI --> Init["一键安装"]
     
-    Init --> Commands["~/.claude/commands/ccg/<br/>16 个命令"]
-    Init --> Agents["~/.claude/agents/ccg/<br/>4 个子智能体"]
+    Init --> Commands["~/.claude/commands/ccx/<br/>16 个命令"]
+    Init --> Agents["~/.claude/agents/ccx/<br/>4 个子智能体"]
     Init --> Skills["~/.claude/skills/<br/>1 个 skill"]
-    Init --> Prompts["~/.claude/.ccg/prompts/<br/>13 个专家提示词"]
+    Init --> Prompts["~/.claude/.ccx/prompts/<br/>13 个专家提示词"]
     Init --> Binary["~/.claude/bin/<br/>codeagent-wrapper"]
     Init --> MCP["~/.claude.json<br/>MCP 配置（可选）"]
 
-    User2["Claude Code 用户"] --> SlashCmd["/ccg:workflow<br/>/ccg:frontend<br/>..."]
+    User2["Claude Code 用户"] --> SlashCmd["/ccx:workflow<br/>/ccx:frontend<br/>..."]
     SlashCmd --> Commands
 
     Commands --> Wrapper["codeagent-wrapper"]

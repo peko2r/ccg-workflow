@@ -1,5 +1,5 @@
 ---
-description: 'Codex 全权执行计划 - 读取 /ccg:plan 产出的计划文件，Codex 承担 MCP 搜索 + 代码实现 + 测试，多模型审核'
+description: 'Codex 全权执行计划 - 读取 /ccx:plan 产出的计划文件，Codex 承担 MCP 搜索 + 代码实现 + 测试，多模型审核'
 ---
 
 # Codex-Exec - Codex 全权执行计划
@@ -10,19 +10,19 @@ $ARGUMENTS
 
 ## 核心理念
 
-**与 `/ccg:plan` 配对使用**：
+**与 `/ccx:plan` 配对使用**：
 
 ```
-/ccg:plan → 多模型协同规划（Codex ∥ Gemini 分析 → Claude 综合）
+/ccx:plan → 多模型协同规划（Codex ∥ Gemini 分析 → Claude 综合）
                 ↓ 计划文件 (.claude/plan/xxx.md)
-/ccg:codex-exec → Codex 全权执行（MCP 搜索 + 代码实现 + 测试）
+/ccx:codex-exec → Codex 全权执行（MCP 搜索 + 代码实现 + 测试）
                 ↓ 代码变更
                 → 多模型审核（Codex ∥ Gemini 交叉审查）
 ```
 
-**与 `/ccg:execute` 的区别**：
+**与 `/ccx:execute` 的区别**：
 
-| 维度 | `/ccg:execute` | `/ccg:codex-exec` |
+| 维度 | `/ccx:execute` | `/ccx:codex-exec` |
 |------|---------------|-------------------|
 | 代码实现 | Claude 重构 Codex/Gemini 的 Diff | **Codex 直接实现** |
 | MCP 搜索 | Claude 调用 MCP | **Codex 调用 MCP** |
@@ -108,7 +108,7 @@ REVIEW_EOF",
 
 | 阶段 | Codex | Gemini |
 |------|-------|--------|
-| 审查 | `~/.claude/.ccg/prompts/codex/reviewer.md` | `~/.claude/.ccg/prompts/gemini/reviewer.md` |
+| 审查 | `~/.claude/.ccx/prompts/codex/reviewer.md` | `~/.claude/.ccx/prompts/gemini/reviewer.md` |
 
 **等待后台任务**（最大超时 600000ms = 10 分钟）：
 
@@ -133,7 +133,7 @@ TaskOutput({ task_id: "<task_id>", block: true, timeout: 600000 })
 
 1. **识别输入类型**：
    - 计划文件路径（如 `.claude/plan/xxx.md`）→ 读取并解析
-   - 直接的任务描述 → 提示用户先执行 `/ccg:plan`
+   - 直接的任务描述 → 提示用户先执行 `/ccx:plan`
 
 2. **解析计划内容**，提取：
    - 任务类型（前端/后端/全栈）
@@ -230,7 +230,7 @@ EXEC_EOF",
 
 **📌 记录 SESSION_ID**（`CODEX_EXEC_SESSION`）
 
-如果计划中无 `CODEX_SESSION`（用户跳过了 `/ccg:plan` 的多模型分析），则使用新会话。
+如果计划中无 `CODEX_SESSION`（用户跳过了 `/ccx:plan` 的多模型分析），则使用新会话。
 
 用 `TaskOutput` 等待完成。
 
@@ -309,12 +309,12 @@ FIXEOF",
 2. **并行调用**（`run_in_background: true`）：
 
    - **Codex 审查**：
-     - ROLE_FILE: `~/.claude/.ccg/prompts/codex/reviewer.md`
+     - ROLE_FILE: `~/.claude/.ccx/prompts/codex/reviewer.md`
      - 输入：变更 Diff + 计划文件内容
      - 关注：安全性、性能、错误处理、逻辑正确性
 
    - **Gemini 审查**：
-     - ROLE_FILE: `~/.claude/.ccg/prompts/gemini/reviewer.md`
+     - ROLE_FILE: `~/.claude/.ccx/prompts/gemini/reviewer.md`
      - 输入：变更 Diff + 计划文件内容
      - 关注：代码可读性、设计一致性、可维护性
 
@@ -385,29 +385,29 @@ FIXEOF",
 
 ```bash
 # 标准流程：先规划，再执行
-/ccg:plan 实现用户认证功能
+/ccx:plan 实现用户认证功能
 # 审查计划后...
-/ccg:codex-exec .claude/plan/user-auth.md
+/ccx:codex-exec .claude/plan/user-auth.md
 
-# 直接执行（会提示先 /ccg:plan）
-/ccg:codex-exec 实现用户认证功能
+# 直接执行（会提示先 /ccx:plan）
+/ccx:codex-exec 实现用户认证功能
 ```
 
 ---
 
-## 与 /ccg:plan 的关系
+## 与 /ccx:plan 的关系
 
 ```
-/ccg:plan ──→ .claude/plan/xxx.md
+/ccx:plan ──→ .claude/plan/xxx.md
                     │
           ┌─────────┴─────────┐
           ↓                   ↓
-   /ccg:execute        /ccg:codex-exec
+   /ccx:execute        /ccx:codex-exec
    (Claude 重构)       (Codex 全权)
    Claude 高消耗       Claude 极低消耗
    精细控制             高效执行
 ```
 
 用户可根据任务特点选择：
-- **需要精细控制** → `/ccg:execute`（Claude 逐行重构）
-- **需要高效执行** → `/ccg:codex-exec`（Codex 一把梭）
+- **需要精细控制** → `/ccx:execute`（Claude 逐行重构）
+- **需要高效执行** → `/ccx:codex-exec`（Codex 一把梭）

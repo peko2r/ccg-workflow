@@ -8,7 +8,7 @@ import { homedir } from 'node:os'
 import { join } from 'pathe'
 import { checkForUpdates, compareVersions } from '../utils/version'
 import { uninstallWorkflows } from '../utils/installer'
-import { readCcgConfig, writeCcgConfig } from '../utils/config'
+import { readCcxConfig, writeCcxConfig } from '../utils/config'
 import { migrateToV1_4_0, needsMigration } from '../utils/migration'
 import { i18n } from '../i18n'
 
@@ -28,7 +28,7 @@ export async function update(): Promise<void> {
     const { hasUpdate, currentVersion, latestVersion } = await checkForUpdates()
 
     // Check if local workflow version differs from running version
-    const config = await readCcgConfig()
+    const config = await readCcxConfig()
     const localVersion = config?.general?.version || '0.0.0'
     const needsWorkflowUpdate = compareVersions(currentVersion, localVersion) > 0
 
@@ -176,8 +176,8 @@ async function askReconfigureRouting(currentRouting?: ModelRouting): Promise<Mod
  */
 async function checkIfGlobalInstall(): Promise<boolean> {
   try {
-    const { stdout } = await execAsync('npm list -g ccg-workflow --depth=0', { timeout: 5000 })
-    return stdout.includes('ccg-workflow@')
+    const { stdout } = await execAsync('npm list -g claude-code-ex --depth=0', { timeout: 5000 })
+    return stdout.includes('claude-code-ex@')
   }
   catch {
     return false
@@ -208,7 +208,7 @@ async function performUpdate(fromVersion: string, toVersion: string, isNewVersio
     console.log()
     console.log(`${i18n.t('update:recommendNpm')}`)
     console.log()
-    console.log(ansis.cyan('  npm install -g ccg-workflow@latest'))
+    console.log(ansis.cyan('  npm install -g claude-code-ex@latest'))
     console.log()
     console.log(ansis.gray(i18n.t('update:willUpdateBoth')))
     console.log()
@@ -224,7 +224,7 @@ async function performUpdate(fromVersion: string, toVersion: string, isNewVersio
       console.log()
       console.log(ansis.cyan(i18n.t('update:runInNewTerminal')))
       console.log()
-      console.log(ansis.cyan.bold('  npm install -g ccg-workflow@latest'))
+      console.log(ansis.cyan.bold('  npm install -g claude-code-ex@latest'))
       console.log()
       console.log(ansis.gray(`(${i18n.t('update:autoUpdateAfter')})`))
       console.log()
@@ -259,7 +259,7 @@ async function performUpdate(fromVersion: string, toVersion: string, isNewVersio
     }
 
     spinner.text = i18n.t('update:downloading')
-    await execAsync(`npx --yes ccg-workflow@latest --version`, { timeout: 60000 })
+    await execAsync(`npx --yes claude-code-ex@latest --version`, { timeout: 60000 })
     spinner.succeed(i18n.t('update:downloadDone'))
   }
   catch (error) {
@@ -336,7 +336,7 @@ async function performUpdate(fromVersion: string, toVersion: string, isNewVersio
   spinner = ora(i18n.t('update:installingNew')).start()
 
   try {
-    await execAsync(`npx --yes ccg-workflow@latest init --force --skip-mcp --skip-prompt`, {
+    await execAsync(`npx --yes claude-code-ex@latest init --force --skip-mcp --skip-prompt`, {
       timeout: 300000, // 5min — binary download from GitHub Release may be slow (especially in China)
       env: {
         ...process.env,
@@ -352,12 +352,12 @@ async function performUpdate(fromVersion: string, toVersion: string, isNewVersio
     }
 
     // Read updated config to display installed commands
-    const config = await readCcgConfig()
+    const config = await readCcxConfig()
     if (config?.workflows?.installed) {
       console.log()
       console.log(ansis.cyan(i18n.t('update:installed', { count: config.workflows.installed.length })))
       for (const cmd of config.workflows.installed) {
-        console.log(`  ${ansis.gray('•')} /ccg:${cmd}`)
+        console.log(`  ${ansis.gray('•')} /ccx:${cmd}`)
       }
     }
   }
@@ -382,7 +382,7 @@ async function performUpdate(fromVersion: string, toVersion: string, isNewVersio
     console.log(ansis.red(`${i18n.t('common:error')}: ${error}`))
     console.log()
     console.log(ansis.yellow(i18n.t('update:manualRetry')))
-    console.log(ansis.cyan('  npx ccg-workflow@latest'))
+    console.log(ansis.cyan('  npx claude-code-ex@latest'))
     return
   }
 

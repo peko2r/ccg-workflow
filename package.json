@@ -1,11 +1,11 @@
 {
-  "name": "ccg-workflow",
+  "name": "claude-code-ex",
   "version": "1.7.83",
-  "description": "Claude + Codex + Gemini multi-model collaboration system - smart routing development workflow",
+  "description": "Claude Code Ex (CCX) multi-model collaboration system and bridge workflow",
   "type": "module",
   "packageManager": "pnpm@10.17.1",
   "author": {
-    "name": "CCG Contributors"
+    "name": "Claude Code Ex Contributors"
   },
   "license": "MIT",
   "keywords": [
@@ -19,13 +19,14 @@
     "workflow"
   ],
   "bin": {
-    "ccg": "bin/ccg.mjs"
+    "ccx": "bin/ccx.mjs",
+    "maild": "bin/maild"
   },
   "main": "dist/index.mjs",
   "module": "dist/index.mjs",
   "types": "dist/index.d.mts",
   "files": [
-    "bin/ccg.mjs",
+    "bin/ccx.mjs",
     "dist",
     "templates/commands/analyze.md",
     "templates/commands/backend.md",
@@ -67,12 +68,15 @@
     "templates/prompts/claude/",
     "templates/output-styles/",
     "templates/skills/",
-    "templates/rules/"
+    "templates/rules/",
+    "bin/maild",
+    "lib/mail/",
+    "config/mail/"
   ],
   "scripts": {
     "dev": "tsx src/cli.ts",
     "build": "unbuild",
-    "start": "node bin/ccg.mjs",
+    "start": "node bin/ccx.mjs",
     "typecheck": "tsc --noEmit",
     "prepublishOnly": "pnpm build",
     "test": "vitest run",
@@ -94,7 +98,9 @@
     "smol-toml": "^1.4.2"
   },
   "pnpm": {
-    "onlyBuiltDependencies": ["esbuild"]
+    "onlyBuiltDependencies": [
+      "esbuild"
+    ]
   },
   "devDependencies": {
     "@antfu/eslint-config": "^5.4.1",

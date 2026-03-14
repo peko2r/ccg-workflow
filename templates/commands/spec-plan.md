@@ -13,9 +13,9 @@ description: '多模型分析 → 消除歧义 → 零决策可执行计划'
 - Multi-model collaboration is **mandatory**: use both Codex and Gemini.
 - If constraints cannot be fully specified, escalate to user or return to research phase.
 - Refer to `openspec/config.yaml` for project conventions.
-- **USER GUIDANCE RULE**: When suggesting next steps to the user, ALWAYS use CCG commands (`/ccg:spec-research`, `/ccg:spec-plan`, `/ccg:spec-impl`, `/ccg:spec-review`). NEVER suggest `/opsx:*` commands to the user. If OpenSpec CLI returns error messages referencing OPSX skills, translate them to CCG equivalents.
+- **USER GUIDANCE RULE**: When suggesting next steps to the user, ALWAYS use CCG commands (`/ccx:spec-research`, `/ccx:spec-plan`, `/ccx:spec-impl`, `/ccx:spec-review`). NEVER suggest `/opsx:*` commands to the user. If OpenSpec CLI returns error messages referencing OPSX skills, translate them to CCG equivalents.
 - **TASKS FORMAT RULE**: When generating or modifying `tasks.md`, ALL tasks MUST use checkbox format (`- [ ] X.Y description`). Heading+bullet format will cause OpenSpec CLI to parse 0 tasks and block the workflow.
-- **PHASE BOUNDARY**: This phase ONLY generates OPSX artifacts (specs.md, design.md, tasks.md). Do NOT modify any source code. Do NOT proceed to implementation. After artifacts are generated, STOP and inform the user: "Plan complete. Run `/ccg:spec-impl` to start implementation."
+- **PHASE BOUNDARY**: This phase ONLY generates OPSX artifacts (specs.md, design.md, tasks.md). Do NOT modify any source code. Do NOT proceed to implementation. After artifacts are generated, STOP and inform the user: "Plan complete. Run `/ccx:spec-impl` to start implementation."
 
 **Steps**
 1. **Select Change**
@@ -114,14 +114,14 @@ description: '多模型分析 → 消除歧义 → 零决策可执行计划'
      /opsx:continue
      ```
    - The OPSX skill will use the above summary to create specs.md, design.md, and tasks.md.
-   - **Note**: This is an internal call. If this step fails, guide the user to re-run `/ccg:spec-plan`.
+   - **Note**: This is an internal call. If this step fails, guide the user to re-run `/ccx:spec-plan`.
    - **STOP**: After artifacts are generated, verify they exist and inform user:
-     "Plan phase complete. Artifacts generated: specs.md, design.md, tasks.md. Run `/ccg:spec-impl` to start implementation."
+     "Plan phase complete. Artifacts generated: specs.md, design.md, tasks.md. Run `/ccx:spec-impl` to start implementation."
      Do NOT proceed to modify source code.
 
 6. **Context Checkpoint**
    - Report current context usage.
-   - If approaching 80K tokens, suggest: "Run `/clear` and continue with `/ccg:spec-impl`"
+   - If approaching 80K tokens, suggest: "Run `/clear` and continue with `/ccx:spec-impl`"
 
 **Exit Criteria**
 A change is ready for implementation only when:

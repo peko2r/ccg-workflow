@@ -7,15 +7,15 @@ Different tasks call for different workflows. Don't overthink it — use this de
 ```
 Got a task
   │
-  ├─ Simple, one sentence? ──→ /ccg:frontend or /ccg:backend
+  ├─ Simple, one sentence? ──→ /ccx:frontend or /ccx:backend
   │
-  ├─ Want to review the plan first? → /ccg:plan → /ccg:execute
+  ├─ Want to review the plan first? → /ccx:plan → /ccx:execute
   │
-  ├─ Need strict control? ──→ /ccg:spec-* series
+  ├─ Need strict control? ──→ /ccx:spec-* series
   │
-  ├─ Splits into 3+ modules? → /ccg:team-* series
+  ├─ Splits into 3+ modules? → /ccx:team-* series
   │
-  └─ Full end-to-end? ──────→ /ccg:workflow
+  └─ Full end-to-end? ──────→ /ccx:workflow
 ```
 
 ## Plan → Execute (most common)
@@ -23,13 +23,13 @@ Got a task
 Codex and Gemini each produce an analysis. Claude combines them into a plan. You review it, tweak if needed, then execute.
 
 ```bash
-/ccg:plan implement user authentication
+/ccx:plan implement user authentication
 # Plan saved in .claude/plan/
 # Open it, read it, edit it if you want
 
 # Two ways to execute — pick one:
-/ccg:execute .claude/plan/user-auth.md   # Claude handles each step
-/ccg:codex-exec .claude/plan/user-auth.md  # Codex does everything, Claude just reviews
+/ccx:execute .claude/plan/user-auth.md   # Claude handles each step
+/ccx:codex-exec .claude/plan/user-auth.md  # Codex does everything, Claude just reviews
 ```
 
 **When to use which?**
@@ -45,21 +45,21 @@ For when you don't want the AI making stuff up. Like implementing a permission s
 The idea: **turn requirements into constraints, then turn constraints into a zero-decision plan. During execution, there's nothing to decide — every decision was already made during planning.**
 
 ```bash
-/ccg:spec-init
-/ccg:spec-research implement RBAC permission system
+/ccx:spec-init
+/ccx:spec-research implement RBAC permission system
 # This outputs constraints like:
 # - Must support role inheritance
 # - Permission check latency < 5ms
 # - Must have audit logging
 
-/ccg:spec-plan
+/ccx:spec-plan
 # Constraints → zero-decision plan
 # Every step: which file, what change, how to verify
 
-/ccg:spec-impl
+/ccx:spec-impl
 # Execute step by step, no decisions needed
 
-/ccg:spec-review
+/ccx:spec-review
 # Independent dual-model review, use anytime
 ```
 
@@ -70,19 +70,19 @@ You can `/clear` between phases — state lives in `openspec/`, it won't disappe
 Task splits into independent modules? Like "order CRUD + payment integration + email notifications" — three modules with no dependencies. Let three Builders work at once.
 
 ```bash
-/ccg:team-research implement order system
+/ccx:team-research implement order system
 # Outputs constraints + success criteria
 # /clear
 
-/ccg:team-plan order-system
+/ccx:team-plan order-system
 # Splits into non-overlapping subtasks, each Builder owns their files
 # /clear
 
-/ccg:team-exec
+/ccx:team-exec
 # Multiple Builders code in parallel
 # /clear
 
-/ccg:team-review
+/ccx:team-review
 # Codex reviews + Gemini reviews, Critical = must fix
 ```
 
@@ -94,10 +94,10 @@ Works best when: the task decomposes into 3+ independent modules with no tight c
 
 ## Full Workflow (autopilot)
 
-`/ccg:workflow` runs all 6 phases automatically: research → ideate → plan → execute → optimize → review.
+`/ccx:workflow` runs all 6 phases automatically: research → ideate → plan → execute → optimize → review.
 
 ```bash
-/ccg:workflow implement full user auth with registration, login, and JWT
+/ccx:workflow implement full user auth with registration, login, and JWT
 ```
 
 Good for when you don't want to babysit the process. For big tasks though, `plan + execute` gives you a checkpoint to review the plan before committing to it.

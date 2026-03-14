@@ -14,32 +14,34 @@ import {
   bridgePing,
 } from './commands/bridge'
 import { showMainMenu } from './commands/menu'
+import { runMaild } from './commands/maild'
 import { i18n, initI18n } from './i18n'
-import { readCcgConfig } from './utils/config'
+import { readCcxConfig } from './utils/config'
 
 function customizeHelp(sections: any[]): any[] {
   sections.unshift({
     title: '',
-    body: ansis.cyan.bold(`CCG - Claude + Codex + Gemini v${version}`),
+    body: ansis.cyan.bold(`Claude Code Ex (CCX) v${version}`),
   })
 
   sections.push({
     title: ansis.yellow(i18n.t('cli:help.commands')),
     body: [
-      `  ${ansis.cyan('ccg')}              ${i18n.t('cli:help.commandDescriptions.showMenu')}`,
-      `  ${ansis.cyan('ccg init')} | ${ansis.cyan('i')}     ${i18n.t('cli:help.commandDescriptions.initConfig')}`,
-      `  ${ansis.cyan('ccg config mcp')}   ${i18n.t('cli:help.commandDescriptions.configMcp')}`,
-      `  ${ansis.cyan('ccg diagnose-mcp')} ${i18n.t('cli:help.commandDescriptions.diagnoseMcp')}`,
-      `  ${ansis.cyan('ccg fix-mcp')}      ${i18n.t('cli:help.commandDescriptions.fixMcp')}`,
-      `  ${ansis.cyan('ccg codex gemini')} ${i18n.t('cli:help.commandDescriptions.bridgeLaunch')}`,
-      `  ${ansis.cyan('ccg ask codex "..."')} ${i18n.t('cli:help.commandDescriptions.bridgeAsk')}`,
-      `  ${ansis.cyan('ccg ping codex')}   ${i18n.t('cli:help.commandDescriptions.bridgePing')}`,
-      `  ${ansis.cyan('ccg pend codex 5')} ${i18n.t('cli:help.commandDescriptions.bridgePend')}`,
-      `  ${ansis.cyan('ccg mounted')}      ${i18n.t('cli:help.commandDescriptions.bridgeMounted')}`,
-      `  ${ansis.cyan('ccg cleanup')}      ${i18n.t('cli:help.commandDescriptions.bridgeCleanup')}`,
+      `  ${ansis.cyan('ccx')}              ${i18n.t('cli:help.commandDescriptions.showMenu')}`,
+      `  ${ansis.cyan('ccx init')} | ${ansis.cyan('i')}     ${i18n.t('cli:help.commandDescriptions.initConfig')}`,
+      `  ${ansis.cyan('ccx config mcp')}   ${i18n.t('cli:help.commandDescriptions.configMcp')}`,
+      `  ${ansis.cyan('ccx diagnose-mcp')} ${i18n.t('cli:help.commandDescriptions.diagnoseMcp')}`,
+      `  ${ansis.cyan('ccx fix-mcp')}      ${i18n.t('cli:help.commandDescriptions.fixMcp')}`,
+      `  ${ansis.cyan('ccx codex gemini')} ${i18n.t('cli:help.commandDescriptions.bridgeLaunch')}`,
+      `  ${ansis.cyan('ccx ask codex "..."')} ${i18n.t('cli:help.commandDescriptions.bridgeAsk')}`,
+      `  ${ansis.cyan('ccx ping codex')}   ${i18n.t('cli:help.commandDescriptions.bridgePing')}`,
+      `  ${ansis.cyan('ccx pend codex 5')} ${i18n.t('cli:help.commandDescriptions.bridgePend')}`,
+      `  ${ansis.cyan('ccx mounted')}      ${i18n.t('cli:help.commandDescriptions.bridgeMounted')}`,
+      `  ${ansis.cyan('ccx cleanup')}      ${i18n.t('cli:help.commandDescriptions.bridgeCleanup')}`,
+      `  ${ansis.cyan('ccx maild status')} ${i18n.t('cli:help.commandDescriptions.maild')}`,
       '',
       ansis.gray(`  ${i18n.t('cli:help.shortcuts')}`),
-      `  ${ansis.cyan('ccg i')}            ${i18n.t('cli:help.shortcutDescriptions.quickInit')}`,
+      `  ${ansis.cyan('ccx i')}            ${i18n.t('cli:help.shortcutDescriptions.quickInit')}`,
     ].join('\n'),
   })
 
@@ -65,25 +67,25 @@ function customizeHelp(sections: any[]): any[] {
     title: ansis.yellow(i18n.t('cli:help.examples')),
     body: [
       ansis.gray(`  # ${i18n.t('cli:help.exampleDescriptions.showInteractiveMenu')}`),
-      `  ${ansis.cyan('npx ccg')}`,
+      `  ${ansis.cyan('npx claude-code-ex')}`,
       '',
       ansis.gray(`  # ${i18n.t('cli:help.exampleDescriptions.runFullInitialization')}`),
-      `  ${ansis.cyan('npx ccg init')}`,
-      `  ${ansis.cyan('npx ccg i')}`,
+      `  ${ansis.cyan('npx claude-code-ex init')}`,
+      `  ${ansis.cyan('npx claude-code-ex i')}`,
       '',
       ansis.gray(`  # ${i18n.t('cli:help.exampleDescriptions.customModels')}`),
-      `  ${ansis.cyan('npx ccg i --frontend gemini,codex --backend codex,gemini')}`,
+      `  ${ansis.cyan('npx claude-code-ex i --frontend gemini,codex --backend codex,gemini')}`,
       '',
       ansis.gray(`  # ${i18n.t('cli:help.exampleDescriptions.parallelMode')}`),
-      `  ${ansis.cyan('npx ccg i --mode parallel')}`,
+      `  ${ansis.cyan('npx claude-code-ex i --mode parallel')}`,
       '',
       ansis.gray(`  # ${i18n.t('cli:help.exampleDescriptions.bridgeLaunch')}`),
-      `  ${ansis.cyan('npx ccg codex gemini')}`,
-      `  ${ansis.cyan('npx ccg bridge --restore codex,claude')}`,
+      `  ${ansis.cyan('npx ccx codex gemini')}`,
+      `  ${ansis.cyan('npx ccx bridge --restore codex,claude')}`,
       '',
       ansis.gray(`  # ${i18n.t('cli:help.exampleDescriptions.bridgeAsk')}`),
-      `  ${ansis.cyan('npx ccg ask codex "summarize the repository"')}`,
-      `  ${ansis.cyan('npx ccg mounted')}`,
+      `  ${ansis.cyan('npx ccx ask codex "summarize the repository"')}`,
+      `  ${ansis.cyan('npx ccx mounted')}`,
       '',
     ].join('\n'),
   })
@@ -93,7 +95,7 @@ function customizeHelp(sections: any[]): any[] {
 
 export async function setupCommands(cli: CAC): Promise<void> {
   try {
-    const config = await readCcgConfig()
+    const config = await readCcxConfig()
     const defaultLang = config?.general?.language || 'zh-CN'
     await initI18n(defaultLang)
   }
@@ -137,6 +139,12 @@ export async function setupCommands(cli: CAC): Promise<void> {
     .command('cleanup', i18n.t('cli:help.commandDescriptions.bridgeCleanup'))
     .action(async () => {
       bridgeCleanup()
+    })
+
+  cli
+    .command('maild [...args]', i18n.t('cli:help.commandDescriptions.maild'))
+    .action(async (args: string[]) => {
+      await runMaild(args)
     })
 
   // Default command - show menu

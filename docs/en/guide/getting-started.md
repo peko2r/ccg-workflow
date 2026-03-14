@@ -35,7 +35,7 @@ There's also **codex-exec mode**: Codex writes the code instead, then Claude + G
 ## Install
 
 ```bash
-npx ccg-workflow
+npx claude-code-ex
 ```
 
 First run asks you to pick a language. After that, it remembers.
@@ -67,7 +67,7 @@ scoop install jq
 ### Installing Claude Code
 
 ```bash
-npx ccg-workflow menu  # Look for "Install Claude Code"
+npx claude-code-ex menu  # Look for "Install Claude Code"
 ```
 
 Works with npm, homebrew, curl, powershell, and cmd.
@@ -77,7 +77,7 @@ Works with npm, homebrew, curl, powershell, and cmd.
 After installing, type this in Claude Code:
 
 ```
-/ccg:frontend add a dark mode toggle to the login page
+/ccx:frontend add a dark mode toggle to the login page
 ```
 
 If you see Gemini being called, you're good.
@@ -86,10 +86,10 @@ If you see Gemini being called, you're good.
 
 ```bash
 # Update
-npx ccg-workflow@latest
+npx claude-code-ex@latest
 
 # Uninstall
-npx ccg-workflow  # Select "Uninstall"
+npx claude-code-ex  # Select "Uninstall"
 ```
 
 ## What's next

@@ -14,7 +14,7 @@ $ARGUMENTS
 - **代码主权**：外部模型对文件系统**零写入权限**，所有修改由 Claude 执行
 - **脏原型重构**：将 Codex/Gemini 的 Unified Diff 视为"脏原型"，必须重构为生产级代码
 - **止损机制**：当前阶段输出通过验证前，不进入下一阶段
-- **前置条件**：仅在用户对 `/ccg:plan` 输出明确回复 "Y" 后执行（如缺失，必须先二次确认）
+- **前置条件**：仅在用户对 `/ccx:plan` 输出明确回复 "Y" 后执行（如缺失，必须先二次确认）
 
 ---
 
@@ -92,10 +92,10 @@ EOF",
 
 | 阶段 | Codex | Gemini |
 |------|-------|--------|
-| 实施 | `~/.claude/.ccg/prompts/codex/architect.md` | `~/.claude/.ccg/prompts/gemini/frontend.md` |
-| 审查 | `~/.claude/.ccg/prompts/codex/reviewer.md` | `~/.claude/.ccg/prompts/gemini/reviewer.md` |
+| 实施 | `~/.claude/.ccx/prompts/codex/architect.md` | `~/.claude/.ccx/prompts/gemini/frontend.md` |
+| 审查 | `~/.claude/.ccx/prompts/codex/reviewer.md` | `~/.claude/.ccx/prompts/gemini/reviewer.md` |
 
-**会话复用**：如果 `/ccg:plan` 提供了 SESSION_ID，使用 `resume <SESSION_ID>` 复用上下文。
+**会话复用**：如果 `/ccx:plan` 提供了 SESSION_ID，使用 `resume <SESSION_ID>` 复用上下文。
 
 **等待后台任务**（最大超时 600000ms = 10 分钟）：
 
@@ -178,7 +178,7 @@ TaskOutput({ task_id: "<task_id>", block: true, timeout: 600000 })
 
 **限制**：上下文 < 32k tokens
 
-1. 调用 Gemini（使用 `~/.claude/.ccg/prompts/gemini/frontend.md`）
+1. 调用 Gemini（使用 `~/.claude/.ccx/prompts/gemini/frontend.md`）
 2. 输入：计划内容 + 检索到的上下文 + 目标文件
 3. OUTPUT: `Unified Diff Patch ONLY. Strictly prohibit any actual modifications.`
 4. **Gemini 是前端设计的权威，其 CSS/React/Vue 原型为最终视觉基准**
@@ -187,7 +187,7 @@ TaskOutput({ task_id: "<task_id>", block: true, timeout: 600000 })
 
 #### Route B: 后端/逻辑/算法 → Codex
 
-1. 调用 Codex（使用 `~/.claude/.ccg/prompts/codex/architect.md`）
+1. 调用 Codex（使用 `~/.claude/.ccx/prompts/codex/architect.md`）
 2. 输入：计划内容 + 检索到的上下文 + 目标文件
 3. OUTPUT: `Unified Diff Patch ONLY. Strictly prohibit any actual modifications.`
 4. **Codex 是后端逻辑的权威，利用其逻辑运算与 Debug 能力**
@@ -247,12 +247,12 @@ TaskOutput({ task_id: "<task_id>", block: true, timeout: 600000 })
 **变更生效后，强制立即并行调用** Codex 和 Gemini 进行 Code Review：
 
 1. **Codex 审查**（`run_in_background: true`）：
-   - ROLE_FILE: `~/.claude/.ccg/prompts/codex/reviewer.md`
+   - ROLE_FILE: `~/.claude/.ccx/prompts/codex/reviewer.md`
    - 输入：变更的 Diff + 目标文件
    - 关注：安全性、性能、错误处理、逻辑正确性
 
 2. **Gemini 审查**（`run_in_background: true`）：
-   - ROLE_FILE: `~/.claude/.ccg/prompts/gemini/reviewer.md`
+   - ROLE_FILE: `~/.claude/.ccx/prompts/gemini/reviewer.md`
    - 输入：变更的 Diff + 目标文件
    - 关注：可访问性、设计一致性、用户体验
 
@@ -302,16 +302,16 @@ TaskOutput({ task_id: "<task_id>", block: true, timeout: 600000 })
 
 ```bash
 # 执行计划文件
-/ccg:execute .claude/plan/功能名.md
+/ccx:execute .claude/plan/功能名.md
 
 # 直接执行任务（适用于已在上下文中讨论过的计划）
-/ccg:execute 根据之前的计划实施用户认证功能
+/ccx:execute 根据之前的计划实施用户认证功能
 ```
 
 ---
 
-## 与 /ccg:plan 的关系
+## 与 /ccx:plan 的关系
 
-1. `/ccg:plan` 生成计划 + SESSION_ID
+1. `/ccx:plan` 生成计划 + SESSION_ID
 2. 用户确认 "Y" 后
-3. `/ccg:execute` 读取计划，复用 SESSION_ID，执行实施
+3. `/ccx:execute` 读取计划，复用 SESSION_ID，执行实施

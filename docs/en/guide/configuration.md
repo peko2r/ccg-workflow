@@ -4,15 +4,38 @@
 
 ```
 ~/.claude/
-├── commands/ccg/       # 28 command templates
-├── agents/ccg/         # 4 sub-agents
-├── skills/ccg/         # Quality checks + multi-agent orchestration
+├── commands/ccx/       # 28 command templates
+├── agents/ccx/         # 4 sub-agents
+├── skills/ccx/         # Quality checks + multi-agent orchestration
 ├── bin/codeagent-wrapper
-└── .ccg/
-    ├── config.toml     # CCG config
+└── .ccx/
+    ├── config.toml     # CCX config
     └── prompts/
         ├── codex/      # 6 Codex role prompts
         └── gemini/     # 7 Gemini role prompts
+```
+
+## Mail daemon config
+
+`maild` stores user configuration under:
+
+```text
+~/.claude/.ccx/mail/config.json
+```
+
+The repository template lives at:
+
+```text
+config/mail/config.template.json
+```
+
+Common workflow:
+
+```bash
+maild setup
+maild test
+maild start
+maild status
 ```
 
 ## Environment variables
@@ -54,7 +77,7 @@ We locked these down because testing showed this combo works best. If you disagr
 ## Utilities
 
 ```bash
-npx ccg-workflow menu  # Select "Tools"
+npx claude-code-ex menu  # Select "Tools"
 ```
 
 - **ccusage** — See how much your Claude Code sessions cost
@@ -72,7 +95,7 @@ Upgrade to Node 20+. `ora@9.x` uses Node 20 syntax.
 
 **MCP tools not responding**
 
-Run `npx ccg-workflow diagnose-mcp`.
+Run `npx claude-code-ex diagnose-mcp`.
 
 **Can't find Agent Teams commands**
 

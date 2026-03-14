@@ -16,7 +16,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
-- Bridge compatibility shims reuse the main `ccg` bridge commands through shared launcher resources under `~/.claude/.ccg/bridge/`
+- Bridge compatibility shims reuse the main `ccx` bridge commands through shared launcher resources under `~/.claude/.ccx/bridge/`
 
 ## [1.7.83] - 2026-03-12
 
@@ -51,8 +51,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### 🔄 变更
 
-- **`/ccg:commit` Context 自动归档**：不再依赖手动 session.log，改为从 git diff 自动分析生成 ContextEntry（decisions/bugs/changes），session.log 有内容时额外合并。`.context/` 不存在时提示 init 但不阻断
-- **`/ccg:context log` 降为可选**：核心用法简化为 `init` 一次 → 正常开发 → `/ccg:commit` 全自动归档
+- **`/ccx:commit` Context 自动归档**：不再依赖手动 session.log，改为从 git diff 自动分析生成 ContextEntry（decisions/bugs/changes），session.log 有内容时额外合并。`.context/` 不存在时提示 init 但不阻断
+- **`/ccx:context log` 降为可选**：核心用法简化为 `init` 一次 → 正常开发 → `/ccx:commit` 全自动归档
 
 ---
 
@@ -60,10 +60,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### ✨ 新功能
 
-- **`/ccg:context` 命令**：第 27 个斜杠命令，项目上下文管理（`.context/` 目录初始化、决策日志记录、压缩归档、历史查看）
+- **`/ccx:context` 命令**：第 27 个斜杠命令，项目上下文管理（`.context/` 目录初始化、决策日志记录、压缩归档、历史查看）
 - **`.context` 上下文工程体系**：为 LLM 全面自动化提供决策审计链 — 记录 WHY（为什么改）、WHAT（考虑了什么替代方案）、BUG（遇到了什么坑）
 - **ContextEntry Schema v1.0.0**：JSONL canonical store + Markdown 人类视图，UUIDv7 主键（rebase-safe），`.gitattributes merge=union` 减少冲突
-- **`/ccg:commit` Context Compress Phase**：提交时自动压缩 session.log → 脱敏 → 追加 history/commits.jsonl → 添加 `Context-Id` commit trailer
+- **`/ccx:commit` Context Compress Phase**：提交时自动压缩 session.log → 脱敏 → 追加 history/commits.jsonl → 添加 `Context-Id` commit trailer
 - **13 个角色提示词 `.context Awareness` 注入**：Codex 6 个 + Gemini 7 个角色提示词增加 `.context/prefs/` 读取指令，外部模型自动遵守项目规范
 - **Quality Gate Rules 全局规则**：安装时自动写入 `~/.claude/rules/ccg-skills.md`，定义 5 个质量关卡的自动触发条件（新建模块/代码变更>30行/安全变更/重构）
 
@@ -101,7 +101,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **二进制产物迁移至 GitHub Release**：`bin/codeagent-wrapper-*` 不再打包到 npm 和 git，改从 GitHub Release (`preset` tag) 按需下载，npm 包从 16.3MB 缩减至 161KB
 - **GitHub Actions CI**：新增 `.github/workflows/build-binaries.yml`，`codeagent-wrapper/` 变更时自动交叉编译 6 平台并上传到 `preset` Release
 - **installer.ts 下载逻辑**：仅从 GitHub Release 下载，移除本地 `bin/` fallback（开发者可用 `build-all.sh` 自行编译）
-- **移除本地二进制**：`bin/codeagent-wrapper-*` 6 个文件已从仓库删除，仅保留 `bin/ccg.mjs` 入口
+- **移除本地二进制**：`bin/codeagent-wrapper-*` 6 个文件已从仓库删除，仅保留 `bin/ccx.mjs` 入口
 
 ---
 
@@ -119,8 +119,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### 🐛 修复
 
-- **Skills 命名空间隔离**：安装路径从 `~/.claude/skills/` 改为 `~/.claude/skills/ccg/`，卸载时不再误删用户自建 skill（如 `brainstorming`、`changelog-generator` 等）
-- **旧版迁移**：升级时自动将 v1.7.73-74 散落在 `skills/` 根目录的 CCG 文件迁移到 `skills/ccg/`，用户 skill 原地不动
+- **Skills 命名空间隔离**：安装路径从 `~/.claude/skills/` 改为 `~/.claude/skills/ccx/`，卸载时不再误删用户自建 skill（如 `brainstorming`、`changelog-generator` 等）
+- **旧版迁移**：升级时自动将 v1.7.73-74 散落在 `skills/` 根目录的 CCG 文件迁移到 `skills/ccx/`，用户 skill 原地不动
 
 ---
 
@@ -128,7 +128,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### 🔄 变更
 
-- **spec 模板 guardrail 加固**：`spec-research`/`spec-plan`/`spec-impl` 三个模板新增 USER GUIDANCE RULE，防止 LLM 向用户暴露内部 `/opsx:*` 命令，统一引导至 `/ccg:spec-*`；`spec-plan`/`spec-impl` 额外添加 TASKS FORMAT RULE 防止 checkbox 格式问题
+- **spec 模板 guardrail 加固**：`spec-research`/`spec-plan`/`spec-impl` 三个模板新增 USER GUIDANCE RULE，防止 LLM 向用户暴露内部 `/opsx:*` 命令，统一引导至 `/ccx:spec-*`；`spec-plan`/`spec-impl` 额外添加 TASKS FORMAT RULE 防止 checkbox 格式问题
 
 ### 🐛 修复
 
@@ -142,7 +142,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### ✨ 新功能
 
-- **`/ccg:codex-exec` 命令**：新增第 26 个斜杠命令，与 `/ccg:plan` 配对使用——Codex 全权执行（MCP 搜索 + 代码实现 + 测试），Claude 仅做决策/审核，极大降低 Claude token 消耗
+- **`/ccx:codex-exec` 命令**：新增第 26 个斜杠命令，与 `/ccx:plan` 配对使用——Codex 全权执行（MCP 搜索 + 代码实现 + 测试），Claude 仅做决策/审核，极大降低 Claude token 消耗
 - **Skills 体系**：首次引入 Claude Code 原生 Skills 机制，安装 6 个 skill 到 `~/.claude/skills/`（verify-security / verify-quality / verify-change / verify-module / gen-docs / multi-agent）
 - **context7 MCP 自动安装**：初始化时自动安装 context7（免费库文档查询），无需 API Key
 - **Codex MCP 同步**：新增 `syncMcpToCodex()`，将 CCG 管理的 MCP 服务器镜像同步到 `~/.codex/config.toml`，支持原子写 + stale 清理
@@ -272,7 +272,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### 🔄 变更
 
-- **保持 CCG 封装纯粹性**：移除 `spec-*` 模板中的 `/opsx:xxx` 引用，用户只需使用 `/ccg:spec-*` 命令
+- **保持 CCG 封装纯粹性**：移除 `spec-*` 模板中的 `/opsx:xxx` 引用，用户只需使用 `/ccx:spec-*` 命令
 - **适配 OpenSpec 1.2**：`spec-init` 支持 Profile 系统 + 自动检测，`spec-review` 修复过时引用
 
 ---
@@ -284,7 +284,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **适配 OpenSpec 1.2**：更新 `spec-*` 系列命令兼容新版 OPSX
   - `spec-init`：支持 Profile 系统（`core`/`custom`）+ AI 工具自动检测
   - `spec-review`：更新引用（移除过时的 `AGENTS.md`，改用 `config.yaml`）
-  - **保持封装**：用户只需使用 `/ccg:spec-*` 命令，无需了解底层 OPSX 命令
+  - **保持封装**：用户只需使用 `/ccx:spec-*` 命令，无需了解底层 OPSX 命令
 
 ---
 
@@ -312,13 +312,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 新增独立的 Team 系列命令，利用 Claude Code Agent Teams 实验特性实现多 agent 并行开发：
 
-- `/ccg:team-research` — 需求 → 约束集（并行探索代码库，Codex + Gemini 双模型分析）
-- `/ccg:team-plan` — 约束 → 零决策计划（消除歧义，拆分为文件范围隔离的独立子任务）
-- `/ccg:team-exec` — 读取计划 → spawn Builder teammates 并行写代码（需启用 Agent Teams）
-- `/ccg:team-review` — 双模型交叉审查（Codex 后端审查 + Gemini 前端审查，分级处理）
+- `/ccx:team-research` — 需求 → 约束集（并行探索代码库，Codex + Gemini 双模型分析）
+- `/ccx:team-plan` — 约束 → 零决策计划（消除歧义，拆分为文件范围隔离的独立子任务）
+- `/ccx:team-exec` — 读取计划 → spawn Builder teammates 并行写代码（需启用 Agent Teams）
+- `/ccx:team-review` — 双模型交叉审查（Codex 后端审查 + Gemini 前端审查，分级处理）
 
 **设计特点**：
-- 完全独立体系，不依赖现有 `/ccg:workflow` 等命令
+- 完全独立体系，不依赖现有 `/ccx:workflow` 等命令
 - 每步之间 `/clear` 隔离上下文，通过文件传递状态，不怕上下文爆
 - Builder teammates 使用 Sonnet 模型，成本可控
 - 智能触发：子任务 ≥ 3 个且文件范围无冲突时才启用并行
@@ -333,7 +333,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### ✨ 新功能
 
-- 内置 Prompt 增强（`/ccg:enhance`），移除 ace-tool `enhance_prompt` 依赖
+- 内置 Prompt 增强（`/ccx:enhance`），移除 ace-tool `enhance_prompt` 依赖
 
 ---
 
@@ -412,7 +412,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - `OPENSPEC_COMMANDS_REFERENCE.md` - OpenSpec CLI 命令参考
 - `FINAL_VERIFICATION.md` - 最终验证报告
 
-**影响范围**：所有使用 `/ccg:spec-*` 命令的用户
+**影响范围**：所有使用 `/ccx:spec-*` 命令的用户
 
 ---
 
@@ -470,7 +470,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 **迁移到 OPSX 架构**
 
-- 废弃 `/ccg:spec-*` 命令（基于旧的 OpenSpec 集成）
+- 废弃 `/ccx:spec-*` 命令（基于旧的 OpenSpec 集成）
 - 启用 `/opsx:*` 命令（新的 OPSX 架构）
 - 更新所有 spec 相关命令模板以支持新架构
 
@@ -520,15 +520,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 **集成 OpenSpec 规范驱动开发**
 
-新增 5 个 `/ccg:spec-*` 命令，把需求变成约束，让 AI 没法自由发挥：
+新增 5 个 `/ccx:spec-*` 命令，把需求变成约束，让 AI 没法自由发挥：
 
 | 命令 | 说明 |
 |------|------|
-| `/ccg:spec-init` | 初始化 OpenSpec 环境 + 验证多模型 MCP 工具 |
-| `/ccg:spec-research` | 需求 → 约束集（并行探索 + OpenSpec 提案） |
-| `/ccg:spec-plan` | 多模型分析 → 消除歧义 → 零决策可执行计划 |
-| `/ccg:spec-impl` | 按规范执行 + 多模型协作 + 归档 |
-| `/ccg:spec-review` | 双模型交叉审查（独立工具，随时可用） |
+| `/ccx:spec-init` | 初始化 OpenSpec 环境 + 验证多模型 MCP 工具 |
+| `/ccx:spec-research` | 需求 → 约束集（并行探索 + OpenSpec 提案） |
+| `/ccx:spec-plan` | 多模型分析 → 消除歧义 → 零决策可执行计划 |
+| `/ccx:spec-impl` | 按规范执行 + 多模型协作 + 归档 |
+| `/ccx:spec-review` | 双模型交叉审查（独立工具，随时可用） |
 
 **核心理念**：
 - 约束集 vs 信息堆砌：输出明确约束（如 "JWT TTL=15min"），而不是一堆背景知识
@@ -550,13 +550,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - **问题**: Windows 用户使用会话复用时报错：
   ```
-  Failed to read ROLE_FILE 'C:/Users/XXX/.claude/.ccg/prompts/gemini/architect.md':
+  Failed to read ROLE_FILE 'C:/Users/XXX/.claude/.ccx/prompts/gemini/architect.md':
   The system cannot find the file specified.
   ```
 - **根本原因**: `templates/prompts/gemini/` 目录下缺失 `architect.md` 文件，但命令模板 (`plan.md`, `execute.md` 等) 引用了该文件
 - **修复**: 新增 `templates/prompts/gemini/architect.md` 文件，定义前端架构师角色
 - **影响**:
-  - ✅ `/ccg:plan` 和 `/ccg:execute` 可正常使用 Gemini 后端
+  - ✅ `/ccx:plan` 和 `/ccx:execute` 可正常使用 Gemini 后端
   - ✅ 会话复用 (`resume`) 功能恢复正常
   - ✅ 更新 `package.json` 将新文件加入发布列表
 
@@ -624,11 +624,11 @@ VSCode 插件启动的子进程不会继承终端环境变量，必须通过 `se
 
 ### ✨ 新功能
 
-**新增 `/ccg:plan` 和 `/ccg:execute` 命令 - 分离规划与执行**
+**新增 `/ccx:plan` 和 `/ccx:execute` 命令 - 分离规划与执行**
 
 将原有的 workflow 拆分为两个独立命令，实现规划与执行的解耦：
 
-#### `/ccg:plan` - 多模型协作规划
+#### `/ccx:plan` - 多模型协作规划
 - **Phase 1**: 上下文全量检索
   - 强制调用 `mcp__ace-tool__enhance_prompt` 增强提示词
   - 调用 `mcp__ace-tool__search_context` 检索项目上下文
@@ -639,7 +639,7 @@ VSCode 插件启动的子进程不会继承终端环境变量，必须通过 `se
 - **计划交付**：保存至 `.claude/plan/<功能名>.md`，提示用户审查或执行
 - **不问 Y/N**：只展示计划，让用户决定下一步
 
-#### `/ccg:execute` - 多模型协作执行
+#### `/ccx:execute` - 多模型协作执行
 - **Phase 0**: 读取计划文件，提取 SESSION_ID
 - **Phase 1**: 上下文快速检索（使用 MCP 工具，禁止手动 find/ls）
 - **Phase 3**: 原型获取（Codex/Gemini 根据任务类型路由）
@@ -653,7 +653,7 @@ VSCode 插件启动的子进程不会继承终端环境变量，必须通过 `se
 
 ### 🐛 Bug 修复
 
-**修复 `/ccg:init` 不调用子智能体的问题**
+**修复 `/ccx:init` 不调用子智能体的问题**
 
 - 原模板只是描述性地说"调用子智能体"，没有给出具体调用语法
 - 现在添加了明确的 Task 工具调用格式
@@ -676,7 +676,7 @@ VSCode 插件启动的子进程不会继承终端环境变量，必须通过 `se
 
 #### 问题背景
 
-用户反馈：当通过 npm 全局安装且当前版本已是最新版本时，系统仍然提示用户运行 `npm install -g ccg-workflow@latest`，导致用户困惑。
+用户反馈：当通过 npm 全局安装且当前版本已是最新版本时，系统仍然提示用户运行 `npm install -g claude-code-ex@latest`，导致用户困惑。
 
 **场景重现**：
 ```
@@ -687,7 +687,7 @@ VSCode 插件启动的子进程不会继承终端环境变量，必须通过 `se
 检测到本地工作流版本(v1.7.25)低于当前版本(v1.7.37)，是否更新? Yes
 ⚠️  检测到你是通过 npm 全局安装的
 推荐的更新方式:
-npm install -g ccg-workflow@latest  ← 用户困惑：明明已经是最新版本了
+npm install -g claude-code-ex@latest  ← 用户困惑：明明已经是最新版本了
 ```
 
 #### 修复方案
@@ -712,7 +712,7 @@ if (isGlobalInstall && !isNewVersion) {
 // 如果全局安装且包有新版本
 else if (isGlobalInstall && isNewVersion) {
   console.log('⚠️  检测到你是通过 npm 全局安装的')
-  console.log('推荐的更新方式: npm install -g ccg-workflow@latest')
+  console.log('推荐的更新方式: npm install -g claude-code-ex@latest')
   // 提示用户更新包
 }
 ```
@@ -739,12 +739,12 @@ else if (isGlobalInstall && isNewVersion) {
 确认要更新到 v1.7.38 吗? Yes
 ⚠️  检测到你是通过 npm 全局安装的
 推荐的更新方式:
-npm install -g ccg-workflow@latest
+npm install -g claude-code-ex@latest
 ```
 
 ### 📦 版本更新
 
-- **ccg-workflow**: 1.7.37 → 1.7.38
+- **claude-code-ex**: 1.7.37 → 1.7.38
 
 ---
 
@@ -801,7 +801,7 @@ export async function installAceToolRs(config: AceToolConfig): Promise<...> {
 
 **初始化时选择**：
 ```bash
-npx ccg-workflow
+npx claude-code-ex
 
 # 选择 MCP 工具
 ? 选择 MCP 工具
@@ -812,7 +812,7 @@ npx ccg-workflow
 
 **后续配置**：
 ```bash
-npx ccg-workflow config mcp
+npx claude-code-ex config mcp
 
 # 选择操作
 ? 选择操作
@@ -860,7 +860,7 @@ npx ccg-workflow config mcp
 
 ### 📦 版本更新
 
-- **ccg-workflow**: 1.7.36 → 1.7.37
+- **claude-code-ex**: 1.7.36 → 1.7.37
 
 ---
 
@@ -917,7 +917,7 @@ if !envFlagEnabled("CODEX_REQUIRE_APPROVAL") {
 
 ### 📦 版本更新
 
-- **ccg-workflow**: 1.7.35 → 1.7.36
+- **claude-code-ex**: 1.7.35 → 1.7.36
 - **codeagent-wrapper**: 5.6.0 → 5.7.0
 
 ---
@@ -1210,7 +1210,7 @@ if isWindows() {
 
 #### 问题背景
 
-用户在 Windows 系统上通过 `npx ccg-workflow` 更新时遇到错误：
+用户在 Windows 系统上通过 `npx claude-code-ex` 更新时遇到错误：
 ```
 Binary not found in package: codeagent-wrapper-windows-amd64.exe
 ```
@@ -1326,7 +1326,7 @@ if isWindows() {
 
 #### 问题背景
 
-用户通过 `npx ccg-workflow` 运行时，npm 包已是最新版本，但本地工作流可能是旧版本（例如 v1.7.10 安装的）。
+用户通过 `npx claude-code-ex` 运行时，npm 包已是最新版本，但本地工作流可能是旧版本（例如 v1.7.10 安装的）。
 
 原因：`checkForUpdates()` 只比较 npm registry 版本，没有比较本地配置版本 (`config.general.version`)。
 
@@ -1337,7 +1337,7 @@ if isWindows() {
 #### 核心修复
 
 1. **新增本地版本检测**
-   - ✅ 读取 `~/.claude/.ccg/config.toml` 中的 `general.version`
+   - ✅ 读取 `~/.claude/.ccx/config.toml` 中的 `general.version`
    - ✅ 比较本地版本与当前 npm 包版本
    - ✅ 如果本地版本低于当前包版本，`needsWorkflowUpdate = true`
    - 📝 修改文件：`src/commands/update.ts`
@@ -1380,7 +1380,7 @@ if isWindows() {
 #### 问题背景
 
 Windows 用户使用 PowerShell 执行命令时，路径格式不兼容：
-- 模板中的路径被转换为 Git Bash 格式：`/c/Users/zlb/.claude/.ccg/...`
+- 模板中的路径被转换为 Git Bash 格式：`/c/Users/zlb/.claude/.ccx/...`
 - PowerShell 无法识别此格式，报错"路径不存在"
 
 #### 核心修复
@@ -1404,31 +1404,31 @@ Windows 用户使用 PowerShell 执行命令时，路径格式不兼容：
 
 #### 问题背景
 
-用户通过 `npm install -g ccg-workflow` 全局安装后，存在双重路径问题：
-- npm 全局包路径（提供 `ccg` 命令入口）
+用户通过 `npm install -g claude-code-ex` 全局安装后，存在双重路径问题：
+- npm 全局包路径（提供 `ccx` 命令入口）
 - 用户工作目录 `~/.claude/`（存储命令模板、配置等）
 
 导致：
 1. **卸载显示成功但命令仍可用** - 只删除了 `~/.claude/` 文件，npm 全局包未移除
-2. **更新显示成功但版本号不变** - 只更新了工作目录文件，`ccg` 命令仍指向旧版本
+2. **更新显示成功但版本号不变** - 只更新了工作目录文件，`ccx` 命令仍指向旧版本
 
 #### 核心修复
 
 1. **新增全局安装检测**
    - ✅ 新增 `checkIfGlobalInstall()` 函数检测 npm 全局安装
-   - ✅ 通过 `npm list -g ccg-workflow --depth=0` 判断
+   - ✅ 通过 `npm list -g claude-code-ex --depth=0` 判断
    - 📝 修改文件：`src/commands/update.ts`, `src/commands/menu.ts`
 
 2. **修复更新功能**
-   - ✅ 检测到全局安装时，引导用户使用 `npm install -g ccg-workflow@latest`
+   - ✅ 检测到全局安装时，引导用户使用 `npm install -g claude-code-ex@latest`
    - ✅ 提供交互式选择：推荐 npm 更新 / 继续内置更新（仅更新工作流文件）
-   - ✅ 明确告知内置更新不会更新 `ccg` 命令本身
+   - ✅ 明确告知内置更新不会更新 `ccx` 命令本身
    - 📝 修改文件：`src/commands/update.ts`
 
 3. **修复卸载功能**
    - ✅ 卸载前提示"完整卸载需要两步"
-   - ✅ 卸载后显示第二步提示：`npm uninstall -g ccg-workflow`
-   - ✅ 说明完成后 `ccg` 命令将彻底移除
+   - ✅ 卸载后显示第二步提示：`npm uninstall -g claude-code-ex`
+   - ✅ 说明完成后 `ccx` 命令将彻底移除
    - 📝 修改文件：`src/commands/menu.ts`
 
 #### 用户体验改进
@@ -1438,7 +1438,7 @@ Windows 用户使用 PowerShell 执行命令时，路径格式不兼容：
 ⚠️  检测到你是通过 npm 全局安装的
 
 推荐的更新方式：
-  npm install -g ccg-workflow@latest
+  npm install -g claude-code-ex@latest
 
 这将同时更新命令和工作流文件
 
@@ -1460,7 +1460,7 @@ Windows 用户使用 PowerShell 执行命令时，路径格式不兼容：
 🔸 最后一步：卸载 npm 全局包
 
 请在新的终端窗口中运行：
-  npm uninstall -g ccg-workflow
+  npm uninstall -g claude-code-ex
 
 (完成后 ccg 命令将彻底移除)
 ```
@@ -1489,7 +1489,7 @@ Windows 用户使用 PowerShell 执行命令时，路径格式不兼容：
    - 📝 修改文件：`src/utils/installer.ts`
 
 2. **修复配置迁移问题**
-   - ✅ `update` 命令现在会自动检测并执行从 `~/.ccg` 到 `~/.claude/.ccg` 的迁移
+   - ✅ `update` 命令现在会自动检测并执行从 `~/.ccg` 到 `~/.claude/.ccx` 的迁移
    - ✅ 从 v1.3.x 升级到 v1.7.x 时自动迁移配置文件和 prompts
    - ✅ 显示详细的迁移日志（已迁移文件、已跳过文件、错误信息）
    - 📝 修改文件：`src/commands/update.ts`
@@ -1535,12 +1535,12 @@ Windows 用户使用 PowerShell 执行命令时，路径格式不兼容：
    - ✅ **多模型并行分析**：Step 2 新增多模型并行分析（Codex + Gemini / Gemini + Claude）
    - ✅ **多模型审计交付**：Step 5 新增多模型交叉验证审计
    - ✅ **强制用户确认**：分析完成后询问"是否继续执行此方案？(Y/N)"
-   - ✅ **详细使用说明**：每个命令添加 v1.6.0 升级说明、与 /ccg:dev 的区别、使用建议
+   - ✅ **详细使用说明**：每个命令添加 v1.6.0 升级说明、与 /ccx:dev 的区别、使用建议
 
 2. **用户价值**
-   - **后端专家**：使用 `/ccg:backend` 享受 Codex + Gemini 交叉验证
-   - **前端专家**：使用 `/ccg:frontend` 享受 Gemini + Claude 交叉验证
-   - **全栈开发者**：继续使用 `/ccg:dev` 获得完整 6 阶段工作流
+   - **后端专家**：使用 `/ccx:backend` 享受 Codex + Gemini 交叉验证
+   - **前端专家**：使用 `/ccx:frontend` 享受 Gemini + Claude 交叉验证
+   - **全栈开发者**：继续使用 `/ccx:dev` 获得完整 6 阶段工作流
 
 ### 🎨 用户体验改进
 
@@ -1581,7 +1581,7 @@ Windows 用户使用 PowerShell 执行命令时，路径格式不兼容：
 
 3. **Token 配置优化**
    - ✅ 支持跳过 Token 配置（默认：跳过）
-   - ✅ 可稍后运行 `npx ccg config mcp` 配置
+   - ✅ 可稍后运行 `npx ccx config mcp` 配置
    - ✅ 提高安装成功率（60% → 90%）
 
 ### 🧹 代码清理
@@ -1640,13 +1640,13 @@ Windows 用户使用 PowerShell 执行命令时，路径格式不兼容：
    - 新增 "⭐ v1.6.0 重大升级" 说明部分
    - 详细说明 5 阶段工作流
    - 添加交叉验证机制说明
-   - 添加与 /ccg:dev 的对比表格
+   - 添加与 /ccx:dev 的对比表格
    - 提供使用建议
 
 ### 🔄 升级说明
 
-- 已安装用户：运行 `npx ccg-workflow@latest` → 选择"更新工作流"
-- 新用户：直接运行 `npx ccg-workflow` 安装即可
+- 已安装用户：运行 `npx claude-code-ex@latest` → 选择"更新工作流"
+- 新用户：直接运行 `npx claude-code-ex` 安装即可
 - 自动应用所有改进，保留用户配置
 
 ---
@@ -1676,8 +1676,8 @@ Windows 用户使用 PowerShell 执行命令时，路径格式不兼容：
 
 #### 影响
 
-- ✅ `/ccg:dev` 现在会正确并行调用所有配置的模型（例如 4 次而非 2 次）
-- ✅ `/ccg:review` 会正确遍历所有审查模型
+- ✅ `/ccx:dev` 现在会正确并行调用所有配置的模型（例如 4 次而非 2 次）
+- ✅ `/ccx:review` 会正确遍历所有审查模型
 - ✅ 其他命令（code/feat/analyze 等）无需修改
 
 ---
@@ -1727,14 +1727,14 @@ Windows 用户使用 PowerShell 执行命令时，路径格式不兼容：
 - `{{REVIEW_MODELS}}` → `["codex", "gemini", "claude"]`
 
 **路径替换**：
-- `~/.claude/.ccg/prompts/{{BACKEND_PRIMARY}}/analyzer.md`
+- `~/.claude/.ccx/prompts/{{BACKEND_PRIMARY}}/analyzer.md`
 - 安装后自动替换为绝对路径
 
 #### 5. 配置文件更新
 
 - 新增 auggie MCP 的 `enhance_prompt` 工具
-- 统一配置文件路径：`~/.claude/.ccg/config.toml`
-- Prompts 路径：`~/.claude/.ccg/prompts/{codex,gemini,claude}/`
+- 统一配置文件路径：`~/.claude/.ccx/config.toml`
+- Prompts 路径：`~/.claude/.ccx/prompts/{codex,gemini,claude}/`
 
 #### 修改文件
 
@@ -1772,12 +1772,12 @@ Windows 用户使用 PowerShell 执行命令时，路径格式不兼容：
 
 #### 问题描述
 
-在 Windows 多用户环境中，当 Administrator 运行 `npx ccg init` 后，普通用户（如 `li`、`yao`）无法使用命令：
+在 Windows 多用户环境中，当 Administrator 运行 `npx ccx init` 后，普通用户（如 `li`、`yao`）无法使用命令：
 
 ```
 Administrator 安装:
   C:\Users\Administrator\.claude\.ccg\config.toml
-  模板中硬编码: ROLE_FILE: ~/.claude/.ccg/prompts/codex/analyzer.md
+  模板中硬编码: ROLE_FILE: ~/.claude/.ccx/prompts/codex/analyzer.md
 
 用户 li 运行命令:
   homedir() 解析到: C:\Users\li
@@ -1791,7 +1791,7 @@ Administrator 安装:
 
 修改前（模板）：
 ```markdown
-ROLE_FILE: ~/.claude/.ccg/prompts/codex/analyzer.md
+ROLE_FILE: ~/.claude/.ccx/prompts/codex/analyzer.md
 ```
 
 修改后（用户 li 安装后）：
@@ -1819,13 +1819,13 @@ ROLE_FILE: C:\Users\li\.claude\.ccg\prompts\codex\analyzer.md
 
 ```bash
 # 用户 Administrator
-C:\Users\Administrator> npx ccg init
+C:\Users\Administrator> npx ccx init
 
 # 用户 li
-C:\Users\li> npx ccg init
+C:\Users\li> npx ccx init
 
 # 用户 yao
-C:\Users\yao> npx ccg init
+C:\Users\yao> npx ccx init
 ```
 
 每个用户将拥有独立的配置和路径，互不干扰。
@@ -1852,10 +1852,10 @@ C:\Users\yao> npx ccg init
 3. **新增诊断工具**：
    ```bash
    # 诊断 MCP 配置问题
-   npx ccg diagnose-mcp
+   npx ccx diagnose-mcp
 
    # 修复 Windows MCP 配置（Windows 用户）
-   npx ccg fix-mcp
+   npx ccx fix-mcp
    ```
 
 #### 新增文件
@@ -1900,9 +1900,9 @@ C:\Users\yao> npx ccg init
 #### 升级说明
 
 已安装 v1.4.1 的用户：
-1. 运行 `npx ccg-workflow@latest init` 更新
-2. Windows 用户可运行 `npx ccg fix-mcp` 修复现有配置
-3. 所有用户可运行 `npx ccg diagnose-mcp` 验证配置
+1. 运行 `npx claude-code-ex@latest init` 更新
+2. Windows 用户可运行 `npx ccx fix-mcp` 修复现有配置
+3. 所有用户可运行 `npx ccx diagnose-mcp` 验证配置
 
 ---
 
@@ -1917,13 +1917,13 @@ C:\Users\yao> npx ccg init
 1. **提示词路径**：
    ```bash
    旧引用：ROLE_FILE: ~/.claude/prompts/ccg/<model>/<role>.md
-   新引用：ROLE_FILE: ~/.claude/.ccg/prompts/<model>/<role>.md
+   新引用：ROLE_FILE: ~/.claude/.ccx/prompts/<model>/<role>.md
    ```
 
 2. **配置文件路径**：
    ```bash
-   旧引用：~/.ccg/config.toml
-   新引用：~/.claude/.ccg/config.toml
+   旧引用：~/.ccx/config.toml
+   新引用：~/.claude/.ccx/config.toml
    ```
 
 #### 影响范围
@@ -1936,7 +1936,7 @@ C:\Users\yao> npx ccg init
 
 如果你已经安装了 v1.4.0，请重新运行安装命令更新模板：
 ```bash
-npx ccg-workflow@latest init
+npx claude-code-ex@latest init
 ```
 
 ---
@@ -1945,42 +1945,42 @@ npx ccg-workflow@latest init
 
 ### 🏗️ 目录结构重构
 
-**重大变更**：统一配置目录到 `~/.claude/.ccg/`，提升组织性和减少目录污染。
+**重大变更**：统一配置目录到 `~/.claude/.ccx/`，提升组织性和减少目录污染。
 
 #### 变更详情
 
 **变更 1：配置目录迁移**
 ```
-旧版本：~/.ccg/
-新版本：~/.claude/.ccg/
+旧版本：~/.ccx/
+新版本：~/.claude/.ccx/
 ```
 
 **变更 2：Prompts 目录迁移**
 ```
 旧版本：~/.claude/prompts/ccg/
-新版本：~/.claude/.ccg/prompts/
+新版本：~/.claude/.ccx/prompts/
 ```
 
 **变更 3：共享配置文件**
 ```
-旧版本：~/.claude/commands/ccg/_config.md  (会被 CC 误识别为命令)
-新版本：~/.claude/.ccg/shared-config.md     (不会被 CC 扫描)
+旧版本：~/.claude/commands/ccx/_config.md  (会被 CC 误识别为命令)
+新版本：~/.claude/.ccx/shared-config.md     (不会被 CC 扫描)
 ```
 
 #### 最终目录结构
 
 ```
 ~/.claude/
-├── commands/ccg/           # ✅ CC 读取的 slash commands
+├── commands/ccx/           # ✅ CC 读取的 slash commands
 │   ├── dev.md
 │   ├── code.md
 │   └── ...
-├── agents/ccg/             # ✅ CC 读取的 subagents
+├── agents/ccx/             # ✅ CC 读取的 subagents
 │   ├── planner.md
 │   └── ...
 ├── bin/                    # ✅ 二进制文件
 │   └── codeagent-wrapper
-└── .ccg/                   # ✅ CCG 配置目录（CC 不读取）
+└── .ccg/                   # ✅ CCX 配置目录（CC 不读取）
     ├── config.toml         # 主配置文件
     ├── shared-config.md    # 共享配置
     ├── backup/             # 备份目录
@@ -1992,7 +1992,7 @@ npx ccg-workflow@latest init
 
 #### 自动迁移
 
-✨ **无需手动操作**！运行 `npx ccg-workflow@latest init` 会自动：
+✨ **无需手动操作**！运行 `npx claude-code-ex@latest init` 会自动：
 1. 检测旧版本配置
 2. 迁移所有文件到新位置
 3. 清理旧文件（安全检查后）
@@ -2001,10 +2001,10 @@ npx ccg-workflow@latest init
 示例输出：
 ```
 ℹ Migration completed:
-  ✓ ~/.ccg/config.toml → ~/.claude/.ccg/config.toml
-  ✓ ~/.claude/prompts/ccg/ → ~/.claude/.ccg/prompts/
-  ✓ ~/.claude/commands/ccg/_config.md → ~/.claude/.ccg/shared-config.md
-  ✓ Removed old ~/.ccg/ directory
+  ✓ ~/.ccx/config.toml → ~/.claude/.ccx/config.toml
+  ✓ ~/.claude/prompts/ccg/ → ~/.claude/.ccx/prompts/
+  ✓ ~/.claude/commands/ccx/_config.md → ~/.claude/.ccx/shared-config.md
+  ✓ Removed old ~/.ccx/ directory
   ○ Skipped: ~/.claude/prompts/ccg/ (already exists in new location)
 ```
 
@@ -2018,19 +2018,19 @@ cp -r ~/.ccg ~/.ccg.backup
 cp -r ~/.claude/prompts/ccg ~/.claude/prompts/ccg.backup
 
 # 2. 运行升级
-npx ccg-workflow@latest init
+npx claude-code-ex@latest init
 
 # 3. 验证配置
-cat ~/.claude/.ccg/config.toml
-ls -la ~/.claude/.ccg/prompts/
+cat ~/.claude/.ccx/config.toml
+ls -la ~/.claude/.ccx/prompts/
 ```
 
 #### 不兼容性说明
 
 | 影响项 | 描述 | 解决方案 |
 |--------|------|----------|
-| **配置路径硬编码** | 如果你的脚本硬编码了 `~/.ccg/` 路径 | 改为 `~/.claude/.ccg/` |
-| **Prompts 引用** | 如果你的命令引用了 `~/.claude/prompts/ccg/` | 改为 `~/.claude/.ccg/prompts/` |
+| **配置路径硬编码** | 如果你的脚本硬编码了 `~/.ccx/` 路径 | 改为 `~/.claude/.ccx/` |
+| **Prompts 引用** | 如果你的命令引用了 `~/.claude/prompts/ccg/` | 改为 `~/.claude/.ccx/prompts/` |
 | **_config.md** | 旧的 `_config.md` 已重命名 | 改为 `shared-config.md` |
 
 #### 修改位置
@@ -2043,7 +2043,7 @@ ls -la ~/.claude/.ccg/prompts/
 
 #### 优势
 
-- ✅ **更清晰**：所有 CCG 配置集中在 `~/.claude/.ccg/`
+- ✅ **更清晰**：所有 CCX 配置集中在 `~/.claude/.ccx/`
 - ✅ **减少污染**：不再占用 `~/.claude/` 顶层空间
 - ✅ **避免混淆**：`_config.md` 不会被 CC 误识别为命令
 - ✅ **符合规范**：遵循社区最佳实践（参考 ccline）
@@ -2112,8 +2112,8 @@ existingConfig.mcpServers['ace-tool'] = {
 ### 修复 2：Subagents 安装路径修正
 
 #### 问题描述
-- Subagents 被安装到 `~/.claude/commands/ccg/agents/`（错误路径）
-- Claude Code 无法识别，因为 subagents 应该在 `~/.claude/agents/ccg/`
+- Subagents 被安装到 `~/.claude/commands/ccx/agents/`（错误路径）
+- Claude Code 无法识别，因为 subagents 应该在 `~/.claude/agents/ccx/`
 
 #### 修复方案
 
@@ -2132,12 +2132,12 @@ const agentsDestDir = join(installDir, 'agents', 'ccg')
 ```
 
 #### 修复效果
-- ✅ **正确识别**：Subagents 安装到 `~/.claude/agents/ccg/`，Claude Code 可以识别
+- ✅ **正确识别**：Subagents 安装到 `~/.claude/agents/ccx/`，Claude Code 可以识别
 - ✅ **符合规范**：遵循 Claude Code 的 agents 目录结构
-- ✅ **不影响命令**：Slash commands 仍在 `~/.claude/commands/ccg/`
+- ✅ **不影响命令**：Slash commands 仍在 `~/.claude/commands/ccx/`
 
 #### 影响范围
-- **所有平台**：通过 `npx ccg-workflow init` 或 `python3 install.py` 安装的用户
+- **所有平台**：通过 `npx claude-code-ex init` 或 `python3 install.py` 安装的用户
 - **Subagents**：planner, ui-ux-designer, init-architect, get-current-datetime
 - **向下兼容**：旧路径的 agents 不会被自动清理，需要手动删除
 
@@ -2192,7 +2192,7 @@ console.log(ansis.gray(`     }`))
 ### 关键 Bug 修复：MCP 配置缺失
 
 #### 问题描述
-- 安装后 `~/.ccg/config.toml` 缺少 `[mcp]` 配置部分
+- 安装后 `~/.ccx/config.toml` 缺少 `[mcp]` 配置部分
 - TypeScript 类型定义 `CcgConfig` 未包含 `mcp` 字段
 - `createDefaultConfig` 函数未生成 MCP 相关配置
 
@@ -2243,7 +2243,7 @@ console.log(ansis.gray(`     }`))
 
 #### 影响
 - 修复后，所有新安装都会自动生成完整的 MCP 配置
-- 命令模板（如 `/ccg:dev`, `/ccg:enhance`）可以正确读取 MCP 工具映射
+- 命令模板（如 `/ccx:dev`, `/ccx:enhance`）可以正确读取 MCP 工具映射
 - 用户无需手动编辑配置文件即可使用 MCP 功能
 
 ---
@@ -2253,7 +2253,7 @@ console.log(ansis.gray(`     }`))
 ### 命令模板修正
 
 - **说明修正**：澄清 auggie 也支持 Prompt 增强功能（需按教程配置）
-- **模板更新**：修正 `/ccg:dev` 和 `/ccg:enhance` 命令的提示信息
+- **模板更新**：修正 `/ccx:dev` 和 `/ccx:enhance` 命令的提示信息
   - 从"auggie 不支持"改为"未配置 Prompt 增强功能"
   - 提供配置教程链接
 - **配置注释**：更新 `prompt_enhance_auggie = ""` 的说明
@@ -2268,7 +2268,7 @@ console.log(ansis.gray(`     }`))
 
 - **多 MCP 支持**：安装时可选择 ace-tool（第三方封装）或 auggie（官方原版）
 - **交互式选择**：安装脚本提供友好的 MCP 选择界面，显示各选项的功能对比
-- **配置文件驱动**：生成 `~/.ccg/config.toml` 记录 MCP 选择，命令模板动态适配
+- **配置文件驱动**：生成 `~/.ccx/config.toml` 记录 MCP 选择，命令模板动态适配
 - **完全兼容**：命令模板根据配置自动使用正确的 MCP 工具名称
 - **简洁高效**：命令模板引用共享配置，避免重复说明
 
@@ -2277,10 +2277,10 @@ console.log(ansis.gray(`     }`))
 - **install.py 更新**：
   - 新增 `choose_mcp_provider()` 函数：交互式选择界面
   - 新增 `install_auggie()` 函数：安装 auggie MCP (`@augmentcode/auggie@prerelease`)
-  - 新增 `create_ccg_config()` 函数：生成配置文件 `~/.ccg/config.toml`
+  - 新增 `create_ccg_config()` 函数：生成配置文件 `~/.ccx/config.toml`
   - 修改 `execute_operation()`：支持 `"install_mcp"` 操作类型，动态路由到不同的安装函数
 
-- **配置文件结构** (`~/.ccg/config.toml`)：
+- **配置文件结构** (`~/.ccx/config.toml`)：
   ```toml
   [mcp]
   provider = "ace-tool"  # ace-tool | auggie | none
@@ -2300,7 +2300,7 @@ console.log(ansis.gray(`     }`))
 - **命令模板更新**（11个命令文件）：
   - 所有命令模板统一引用 `memorys/MCP_USAGE.md` 获取 MCP 调用规范
   - 移除重复的 MCP 工具调用说明，减少 50% 的提示词长度
-  - 命令模板只需引用配置文件 `~/.ccg/config.toml` 中的工具映射表
+  - 命令模板只需引用配置文件 `~/.ccx/config.toml` 中的工具映射表
   - 支持文件：`dev.md`, `enhance.md`, `code.md`, `debug.md`, `bugfix.md`, `test.md`, `think.md`, `optimize.md`, `analyze.md`, `backend.md`, `frontend.md`, `review.md`
 
 - **工具映射对照**：
@@ -2312,7 +2312,7 @@ console.log(ansis.gray(`     }`))
 #### 用户体验
 
 - **安装流程**：
-  1. 运行 `python3 install.py` 或 `npx ccg-workflow`
+  1. 运行 `python3 install.py` 或 `npx claude-code-ex`
   2. 看到 MCP 选择菜单，对比功能后选择
   3. 自动安装并配置对应的 MCP 工具
   4. 生成配置文件，记录选择
@@ -2371,7 +2371,7 @@ console.log(ansis.gray(`     }`))
 
 ### 修复
 
-- 确保 `~/.ccg/config.toml` 配置文件在安装失败时也能创建
+- 确保 `~/.ccx/config.toml` 配置文件在安装失败时也能创建
 - 将 `writeCcgConfig()` 调整到 `installWorkflows()` 之前执行
 - 修复首次 `init` 时配置文件可能不存在的问题
 
@@ -2489,7 +2489,7 @@ EOF
 - **智能更新系统**：一键更新命令模板和提示词，无需卸载重装
   - 自动检测 npm 最新版本并对比当前版本
   - 增量更新，仅更新命令和提示词文件
-  - 保留用户配置（`~/.ccg/config.toml`）
+  - 保留用户配置（`~/.ccx/config.toml`）
   - 支持强制重装，修复损坏的文件
   - 无需 sudo 权限
 
@@ -2512,7 +2512,7 @@ EOF
 
 ### 用户体验
 
-- 运行 `npx ccg-workflow` 选择"更新工作流"即可更新
+- 运行 `npx claude-code-ex` 选择"更新工作流"即可更新
 - 显示当前版本 vs 最新版本对比
 - 自动更新所有文件并保留配置
 - 提供友好的进度提示和错误处理
@@ -2584,7 +2584,7 @@ EOF
 #### 安装方式革命性升级
 
 - ✅ 从 Python 脚本重构为 **TypeScript + unbuild** 构建系统
-- ✅ 发布到 npm: `npx ccg-workflow` 一键安装
+- ✅ 发布到 npm: `npx claude-code-ex` 一键安装
 - ✅ 交互式配置菜单（初始化/卸载）
 - ✅ 更好的跨平台兼容性
 
@@ -2596,38 +2596,38 @@ EOF
 
 #### 配置系统升级
 
-- ✅ 配置文件从 `config.json` 迁移到 `~/.ccg/config.toml`
+- ✅ 配置文件从 `config.json` 迁移到 `~/.ccx/config.toml`
 - ✅ 支持 **smart/parallel/sequential** 三种协作模式
 - ✅ 可配置前端/后端模型优先级
 
 #### 核心功能
 
 **开发工作流（12个命令）**
-- `/ccg:dev` - 完整6阶段三模型工作流
-- `/ccg:code` - 三模型代码生成（智能路由）
-- `/ccg:debug` - UltraThink 三模型调试
-- `/ccg:test` - 三模型测试生成
-- `/ccg:bugfix` - 质量门控修复（90%+ 通过）
-- `/ccg:think` - 深度分析
-- `/ccg:optimize` - 性能优化
-- `/ccg:frontend` - 前端任务 → Gemini
-- `/ccg:backend` - 后端任务 → Codex
-- `/ccg:review` - 三模型代码审查
-- `/ccg:analyze` - 三模型技术分析
-- `/ccg:enhance` - Prompt 增强（ace-tool MCP）
+- `/ccx:dev` - 完整6阶段三模型工作流
+- `/ccx:code` - 三模型代码生成（智能路由）
+- `/ccx:debug` - UltraThink 三模型调试
+- `/ccx:test` - 三模型测试生成
+- `/ccx:bugfix` - 质量门控修复（90%+ 通过）
+- `/ccx:think` - 深度分析
+- `/ccx:optimize` - 性能优化
+- `/ccx:frontend` - 前端任务 → Gemini
+- `/ccx:backend` - 后端任务 → Codex
+- `/ccx:review` - 三模型代码审查
+- `/ccx:analyze` - 三模型技术分析
+- `/ccx:enhance` - Prompt 增强（ace-tool MCP）
 
 **智能规划（2个命令）**
-- `/ccg:scan` - 智能仓库扫描
-- `/ccg:feat` - 智能功能开发
+- `/ccx:scan` - 智能仓库扫描
+- `/ccx:feat` - 智能功能开发
 
 **Git 工具（4个命令）**
-- `/ccg:commit` - 智能 commit（支持 emoji）
-- `/ccg:rollback` - 交互式回滚
-- `/ccg:clean-branches` - 清理已合并分支
-- `/ccg:worktree` - Worktree 管理
+- `/ccx:commit` - 智能 commit（支持 emoji）
+- `/ccx:rollback` - 交互式回滚
+- `/ccx:clean-branches` - 清理已合并分支
+- `/ccx:worktree` - Worktree 管理
 
 **项目初始化（1个命令）**
-- `/ccg:init` - 初始化项目 AI 上下文
+- `/ccx:init` - 初始化项目 AI 上下文
 
 #### 专家提示词系统
 
@@ -2678,6 +2678,6 @@ EOF
 
 ## 链接
 
-- [GitHub Repository](https://github.com/fengshao1227/ccg-workflow)
-- [npm Package](https://www.npmjs.com/package/ccg-workflow)
-- [README](https://github.com/fengshao1227/ccg-workflow/blob/main/README.md)
+- [GitHub Repository](https://github.com/fengshao1227/claude-code-ex)
+- [npm Package](https://www.npmjs.com/package/claude-code-ex)
+- [README](https://github.com/fengshao1227/claude-code-ex/blob/main/README.md)

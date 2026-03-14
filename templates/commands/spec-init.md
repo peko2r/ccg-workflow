@@ -84,17 +84,17 @@ description: '初始化 OpenSpec (OPSX) 环境 + 验证多模型 MCP 工具'
    ```
 
    **Next Steps (Use CCG Encapsulated Commands)**
-   1. Start Research: `/ccg:spec-research "description"`
-   2. Plan & Design: `/ccg:spec-plan`
-   3. Implement: `/ccg:spec-impl` (Includes auto-review & archive)
+   1. Start Research: `/ccx:spec-research "description"`
+   2. Plan & Design: `/ccx:spec-plan`
+   3. Implement: `/ccx:spec-impl` (Includes auto-review & archive)
 
    **Standalone Tools (Available Anytime)**
-   - Code Review: `/ccg:spec-review` (Independent dual-model review)
+   - Code Review: `/ccx:spec-review` (Independent dual-model review)
 
 **Reference**
 - OpenSpec (OPSX) CLI: `npx @fission-ai/openspec --help`
 - Profile Management: `openspec config profile`
-- CCG Workflow: `npx ccg-workflow`
+- CCG Workflow: `npx claude-code-ex`
 - Codex/Gemini MCP: Bundled with codeagent-wrapper
 - Node.js >= 18.x required for OpenSpec
 <!-- CCG:SPEC:INIT:END -->

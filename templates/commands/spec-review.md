@@ -88,7 +88,7 @@ description: '双模型交叉审查（独立工具，随时可用）'
 6. **Decision Gate**
    - **If Critical > 0**:
      * Present findings to user.
-     * Ask: "Fix now or return to `/ccg:spec-impl` to address?"
+     * Ask: "Fix now or return to `/ccx:spec-impl` to address?"
      * Do NOT allow archiving.
 
    - **If Critical = 0**:
@@ -104,7 +104,7 @@ description: '双模型交叉审查（独立工具，随时可用）'
 
 8. **Context Checkpoint**
    - Report current context usage.
-   - If approaching 80K tokens, suggest: "Run `/clear` and continue with `/ccg:spec-review` or `/ccg:spec-impl`"
+   - If approaching 80K tokens, suggest: "Run `/clear` and continue with `/ccx:spec-review` or `/ccx:spec-impl`"
 
 **Exit Criteria**
 Review is complete when:
@@ -117,5 +117,5 @@ Review is complete when:
 - View proposal: `openspec status --change "<id>" --json`
 - Check spec constraints: `rg -n "CONSTRAINT:|MUST|INVARIANT:" openspec/changes/<id>/specs/`
 - View implementation diff: `git diff`
-- Archive (after passing): `/ccg:spec-impl` → Step 10
+- Archive (after passing): `/ccx:spec-impl` → Step 10
 <!-- CCG:SPEC:REVIEW:END -->

@@ -64,8 +64,8 @@ EOF",
 
 | 模型 | 提示词 |
 |------|--------|
-| Codex | `~/.claude/.ccg/prompts/codex/tester.md` |
-| Gemini | `~/.claude/.ccg/prompts/gemini/tester.md` |
+| Codex | `~/.claude/.ccx/prompts/codex/tester.md` |
+| Gemini | `~/.claude/.ccx/prompts/gemini/tester.md` |
 
 **智能路由**：
 
@@ -96,7 +96,7 @@ TaskOutput({ task_id: "<task_id>", block: true, timeout: 600000 })
 
 ### 🔍 阶段 0：Prompt 增强（可选）
 
-`[模式：准备]` - **Prompt 增强**（按 `/ccg:enhance` 的逻辑执行）：分析 $ARGUMENTS 的意图、缺失信息、隐含假设，补全为结构化需求（明确目标、技术约束、范围边界、验收标准），**用增强结果替代原始 $ARGUMENTS，后续调用 Codex/Gemini 时传入增强后的需求**
+`[模式：准备]` - **Prompt 增强**（按 `/ccx:enhance` 的逻辑执行）：分析 $ARGUMENTS 的意图、缺失信息、隐含假设，补全为结构化需求（明确目标、技术约束、范围边界、验收标准），**用增强结果替代原始 $ARGUMENTS，后续调用 Codex/Gemini 时传入增强后的需求**
 
 ### 🔍 阶段 1：测试分析
 
@@ -114,14 +114,14 @@ TaskOutput({ task_id: "<task_id>", block: true, timeout: 600000 })
 **⚠️ 根据代码类型必须调用对应模型**（参照上方调用规范）：
 
 - **后端代码** → `Bash({ command: "...--backend codex...", run_in_background: false })`
-  - ROLE_FILE: `~/.claude/.ccg/prompts/codex/tester.md`
+  - ROLE_FILE: `~/.claude/.ccx/prompts/codex/tester.md`
 - **前端代码** → `Bash({ command: "...--backend gemini...", run_in_background: false })`
-  - ROLE_FILE: `~/.claude/.ccg/prompts/gemini/tester.md`
+  - ROLE_FILE: `~/.claude/.ccx/prompts/gemini/tester.md`
 - **全栈代码** → 并行调用两者：
   1. `Bash({ command: "...--backend codex...", run_in_background: true })`
-     - ROLE_FILE: `~/.claude/.ccg/prompts/codex/tester.md`
+     - ROLE_FILE: `~/.claude/.ccx/prompts/codex/tester.md`
   2. `Bash({ command: "...--backend gemini...", run_in_background: true })`
-     - ROLE_FILE: `~/.claude/.ccg/prompts/gemini/tester.md`
+     - ROLE_FILE: `~/.claude/.ccx/prompts/gemini/tester.md`
   用 `TaskOutput` 等待结果
 
 OUTPUT：完整测试代码（使用项目现有测试框架，覆盖正常路径、边界条件、异常处理）
