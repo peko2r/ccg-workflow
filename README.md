@@ -83,54 +83,96 @@ Supports: npm, homebrew, curl, powershell, cmd.
 
 ### Mail Daemon (`maild`)
 
-CCX bundles a Python-based mail daemon for ASK-by-email workflows.
+CCX ships with a mail daemon for ASK-by-email workflows.
 
-**Runtime requirements**
-- Python 3 must be available as `python` (Windows) or `python3` (macOS/Linux)
-- The `maild` entrypoint is exposed both as `maild ...` and `ccx maild ...`
+### Requirements
 
-**Config locations**
-- Config template in repo: `config/mail/config.template.json`
-- Active user config: `~/.claude/.ccx/mail/config.json`
-- Override config directory with env: `CCB_MAIL_CONFIG_DIR`
+- Python 3 must be available
+- Use `python` on Windows
+- Use `python3` on macOS / Linux
 
-**Core commands**
+### Entry points
+
 ```bash
-maild setup              # interactive setup wizard
-maild config             # print effective configuration
-maild test               # test IMAP/SMTP connectivity
-maild start              # start daemon in background
-maild start -f           # start in foreground
-maild status             # show daemon status
-maild stop               # stop daemon
-
-# equivalent CLI entry
+maild status
 ccx maild status
 ```
 
-**Minimal setup flow**
-1. Copy values from `config/mail/config.template.json`
-2. Run `maild setup`
-3. Configure a service mailbox (`service_account`) and target mailbox (`target_email`)
-4. Choose a default provider such as `claude`, `codex`, or `gemini`
-5. Run `maild test` until both IMAP and SMTP succeed
-6. Run `maild start` and verify with `maild status`
+Both forms are equivalent.
 
-**What the daemon does**
-- Polls IMAP inboxes and supports IMAP IDLE when available
+### Config files
+
+```text
+# Repository template
+config/mail/config.template.json
+
+# Active user config
+~/.claude/.ccx/mail/config.json
+```
+
+Override the config directory with `CCX_MAIL_CONFIG_DIR`.
+
+Compatibility note: the current version still accepts the legacy `CCB_MAIL_CONFIG_DIR`, but `CCX_MAIL_CONFIG_DIR` takes precedence.
+
+### Setup
+
+```bash
+maild setup
+```
+
+The wizard asks for:
+
+- service mailbox (`service_account`)
+- target mailbox (`target_email`)
+- default provider such as `claude`, `codex`, `gemini`
+- default working directory (optional)
+
+### Common commands
+
+```bash
+maild setup              # interactive setup
+maild config             # show current config
+maild test               # test IMAP / SMTP
+maild start              # start in background
+maild start -f           # start in foreground
+maild status             # show daemon status
+maild stop               # stop the daemon
+```
+
+### Recommended flow
+
+```bash
+maild setup
+maild test
+maild start
+maild status
+```
+
+### What it does
+
+- Polls the IMAP inbox
+- Uses IMAP IDLE when the provider supports it
 - Sends replies over SMTP
-- Routes ASK-style requests into the configured provider workflow
-- Uses `default_provider` and `default_work_dir` when the email does not override them
+- Routes mail content to the configured provider
+- Falls back to `default_provider` and `default_work_dir` when the message does not override them
 
-**Email routing notes**
-- Provider prefixes in the email body are supported, e.g. `CLAUDE: ...` or `CODEX: ...`
-- The default provider falls back to the configured `default_provider`
+### Mail routing
 
-**Recommended testing order**
-1. Use a dedicated test mailbox, not a production mailbox
-2. Verify provider-side IMAP/SMTP enablement first
-3. Use app passwords / authorization codes where required (QQ / Gmail / Outlook, etc.)
-4. Run real send/receive validation only after `maild test` passes
+You can put a provider prefix directly in the email body:
+
+```text
+CLAUDE: fix the bug
+CODEX: analyze this code
+```
+
+If no prefix is provided, `default_provider` is used.
+
+### Testing tips
+
+1. Use a dedicated test mailbox first
+2. Confirm IMAP / SMTP is enabled on the provider side
+3. Prefer app passwords / authorization codes
+4. Only do real send/receive validation after `maild test` passes
 
 ## Commands
 

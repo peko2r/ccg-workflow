@@ -83,54 +83,96 @@ npx claude-code-ex menu  # 选择「安装 Claude Code」
 
 ### Mail Daemon（`maild`）
 
-CCX 内置了一个基于 Python 的邮箱守护进程，用于通过邮件触发 ASK 工作流。
+CCX 内置邮箱守护进程，可通过邮件触发 ASK 工作流。
 
-**运行前提**
-- 系统可用 Python 3：Windows 走 `python`，macOS/Linux 走 `python3`
-- `maild ...` 和 `ccx maild ...` 都可以作为入口
+### 运行前提
 
-**配置位置**
-- 仓库内模板：`config/mail/config.template.json`
-- 用户实际配置：`~/.claude/.ccx/mail/config.json`
-- 如需改配置目录，可设置环境变量：`CCB_MAIL_CONFIG_DIR`
+- 系统可用 Python 3
+- Windows 走 `python`
+- macOS / Linux 走 `python3`
 
-**核心命令**
+### 入口
+
 ```bash
-maild setup              # 交互式初始化
-maild config             # 打印当前生效配置
-maild test               # 测试 IMAP/SMTP 连通性
-maild start              # 后台启动守护进程
-maild start -f           # 前台启动
-maild status             # 查看守护进程状态
-maild stop               # 停止守护进程
-
-# 等价 CLI 入口
+maild status
 ccx maild status
 ```
 
-**最小配置流程**
-1. 参考 `config/mail/config.template.json` 准备参数
-2. 运行 `maild setup`
-3. 配置服务邮箱（`service_account`）和目标邮箱（`target_email`）
-4. 选择默认 provider，例如 `claude`、`codex`、`gemini`
-5. 反复执行 `maild test`，直到 IMAP 和 SMTP 都通过
-6. 执行 `maild start`，再用 `maild status` 确认状态
+两种写法等价。
 
-**守护进程职责**
-- 轮询 IMAP 收件箱，服务端支持时优先使用 IMAP IDLE
+### 配置文件
+
+```text
+# 仓库内模板
+config/mail/config.template.json
+
+# 用户实际配置
+~/.claude/.ccx/mail/config.json
+```
+
+如需改配置目录，可设置环境变量：`CCX_MAIL_CONFIG_DIR`。
+
+兼容说明：当前版本仍兼容旧变量 `CCB_MAIL_CONFIG_DIR`，但优先使用 `CCX_MAIL_CONFIG_DIR`。
+
+### 初始化
+
+```bash
+maild setup
+```
+
+按提示填写：
+
+- 服务邮箱（`service_account`）
+- 通知目标邮箱（`target_email`）
+- 默认 provider（如 `claude`、`codex`、`gemini`）
+- 默认工作目录（可选）
+
+### 常用命令
+
+```bash
+maild setup              # 交互式初始化
+maild config             # 查看当前配置
+maild test               # 测试 IMAP / SMTP
+maild start              # 后台启动
+maild start -f           # 前台启动
+maild status             # 查看状态
+maild stop               # 停止守护进程
+```
+
+### 推荐流程
+
+```bash
+maild setup
+maild test
+maild start
+maild status
+```
+
+### 它能做什么
+
+- 轮询 IMAP 收件箱
+- 服务端支持时优先用 IMAP IDLE
 - 通过 SMTP 发送回复
-- 将 ASK 风格请求路由到配置好的 provider 工作流
-- 当邮件里没有覆盖参数时，回退到 `default_provider` 与 `default_work_dir`
+- 将邮件内容路由到配置好的 provider
+- 未显式指定时回退到 `default_provider` 和 `default_work_dir`
 
-**邮件路由说明**
-- 支持在邮件正文里加 provider 前缀，例如 `CLAUDE: ...`、`CODEX: ...`
-- 未显式指定时，回退到配置中的 `default_provider`
+### 邮件路由
 
-**建议测试顺序**
-1. 使用专门测试邮箱，不要直接连生产邮箱
-2. 先确认邮箱供应商侧已开启 IMAP/SMTP
-3. 优先使用应用专用密码 / 授权码（QQ / Gmail / Outlook 等常见都需要）
-4. 仅在 `maild test` 通过后，再做真实收发联调
+在邮件正文里可直接写 provider 前缀：
+
+```text
+CLAUDE: fix the bug
+CODEX: analyze this code
+```
+
+未写前缀时，使用配置中的 `default_provider`。
+
+### 测试建议
+
+1. 先用专门测试邮箱，不要直接连生产邮箱
+2. 先确认邮箱服务商已开启 IMAP / SMTP
+3. 优先使用应用专用密码 / 授权码
+4. 只有 `maild test` 通过后，再做真实收发联调
 
 ## 命令
 
@@ -407,4 +449,4 @@ MIT
 
 ---
 
-v1.7.82 | [Issues](https://github.com/fengshao1227/claude-code-ex/issues) | [参与贡献](./CONTRIBUTING.md)
+v1.7.83 | [Issues](https://github.com/fengshao1227/claude-code-ex/issues) | [参与贡献](./CONTRIBUTING.md)

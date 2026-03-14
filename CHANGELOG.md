@@ -9,6 +9,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### 🔄 变更
+
+- **maild 配置目录环境变量进入迁移期**：新增 `CCX_MAIL_CONFIG_DIR` 作为首选变量，当前版本继续兼容 `CCB_MAIL_CONFIG_DIR`；解析顺序为 `CCX_MAIL_CONFIG_DIR` → `CCB_MAIL_CONFIG_DIR` → 默认目录 `~/.claude/.ccx/mail/`
+- **maild 文档口径统一**：README / README.zh-CN / docs 统一改为主推 `CCX_MAIL_CONFIG_DIR`，并明确旧变量的兼容窗口与后续移除方向
+
 ---
 
 ## [1.7.84] - 2026-03-15

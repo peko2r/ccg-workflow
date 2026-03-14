@@ -28,6 +28,10 @@ DEFAULT_CONFIG_DIR = Path.home() / ".claude" / ".ccx" / "mail"
 CONFIG_FILE = "config.json"
 THREADS_FILE = "threads.json"
 
+# Mail config directory environment variables
+MAIL_CONFIG_DIR_ENV = "CCX_MAIL_CONFIG_DIR"
+LEGACY_MAIL_CONFIG_DIR_ENV = "CCB_MAIL_CONFIG_DIR"
+
 # Current config version
 CURRENT_CONFIG_VERSION = 3
 
@@ -324,9 +328,19 @@ class MailConfigV3(MailConfig):
 
 
 def get_config_dir() -> Path:
-    """Get the mail configuration directory."""
-    config_dir = Path(os.environ.get("CCB_MAIL_CONFIG_DIR", DEFAULT_CONFIG_DIR))
-    return config_dir
+    """Get the mail configuration directory.
+
+    Migration order:
+    1. CCX_MAIL_CONFIG_DIR
+    2. CCB_MAIL_CONFIG_DIR (legacy compatibility)
+    3. default ~/.claude/.ccx/mail
+    """
+    override = (
+        os.environ.get(MAIL_CONFIG_DIR_ENV)
+        or os.environ.get(LEGACY_MAIL_CONFIG_DIR_ENV)
+        or DEFAULT_CONFIG_DIR
+    )
+    return Path(override)
 
 
 def ensure_config_dir() -> Path:

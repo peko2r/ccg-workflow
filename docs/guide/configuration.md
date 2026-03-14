@@ -23,6 +23,20 @@
 ~/.claude/.ccx/mail/config.json
 ```
 
+如需改配置目录，优先使用：
+
+```text
+CCX_MAIL_CONFIG_DIR
+```
+
+兼容说明：当前版本仍兼容旧变量：
+
+```text
+CCB_MAIL_CONFIG_DIR
+```
+
+> 说明：迁移期内优先读取 `CCX_MAIL_CONFIG_DIR`，未设置时再回退到 `CCB_MAIL_CONFIG_DIR`。后续版本会移除旧变量支持。
+
 仓库内模板位于：
 
 ```text
