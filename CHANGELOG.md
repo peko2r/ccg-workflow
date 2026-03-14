@@ -9,16 +9,32 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
-### Added
+---
 
-- Bridge compatibility shims are now installed into `~/.claude/bin` for Windows PowerShell usage: `ccb`, `ask`, `ccb-ping`, `pend`, `ccb-mounted`, `ccb-cleanup`
-- Init now surfaces bridge compatibility shim installation and a minimal WezTerm readiness check for Windows users
+## [1.7.84] - 2026-03-15
 
-### Changed
+### ✨ 新功能
 
-- Bridge compatibility shims reuse the main `ccx` bridge commands through shared launcher resources under `~/.claude/.ccx/bridge/`
+- **CCX Mail (`maild`) 并入主仓库**：新增 `bin/maild`、`lib/mail/`、`config/mail/config.template.json` 与 `src/commands/maild.ts`，支持通过 `maild ...` 或 `ccx maild ...` 管理邮件守护进程
+- **邮箱守护进程文档补齐**：README / README.zh-CN / docs 增加 `maild` 的配置位置、核心命令、最小配置流程与联调建议
 
-## [1.7.83] - 2026-03-12
+### 🔄 变更
+
+- **品牌统一升级为 Claude Code Ex / CCX**：主命令统一为 `ccx`，斜杠命令统一为 `/ccx:*`，CLI / 模板 / 文档 / 帮助文本统一切换到新品牌
+- **安装与运行目录统一**：配置目录迁移到 `~/.claude/.ccx/`，bridge 运行目录迁移到项目内 `.ccx-bridge/`，skills 命名空间统一为 `skills/ccx/`
+- **bridge 语义入口收敛**：保留并正式管理 `ask`、`pend`、`maild` 三个语义辅助入口，`ccx` 继续作为主 bridge 入口
+- **迁移与兼容策略更新**：安装器支持清理旧 `ccb*` 遗留入口，并自动迁移旧 `~/.ccg` / `~/.ccx` / prompts 布局到新目录结构
+
+### 🐛 修复
+
+- **安装器生产级重构**：bridge helper commands 现在真实安装 launcher 资源，并在卸载时仅删除受管理文件，避免误删用户自定义命令
+- **测试与文档全面对齐**：更新 installer / bridge / workflow 测试到 CCX 路径与命令模型，修正文档、模板、`maild` 帮助中的旧品牌残留
+- **非阻塞二进制下载测试稳定性**：测试接受 GitHub Release 二进制下载失败的 warning 行为，不再把网络波动误判为安装失败
+
+### ⚠️ Breaking Changes
+
+- **旧品牌入口退出主路径**：`ccg` / `ccb` 不再作为正式品牌入口保留，用户应迁移到 `ccx`
+- **安装路径已切换**：依赖 `commands/ccg`、`agents/ccg`、`skills/ccg`、`~/.claude/.ccg/` 或项目内 `.ccb/` 的本地脚本需要同步更新
 
 ### 🔄 变更
 
