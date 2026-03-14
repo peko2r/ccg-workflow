@@ -5,6 +5,14 @@ import { version } from '../package.json'
 import { configMcp } from './commands/config-mcp'
 import { diagnoseMcp, fixMcp } from './commands/diagnose-mcp'
 import { init } from './commands/init'
+import {
+  bridgeAsk,
+  bridgeCleanup,
+  bridgeLaunch,
+  bridgeMounted,
+  bridgePend,
+  bridgePing,
+} from './commands/bridge'
 import { showMainMenu } from './commands/menu'
 import { i18n, initI18n } from './i18n'
 import { readCcgConfig } from './utils/config'
@@ -23,6 +31,12 @@ function customizeHelp(sections: any[]): any[] {
       `  ${ansis.cyan('ccg config mcp')}   ${i18n.t('cli:help.commandDescriptions.configMcp')}`,
       `  ${ansis.cyan('ccg diagnose-mcp')} ${i18n.t('cli:help.commandDescriptions.diagnoseMcp')}`,
       `  ${ansis.cyan('ccg fix-mcp')}      ${i18n.t('cli:help.commandDescriptions.fixMcp')}`,
+      `  ${ansis.cyan('ccg codex gemini')} ${i18n.t('cli:help.commandDescriptions.bridgeLaunch')}`,
+      `  ${ansis.cyan('ccg ask codex "..."')} ${i18n.t('cli:help.commandDescriptions.bridgeAsk')}`,
+      `  ${ansis.cyan('ccg ping codex')}   ${i18n.t('cli:help.commandDescriptions.bridgePing')}`,
+      `  ${ansis.cyan('ccg pend codex 5')} ${i18n.t('cli:help.commandDescriptions.bridgePend')}`,
+      `  ${ansis.cyan('ccg mounted')}      ${i18n.t('cli:help.commandDescriptions.bridgeMounted')}`,
+      `  ${ansis.cyan('ccg cleanup')}      ${i18n.t('cli:help.commandDescriptions.bridgeCleanup')}`,
       '',
       ansis.gray(`  ${i18n.t('cli:help.shortcuts')}`),
       `  ${ansis.cyan('ccg i')}            ${i18n.t('cli:help.shortcutDescriptions.quickInit')}`,
@@ -63,6 +77,14 @@ function customizeHelp(sections: any[]): any[] {
       ansis.gray(`  # ${i18n.t('cli:help.exampleDescriptions.parallelMode')}`),
       `  ${ansis.cyan('npx ccg i --mode parallel')}`,
       '',
+      ansis.gray(`  # ${i18n.t('cli:help.exampleDescriptions.bridgeLaunch')}`),
+      `  ${ansis.cyan('npx ccg codex gemini')}`,
+      `  ${ansis.cyan('npx ccg bridge --restore codex,claude')}`,
+      '',
+      ansis.gray(`  # ${i18n.t('cli:help.exampleDescriptions.bridgeAsk')}`),
+      `  ${ansis.cyan('npx ccg ask codex "summarize the repository"')}`,
+      `  ${ansis.cyan('npx ccg mounted')}`,
+      '',
     ].join('\n'),
   })
 
@@ -78,6 +100,44 @@ export async function setupCommands(cli: CAC): Promise<void> {
   catch {
     await initI18n('zh-CN')
   }
+
+  cli
+    .command('bridge [...providers]', i18n.t('cli:help.commandDescriptions.bridgeLaunch'))
+    .option('-r, --restore', i18n.t('cli:help.optionDescriptions.bridgeRestore'))
+    .option('-a, --auto-approve', i18n.t('cli:help.optionDescriptions.bridgeAutoApprove'))
+    .action(async (providers: string[], options: { restore?: boolean, autoApprove?: boolean }) => {
+      bridgeLaunch(providers, options)
+    })
+
+  cli
+    .command('ask <provider> [...message]', i18n.t('cli:help.commandDescriptions.bridgeAsk'))
+    .action(async (provider: string, message: string[]) => {
+      bridgeAsk(provider, message)
+    })
+
+  cli
+    .command('ping <provider>', i18n.t('cli:help.commandDescriptions.bridgePing'))
+    .action(async (provider: string) => {
+      bridgePing(provider)
+    })
+
+  cli
+    .command('pend <provider> [count]', i18n.t('cli:help.commandDescriptions.bridgePend'))
+    .action(async (provider: string, count?: string) => {
+      bridgePend(provider, count)
+    })
+
+  cli
+    .command('mounted [provider]', i18n.t('cli:help.commandDescriptions.bridgeMounted'))
+    .action(async (provider?: string) => {
+      bridgeMounted(provider)
+    })
+
+  cli
+    .command('cleanup', i18n.t('cli:help.commandDescriptions.bridgeCleanup'))
+    .action(async () => {
+      bridgeCleanup()
+    })
 
   // Default command - show menu
   cli

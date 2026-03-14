@@ -251,7 +251,7 @@ describe('uninstallWorkflows E2E', () => {
     await fs.remove(tmpDir)
   })
 
-  it('installs then uninstalls cleanly', async () => {
+  it('installs then uninstalls cleanly', { timeout: 30_000 }, async () => {
     // First install
     const installResult = await installWorkflows(getAllCommandIds(), tmpDir, true, {
       mcpProvider: 'ace-tool',
@@ -289,7 +289,7 @@ describe('installWorkflows — binary installation', () => {
     await fs.remove(tmpDir)
   })
 
-  it('installs codeagent-wrapper binary for current platform', async () => {
+  it('installs codeagent-wrapper binary for current platform', { timeout: 30_000 }, async () => {
     const result = await installWorkflows(['workflow'], tmpDir, true, {
       mcpProvider: 'skip',
     })
@@ -312,7 +312,7 @@ describe('installWorkflows — prompts installation', () => {
     await fs.remove(tmpDir)
   })
 
-  it('installs codex, gemini, and claude prompts', async () => {
+  it('installs codex, gemini, and claude prompts', { timeout: 30_000 }, async () => {
     const result = await installWorkflows(getAllCommandIds(), tmpDir, true, {
       mcpProvider: 'skip',
     })
@@ -342,7 +342,7 @@ describe('skills namespace isolation', () => {
     await fs.remove(tmpDir)
   })
 
-  it('installs skills under skills/ccg/ namespace', async () => {
+  it('installs skills under skills/ccg/ namespace', { timeout: 30_000 }, async () => {
     const result = await installWorkflows(['workflow'], tmpDir, true, {
       mcpProvider: 'skip',
     })

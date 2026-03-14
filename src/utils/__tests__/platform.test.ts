@@ -1,5 +1,6 @@
+import { delimiter, join } from 'node:path'
 import { describe, expect, it } from 'vitest'
-import { getMcpCommand, getPlatformName, getPathSeparator, isLinux, isMacOS, isWindows } from '../platform'
+import { detectWindowsShell, getMcpCommand, getPlatformName, getPathSeparator, getPreferredWindowsShell, getWindowsShellCandidates, isLinux, isMacOS, isWindows } from '../platform'
 
 // Note: these tests run on the actual platform, so we test based on current OS
 
@@ -75,5 +76,34 @@ describe('getPathSeparator', () => {
     else {
       expect(sep).toBe('/')
     }
+  })
+})
+
+describe('Windows shell helpers', () => {
+  it('returns Windows shells in preference order', () => {
+    expect(getWindowsShellCandidates()).toEqual(['pwsh', 'powershell'])
+  })
+
+  it('prefers pwsh when both shells are available', () => {
+    const pathEntries = ['/tools/pwsh', '/tools/powershell']
+    const pathEnv = pathEntries.join(delimiter)
+    const matches = new Set([
+      join('/tools/pwsh', 'pwsh.exe'),
+      join('/tools/powershell', 'powershell.exe'),
+    ])
+
+    expect(detectWindowsShell(pathEnv, filePath => matches.has(filePath))).toBe('pwsh')
+  })
+
+  it('falls back to powershell when pwsh is unavailable', () => {
+    const pathEntries = ['/tools/pwsh', '/tools/powershell']
+    const pathEnv = pathEntries.join(delimiter)
+    const matches = new Set([join('/tools/powershell', 'powershell.exe')])
+
+    expect(detectWindowsShell(pathEnv, filePath => matches.has(filePath))).toBe('powershell')
+  })
+
+  it('defaults to powershell when no shell is detected', () => {
+    expect(getPreferredWindowsShell('')).toBe('powershell')
   })
 })

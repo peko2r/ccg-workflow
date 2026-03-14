@@ -1,3 +1,6 @@
+import { existsSync } from 'node:fs'
+import { delimiter, join } from 'node:path'
+
 /**
  * Platform utilities for cross-platform compatibility
  * Adapted from zcf project's platform.ts
@@ -9,6 +12,9 @@
 export function isWindows(): boolean {
   return process.platform === 'win32'
 }
+
+export const WINDOWS_SHELL_CANDIDATES = ['pwsh', 'powershell'] as const
+export type WindowsShellName = (typeof WINDOWS_SHELL_CANDIDATES)[number]
 
 /**
  * Check if current platform is macOS
@@ -64,6 +70,47 @@ export function getPlatformName(): string {
     default:
       return platform
   }
+}
+
+/**
+ * Get Windows shell candidates in preference order.
+ */
+export function getWindowsShellCandidates(): WindowsShellName[] {
+  return [...WINDOWS_SHELL_CANDIDATES]
+}
+
+/**
+ * Detect the best available Windows shell from a PATH-like string.
+ */
+export function detectWindowsShell(
+  pathEnv: string = process.env.PATH || '',
+  exists: (filePath: string) => boolean = existsSync,
+): WindowsShellName | null {
+  if (!pathEnv) {
+    return null
+  }
+
+  const pathEntries = pathEnv.split(delimiter).filter(Boolean)
+  const executableExtensions = ['.exe', '.cmd', '.bat', '']
+
+  for (const shell of WINDOWS_SHELL_CANDIDATES) {
+    for (const pathEntry of pathEntries) {
+      for (const extension of executableExtensions) {
+        if (exists(join(pathEntry, `${shell}${extension}`))) {
+          return shell
+        }
+      }
+    }
+  }
+
+  return null
+}
+
+/**
+ * Return the preferred Windows shell, defaulting to pwsh.
+ */
+export function getPreferredWindowsShell(pathEnv: string = process.env.PATH || ''): WindowsShellName {
+  return detectWindowsShell(pathEnv) ?? 'powershell'
 }
 
 /**

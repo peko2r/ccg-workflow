@@ -1,11 +1,24 @@
 #!/usr/bin/env node
 import cac from 'cac'
 import { setupCommands } from './cli-setup'
+import { looksLikeBridgeInvocation } from './utils/bridge'
+
+function rewriteBridgeArgv(argv: string[]): string[] {
+  const cliArgs = argv.slice(2)
+  if (!looksLikeBridgeInvocation(cliArgs)) {
+    return argv
+  }
+
+  return [argv[0], argv[1], 'bridge', ...cliArgs]
+}
 
 async function main(): Promise<void> {
   const cli = cac('ccg')
   await setupCommands(cli)
-  cli.parse()
+  cli.parse(rewriteBridgeArgv(process.argv))
 }
 
-main().catch(console.error)
+main().catch((error) => {
+  console.error(error instanceof Error ? error.message : error)
+  process.exitCode = 1
+})
