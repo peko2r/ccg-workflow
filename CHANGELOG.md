@@ -9,6 +9,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+---
+
+## [1.7.85] - 2026-03-15
+
 ### 💥 Breaking Changes
 
 - **maild 删除旧配置目录变量**：运行时不再读取 `CCB_MAIL_CONFIG_DIR`，仅支持 `CCX_MAIL_CONFIG_DIR`；未设置时回退到默认目录 `~/.claude/.ccx/mail/`

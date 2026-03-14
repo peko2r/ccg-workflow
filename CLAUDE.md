@@ -2,13 +2,17 @@
 
 > [根目录](../CLAUDE.md) > **skills-v2**
 
-**Last Updated**: 2026-03-12 (v1.7.83)
+**Last Updated**: 2026-03-15 (v1.7.85)
 
 ---
 
 ## 变更记录 (Changelog)
 
 > 完整变更历史请查看 [CHANGELOG.md](./CHANGELOG.md)
+
+### 2026-03-15 (v1.7.85)
+- 💥 **maild 环境变量收口**：删除旧变量 `CCB_MAIL_CONFIG_DIR` 运行时回退，仅保留 `CCX_MAIL_CONFIG_DIR`
+- 🔄 **文档与测试同步**：README / docs / tests 全量移除旧变量兼容说明，并补充旧变量失效的回归验证
 
 ### 2026-03-12 (v1.7.83)
 - 🔄 **安装器重构**：1878 行单文件 → 5 个聚焦模块（-25%），`cmd()` 构建器 + `MCP_PROVIDERS` 注册表 + 共享管线，零功能变更

@@ -1,6 +1,6 @@
 {
   "name": "claude-code-ex",
-  "version": "1.7.83",
+  "version": "1.7.85",
   "description": "Claude Code Ex (CCX) multi-model collaboration system and bridge workflow",
   "type": "module",
   "packageManager": "pnpm@10.17.1",

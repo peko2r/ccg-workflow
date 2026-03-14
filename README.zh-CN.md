@@ -447,4 +447,4 @@ MIT
 
 ---
 
-v1.7.83 | [Issues](https://github.com/fengshao1227/claude-code-ex/issues) | [参与贡献](./CONTRIBUTING.md)
+v1.7.85 | [Issues](https://github.com/fengshao1227/claude-code-ex/issues) | [参与贡献](./CONTRIBUTING.md)
