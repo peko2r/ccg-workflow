@@ -81,6 +81,30 @@ npx ccg-workflow menu  # Select "Install Claude Code"
 
 Supports: npm, homebrew, curl, powershell, cmd.
 
+### Bridge CLI (Windows PowerShell + WezTerm)
+
+After `npx ccg-workflow init`, CCG installs compatibility bridge shims into `~/.claude/bin`:
+
+- `ccb`
+- `ask`
+- `ccb-ping`
+- `pend`
+- `ccb-mounted`
+- `ccb-cleanup`
+
+These shims reuse the main `ccg` bridge implementation. Typical usage:
+
+```powershell
+ccb codex,gemini
+ask codex "summarize the repository"
+ccb-ping codex
+pend codex 5
+ccb-mounted
+ccb-cleanup
+```
+
+`ccg codex gemini` remains the primary entrypoint. WezTerm is required for pane launch commands, and per-project bridge runtime state lives under `.ccb/` while project decision context continues to live under `.context/`.
+
 ## Commands
 
 ### Development Workflow
@@ -207,6 +231,8 @@ Leverage Claude Code Agent Teams to spawn multiple Builder teammates for paralle
         ├── codex/      # 6 Codex expert prompts
         └── gemini/     # 7 Gemini expert prompts
 ```
+
+On Windows installs, `~/.claude/bin` also contains `ccb`, `ask`, `ccb-ping`, `pend`, `ccb-mounted`, and `ccb-cleanup` compatibility shims, and `~/.claude/.ccg/bridge/` stores the shared shim launcher resources.
 
 ### Environment Variables
 

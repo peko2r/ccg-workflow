@@ -413,3 +413,70 @@ describe('skills namespace isolation', () => {
     await fs.remove(migrateDir)
   })
 })
+
+describe('bridge compatibility shim installation', () => {
+  const tmpDir = join(tmpdir(), `ccg-test-bridge-${Date.now()}`)
+  const expectedShims = ['ccb', 'ask', 'ccb-ping', 'pend', 'ccb-mounted', 'ccb-cleanup']
+
+  afterAll(async () => {
+    await fs.remove(tmpDir)
+  })
+
+  it('installs bridge shim metadata and launcher resources', { timeout: 30_000 }, async () => {
+    const result = await installWorkflows(['workflow'], tmpDir, true, {
+      mcpProvider: 'skip',
+    })
+
+    expect(result.success).toBe(true)
+    expect(result.installedBridgeShims).toEqual(expectedShims)
+    expect(result.bridgeResourcePath?.replace(/\\/g, '/')).toBe(join(tmpDir, '.ccg', 'bridge').replace(/\\/g, '/'))
+
+    if (process.platform === 'win32') {
+      expect(fs.existsSync(join(tmpDir, '.ccg', 'bridge', 'compat-launcher.ps1'))).toBe(true)
+      expect(await fs.readFile(join(tmpDir, 'bin', 'ccb.cmd'), 'utf-8')).toContain('pwsh.exe')
+      for (const shim of expectedShims) {
+        expect(fs.existsSync(join(tmpDir, 'bin', `${shim}.cmd`))).toBe(true)
+        expect(fs.existsSync(join(tmpDir, 'bin', `${shim}.ps1`))).toBe(true)
+      }
+    }
+    else {
+      expect(fs.existsSync(join(tmpDir, '.ccg', 'bridge', 'compat-launcher.sh'))).toBe(true)
+      for (const shim of expectedShims) {
+        expect(fs.existsSync(join(tmpDir, 'bin', shim))).toBe(true)
+      }
+    }
+  })
+
+  it('uninstall removes bridge shim entrypoints', { timeout: 30_000 }, async () => {
+    await installWorkflows(['workflow'], tmpDir, true, {
+      mcpProvider: 'skip',
+    })
+
+    const result = await uninstallWorkflows(tmpDir)
+    expect(result.success).toBe(true)
+    expect(result.removedBridgeShims.sort()).toEqual(expectedShims.sort())
+
+    if (process.platform === 'win32') {
+      expect(fs.existsSync(join(tmpDir, 'bin', 'ccb.cmd'))).toBe(false)
+      expect(fs.existsSync(join(tmpDir, 'bin', 'ask.ps1'))).toBe(false)
+    }
+    else {
+      expect(fs.existsSync(join(tmpDir, 'bin', 'ccb'))).toBe(false)
+      expect(fs.existsSync(join(tmpDir, 'bin', 'ask'))).toBe(false)
+    }
+  })
+
+  it('preserves unrelated user-owned bin commands during uninstall', { timeout: 30_000 }, async () => {
+    await fs.ensureDir(join(tmpDir, 'bin'))
+    const customPath = process.platform === 'win32'
+      ? join(tmpDir, 'bin', 'ask.ps1')
+      : join(tmpDir, 'bin', 'ask')
+
+    await fs.writeFile(customPath, 'echo custom\n', 'utf-8')
+
+    const result = await uninstallWorkflows(tmpDir)
+
+    expect(result.removedBridgeShims).not.toContain('ask')
+    expect(fs.existsSync(customPath)).toBe(true)
+  })
+})

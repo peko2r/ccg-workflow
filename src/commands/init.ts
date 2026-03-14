@@ -25,6 +25,17 @@ async function checkJqAvailable(): Promise<boolean> {
   }
 }
 
+async function checkWezTermAvailable(): Promise<boolean> {
+  try {
+    const { execSync } = await import('node:child_process')
+    execSync('wezterm -V', { stdio: 'pipe' })
+    return true
+  }
+  catch {
+    return false
+  }
+}
+
 /**
  * Auto-approve codeagent-wrapper Bash commands in settings.json.
  *
@@ -908,6 +919,27 @@ export async function init(options: InitOptions = {}): Promise<void> {
       console.log(ansis.cyan('  Rules:'))
       console.log(`    ${ansis.green('✓')} quality gate auto-trigger rules`)
       console.log(ansis.gray('       → ~/.claude/rules/ccg-skills.md'))
+    }
+
+    if (result.installedBridgeShims && result.installedBridgeShims.length > 0) {
+      console.log()
+      console.log(ansis.cyan(`  ${i18n.t('init:bridge.title')}`))
+      console.log(`    ${ansis.green('✓')} ${i18n.t('init:bridge.shimsInstalled', { shims: result.installedBridgeShims.join(', ') })}`)
+      if (result.bridgeResourcePath) {
+        console.log(ansis.gray(`       → ${result.bridgeResourcePath}`))
+      }
+
+      if (isWindows()) {
+        console.log(`    ${ansis.green('✓')} ${i18n.t('init:bridge.powershellReady')}`)
+        if (await checkWezTermAvailable()) {
+          console.log(`    ${ansis.green('✓')} ${i18n.t('init:bridge.weztermDetected')}`)
+          console.log(ansis.gray(`       ${i18n.t('init:bridge.weztermTryCommand', { command: 'ccb codex,gemini' })}`))
+        }
+        else {
+          console.log(`    ${ansis.yellow('⚠')} ${i18n.t('init:bridge.weztermMissing')}`)
+          console.log(ansis.gray(`       ${i18n.t('init:bridge.weztermInstallHint')}`))
+        }
+      }
     }
 
     // Show errors if any

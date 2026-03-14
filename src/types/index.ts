@@ -88,10 +88,12 @@ export interface InstallResult {
   installedPrompts: string[]
   installedSkills?: number
   installedRules?: boolean
+  installedBridgeShims?: string[]
   errors: string[]
   configPath: string
   binPath?: string
   binInstalled?: boolean
+  bridgeResourcePath?: string
 }
 
 // ace-tool 配置

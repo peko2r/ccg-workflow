@@ -196,6 +196,15 @@ const zhCN = {
       jqWindows: 'Windows: choco install jq / scoop install jq',
       jqNotFound: '未检测到 jq，Hook 已写入但需安装 jq 后生效',
     },
+    bridge: {
+      title: 'Bridge',
+      shimsInstalled: '已安装兼容命令: {{shims}}',
+      powershellReady: 'PowerShell 兼容入口复用主 ccg bridge 实现',
+      weztermDetected: '已检测到 WezTerm，可直接启动 bridge pane',
+      weztermTryCommand: '可尝试: {{command}}',
+      weztermMissing: '未检测到 WezTerm，bridge pane 启动命令将不可用',
+      weztermInstallHint: '安装 WezTerm 后可使用 ccg codex gemini 或 ccb codex',
+    },
     addToPathManually: '请手动添加到 shell 配置:',
     modes: {
       parallel: '并行模式 - 同时调用多个模型',
@@ -629,6 +638,15 @@ const en: typeof zhCN = {
       jqLinux: 'Linux: sudo apt install jq / sudo yum install jq',
       jqWindows: 'Windows: choco install jq / scoop install jq',
       jqNotFound: 'jq not detected. Hook written but requires jq to work',
+    },
+    bridge: {
+      title: 'Bridge',
+      shimsInstalled: 'Installed compatibility commands: {{shims}}',
+      powershellReady: 'PowerShell compatibility entrypoints reuse the main ccg bridge implementation',
+      weztermDetected: 'WezTerm detected; bridge pane launch commands are ready',
+      weztermTryCommand: 'Try: {{command}}',
+      weztermMissing: 'WezTerm not detected; bridge pane launch commands will stay unavailable',
+      weztermInstallHint: 'Install WezTerm to use ccg codex gemini or ccb codex',
     },
     addToPathManually: 'Please add to shell config manually:',
     modes: {

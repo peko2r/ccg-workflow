@@ -70,6 +70,14 @@ interface InstallContext {
 const GITHUB_REPO = 'fengshao1227/ccg-workflow'
 const RELEASE_TAG = 'preset'
 const BINARY_DOWNLOAD_URL = `https://github.com/${GITHUB_REPO}/releases/download/${RELEASE_TAG}`
+const BRIDGE_COMPAT_SHIMS = [
+  { name: 'ccb', targetArgs: ['bridge'] },
+  { name: 'ask', targetArgs: ['ask'] },
+  { name: 'ccb-ping', targetArgs: ['ping'] },
+  { name: 'pend', targetArgs: ['pend'] },
+  { name: 'ccb-mounted', targetArgs: ['mounted'] },
+  { name: 'ccb-cleanup', targetArgs: ['cleanup'] },
+] as const
 
 /**
  * Download codeagent-wrapper binary from GitHub Release.
@@ -147,6 +155,141 @@ async function copyMdTemplates(
     }
   }
   return installed
+}
+
+function getBridgeResourceDir(installDir: string): string {
+  return join(installDir, '.ccg', 'bridge')
+}
+
+function buildBridgePowerShellLauncher(): string {
+  const mapping = BRIDGE_COMPAT_SHIMS
+    .map(({ name, targetArgs }) => `  '${name}' = @(${targetArgs.map(arg => `'${arg}'`).join(', ')})`)
+    .join('\r\n')
+
+  return `param(
+  [Parameter(Mandatory = $true, Position = 0)]
+  [string] $ShimName,
+
+  [Parameter(ValueFromRemainingArguments = $true)]
+  [string[]] $RemainingArgs
+)
+
+$commandMap = @{
+${mapping}
+}
+
+if (-not $commandMap.ContainsKey($ShimName)) {
+  Write-Error "Unknown CCG bridge compatibility shim: $ShimName"
+  exit 64
+}
+
+$resolvedArgs = @($commandMap[$ShimName] + $RemainingArgs)
+$ccgCommand = Get-Command 'ccg' -ErrorAction SilentlyContinue
+if ($null -ne $ccgCommand) {
+  & $ccgCommand.Source @resolvedArgs
+  exit $LASTEXITCODE
+}
+
+$npxCommand = Get-Command 'npx' -ErrorAction SilentlyContinue
+if ($null -ne $npxCommand) {
+  & $npxCommand.Source '--yes' 'ccg-workflow' @resolvedArgs
+  exit $LASTEXITCODE
+}
+
+Write-Error "Unable to locate 'ccg' or 'npx'. Install ccg-workflow globally or run 'npx ccg-workflow init' again."
+exit 127
+`
+}
+
+function buildBridgeCmdShim(): string {
+  return `@echo off
+setlocal
+set "LAUNCHER=%~dp0..\\.ccg\\bridge\\compat-launcher.ps1"
+where pwsh.exe >nul 2>nul
+if %ERRORLEVEL% EQU 0 (
+  pwsh.exe -NoLogo -NoProfile -ExecutionPolicy Bypass -File "%LAUNCHER%" "%~n0" %*
+) else (
+  powershell.exe -NoLogo -NoProfile -ExecutionPolicy Bypass -File "%LAUNCHER%" "%~n0" %*
+)
+exit /b %ERRORLEVEL%
+`
+}
+
+function buildBridgePowerShellShim(name: string): string {
+  return `& "$PSScriptRoot\\..\\.ccg\\bridge\\compat-launcher.ps1" '${name}' @args
+exit $LASTEXITCODE
+`
+}
+
+function normalizeGeneratedText(content: string): string {
+  return content.replace(/\r\n/g, '\n')
+}
+
+async function removeManagedTextFile(filePath: string, expectedContent: string): Promise<boolean> {
+  if (!(await fs.pathExists(filePath))) {
+    return false
+  }
+
+  const actual = normalizeGeneratedText(await fs.readFile(filePath, 'utf-8'))
+  if (actual !== normalizeGeneratedText(expectedContent)) {
+    return false
+  }
+
+  await fs.remove(filePath)
+  return true
+}
+
+function buildBridgePosixLauncher(): string {
+  const mapping = BRIDGE_COMPAT_SHIMS
+    .map(({ name, targetArgs }) => `  ${name}) set -- ${targetArgs.join(' ')} "$@" ;;`)
+    .join('\n')
+
+  return `#!/usr/bin/env sh
+set -eu
+
+shim_name=$1
+shift
+
+case "$shim_name" in
+${mapping}
+  *)
+    printf '%s\n' "Unknown CCG bridge compatibility shim: $shim_name" >&2
+    exit 64
+    ;;
+esac
+
+if command -v ccg >/dev/null 2>&1; then
+  exec ccg "$@"
+fi
+
+if command -v npx >/dev/null 2>&1; then
+  exec npx --yes ccg-workflow "$@"
+fi
+
+printf '%s\n' "Unable to locate 'ccg' or 'npx'. Install ccg-workflow globally or run 'npx ccg-workflow init' again." >&2
+exit 127
+`
+}
+
+function buildBridgePosixShim(): string {
+  return `#!/usr/bin/env sh
+set -eu
+
+SCRIPT_DIR=$(CDPATH= cd -- "$(dirname "$0")" && pwd)
+SHIM_NAME=$(basename "$0")
+exec "$SCRIPT_DIR/../.ccg/bridge/compat-launcher.sh" "$SHIM_NAME" "$@"
+`
+}
+
+async function writeTextFileIfNeeded(filePath: string, content: string, force: boolean, mode?: number): Promise<void> {
+  if (!force && await fs.pathExists(filePath)) {
+    return
+  }
+
+  await fs.outputFile(filePath, content, 'utf-8')
+  if (mode !== undefined) {
+    await fs.chmod(filePath, mode)
+  }
 }
 
 // ═══════════════════════════════════════════════════════
@@ -355,6 +498,39 @@ async function installRuleFiles(ctx: InstallContext): Promise<void> {
   }
 }
 
+async function installBridgeCompatFiles(ctx: InstallContext): Promise<void> {
+  const resourceDir = getBridgeResourceDir(ctx.installDir)
+  const binDir = join(ctx.installDir, 'bin')
+
+  try {
+    await fs.ensureDir(resourceDir)
+    await fs.ensureDir(binDir)
+
+    if (process.platform === 'win32') {
+      await writeTextFileIfNeeded(join(resourceDir, 'compat-launcher.ps1'), buildBridgePowerShellLauncher(), ctx.force)
+
+      for (const shim of BRIDGE_COMPAT_SHIMS) {
+        await writeTextFileIfNeeded(join(binDir, `${shim.name}.cmd`), buildBridgeCmdShim(), ctx.force)
+        await writeTextFileIfNeeded(join(binDir, `${shim.name}.ps1`), buildBridgePowerShellShim(shim.name), ctx.force)
+      }
+    }
+    else {
+      await writeTextFileIfNeeded(join(resourceDir, 'compat-launcher.sh'), buildBridgePosixLauncher(), ctx.force, 0o755)
+
+      for (const _shim of BRIDGE_COMPAT_SHIMS) {
+        await writeTextFileIfNeeded(join(binDir, _shim.name), buildBridgePosixShim(), ctx.force, 0o755)
+      }
+    }
+
+    ctx.result.installedBridgeShims = BRIDGE_COMPAT_SHIMS.map(({ name }) => name)
+    ctx.result.bridgeResourcePath = resourceDir
+  }
+  catch (error) {
+    ctx.result.errors.push(`Failed to install bridge compatibility shims: ${error}`)
+    ctx.result.success = false
+  }
+}
+
 /** Resolve platform-specific binary name. Returns null for unsupported platforms. */
 function getBinaryName(): string | null {
   const osMap: Record<string, string> = { darwin: 'darwin', linux: 'linux', win32: 'windows' }
@@ -456,6 +632,7 @@ export async function installWorkflows(
   await installPromptFiles(ctx)
   await installSkillFiles(ctx)
   await installRuleFiles(ctx)
+  await installBridgeCompatFiles(ctx)
   await installBinaryFile(ctx)
 
   ctx.result.configPath = join(installDir, 'commands', 'ccg')
@@ -472,6 +649,7 @@ export interface UninstallResult {
   removedPrompts: string[]
   removedAgents: string[]
   removedSkills: string[]
+  removedBridgeShims: string[]
   removedRules: boolean
   removedBin: boolean
   errors: string[]
@@ -487,6 +665,7 @@ export async function uninstallWorkflows(installDir: string): Promise<UninstallR
     removedPrompts: [],
     removedAgents: [],
     removedSkills: [],
+    removedBridgeShims: [],
     removedRules: false,
     removedBin: false,
     errors: [],
@@ -542,6 +721,35 @@ export async function uninstallWorkflows(installDir: string): Promise<UninstallR
     }
     catch (error) {
       result.errors.push(`Failed to remove rules: ${error}`)
+    }
+  }
+
+  // Remove bridge compatibility shims from bin/
+  if (await fs.pathExists(binDir)) {
+    try {
+      for (const shim of BRIDGE_COMPAT_SHIMS) {
+        const managedFiles = process.platform === 'win32'
+          ? [
+              { path: join(binDir, `${shim.name}.cmd`), content: buildBridgeCmdShim() },
+              { path: join(binDir, `${shim.name}.ps1`), content: buildBridgePowerShellShim(shim.name) },
+            ]
+          : [
+              { path: join(binDir, shim.name), content: buildBridgePosixShim() },
+            ]
+
+        let removedAny = false
+        for (const file of managedFiles) {
+          removedAny = await removeManagedTextFile(file.path, file.content) || removedAny
+        }
+
+        if (removedAny && !result.removedBridgeShims.includes(shim.name)) {
+          result.removedBridgeShims.push(shim.name)
+        }
+      }
+    }
+    catch (error) {
+      result.errors.push(`Failed to remove bridge shims: ${error}`)
+      result.success = false
     }
   }
 

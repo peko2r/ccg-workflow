@@ -7,6 +7,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [Unreleased]
+
+### Added
+
+- Bridge compatibility shims are now installed into `~/.claude/bin` for Windows PowerShell usage: `ccb`, `ask`, `ccb-ping`, `pend`, `ccb-mounted`, `ccb-cleanup`
+- Init now surfaces bridge compatibility shim installation and a minimal WezTerm readiness check for Windows users
+
+### Changed
+
+- Bridge compatibility shims reuse the main `ccg` bridge commands through shared launcher resources under `~/.claude/.ccg/bridge/`
+
 ## [1.7.83] - 2026-03-12
 
 ### 🔄 变更
