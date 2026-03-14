@@ -112,8 +112,6 @@ config/mail/config.template.json
 
 Override the config directory with `CCX_MAIL_CONFIG_DIR`.
 
-Compatibility note: the current version still accepts the legacy `CCB_MAIL_CONFIG_DIR`, but `CCX_MAIL_CONFIG_DIR` takes precedence.
-
 ### Setup
 
 ```bash

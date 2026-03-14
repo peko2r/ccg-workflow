@@ -29,8 +29,8 @@ function runMailConfigDir(env: NodeJS.ProcessEnv) {
   }).trim()
 }
 
-describe('mail config dir env migration', () => {
-  it('prefers CCX_MAIL_CONFIG_DIR when both env vars are set', () => {
+describe('mail config dir env resolution', () => {
+  it('uses CCX_MAIL_CONFIG_DIR when it is set', () => {
     const result = runMailConfigDir({
       CCX_MAIL_CONFIG_DIR: 'override-ccx',
       CCB_MAIL_CONFIG_DIR: 'override-ccb',
@@ -39,23 +39,14 @@ describe('mail config dir env migration', () => {
     expect(result).toContain('override-ccx')
   })
 
-  it('falls back to legacy CCB_MAIL_CONFIG_DIR when new env var is missing', () => {
+  it('ignores legacy CCB_MAIL_CONFIG_DIR when new env var is missing', () => {
     const env = { ...process.env }
     delete env.CCX_MAIL_CONFIG_DIR
     env.CCB_MAIL_CONFIG_DIR = 'override-ccb'
 
     const result = runMailConfigDir(env)
 
-    expect(result).toContain('override-ccb')
-  })
-
-  it('falls back to legacy CCB_MAIL_CONFIG_DIR when new env var is empty', () => {
-    const result = runMailConfigDir({
-      CCX_MAIL_CONFIG_DIR: '',
-      CCB_MAIL_CONFIG_DIR: 'override-ccb',
-    })
-
-    expect(result).toContain('override-ccb')
+    expect(result.replace(/\\/g, '/')).toContain('/.claude/.ccx/mail')
   })
 
   it('uses default .ccx mail directory when no env override exists', () => {

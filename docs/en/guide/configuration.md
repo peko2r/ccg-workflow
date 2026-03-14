@@ -23,19 +23,11 @@
 ~/.claude/.ccx/mail/config.json
 ```
 
-To override the config directory, prefer:
+To override the config directory, use:
 
 ```text
 CCX_MAIL_CONFIG_DIR
 ```
-
-Compatibility note: the current version still accepts the legacy variable:
-
-```text
-CCB_MAIL_CONFIG_DIR
-```
-
-> Note: during the migration window, `CCX_MAIL_CONFIG_DIR` is checked first and falls back to `CCB_MAIL_CONFIG_DIR` only if unset. Legacy support will be removed in a later release.
 
 The repository template lives at:
 

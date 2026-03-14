@@ -112,8 +112,6 @@ config/mail/config.template.json
 
 如需改配置目录，可设置环境变量：`CCX_MAIL_CONFIG_DIR`。
 
-兼容说明：当前版本仍兼容旧变量 `CCB_MAIL_CONFIG_DIR`，但优先使用 `CCX_MAIL_CONFIG_DIR`。
-
 ### 初始化
 
 ```bash
