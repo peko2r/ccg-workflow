@@ -1,36 +1,27 @@
 # Getting Started
 
-## What is CCG
+This page is for first-time CCX users. The goal is to get a minimal working path running first, then layer on extra models and MCP tools if needed.
 
-In short: **Codex and Gemini analyze. Claude writes the code. Fully transparent.**
+## What CCX is
 
-```
-Your request
-   │
-   ↓
-Claude Code (orchestration + code writing)
-   │
-   ├── Backend related → sent to Codex for analysis
-   ├── Frontend related → sent to Gemini for analysis
-   │
-   ↓
-Codex/Gemini return analysis (patches / proposals)
-   │
-   ↓
-Claude synthesizes and writes the code ← you see every change
-```
+CCX is a workflow layer on top of Claude Code:
 
-**The key point**: by default, Claude is the one writing code — not a black box. You see the full process in Claude Code. Codex and Gemini are "advisors" that never directly touch your files.
+- **Gemini** handles frontend analysis
+- **Codex** handles backend analysis
+- **Claude** integrates plans, applies code changes, reviews output, and delivers the final result
 
-There's also **codex-exec mode**: Codex writes the code instead, then Claude + Gemini do multi-model cross-review. Good for well-defined tasks with lower token cost. See [Workflow Guide](/en/guide/workflows).
+In the default mode, Claude remains in the write/review loop. For narrowly scoped tasks, you can also use `/ccx:codex-exec` so Codex drives implementation and Claude + Gemini review the outcome.
 
-## What you need
+## Prerequisites
 
-- **Node.js 20+** — Below 20 will break (`ora@9.x` requires it)
-- **Claude Code CLI** — Nothing works without this
-- **jq** — For the auto-authorization hook
-- **Codex CLI** — Optional. Enables backend routing
-- **Gemini CLI** — Optional. Enables frontend routing
+| Dependency | Required | Purpose |
+|------------|----------|---------|
+| Node.js 20+ | Yes | `ora@9.x` requires Node 20+ |
+| Claude Code CLI | Yes | Base runtime for CCX |
+| jq | Recommended | Commonly used in hooks, auto-authorization, and command processing |
+| Codex CLI | Optional | Backend routing, `/ccx:backend`, `/ccx:codex-exec` |
+| Gemini CLI | Optional | Frontend routing, `/ccx:frontend` |
+| Python 3 | Required for `maild` only | `maild` runtime; Windows uses `python`, macOS/Linux use `python3` |
 
 ## Install
 
@@ -38,9 +29,114 @@ There's also **codex-exec mode**: Codex writes the code instead, then Claude + G
 npx claude-code-ex
 ```
 
-First run asks you to pick a language. After that, it remembers.
+On first run, CCX asks for language selection and persists it for later sessions.
 
-### Installing jq
+## CLI usage vs slash command usage
+
+### `ccx` CLI
+
+The CLI is for installation and operational tasks:
+
+- install and update
+- MCP configuration
+- MCP diagnostics and repair
+- bridge / helper commands
+- the `maild` daemon
+
+Common examples:
+
+```bash
+npx claude-code-ex
+npx claude-code-ex init
+npx claude-code-ex config mcp
+npx claude-code-ex diagnose-mcp
+ccx maild status
+```
+
+### `/ccx:*` slash commands
+
+Slash commands run inside Claude Code and cover analysis, planning, coding, review, OPSX, and Agent Teams.
+
+The current implementation installs **27 `/ccx:*` commands**.
+
+Common examples:
+
+```text
+/ccx:frontend add dark mode to the login page
+/ccx:backend add pagination to /api/users
+/ccx:plan implement JWT auth
+/ccx:review
+```
+
+## Recommended first-run paths
+
+### Path A: minimal usable setup
+
+1. Run install:
+
+```bash
+npx claude-code-ex
+```
+
+2. Initialize workflows:
+
+```bash
+npx claude-code-ex init
+```
+
+3. Inside Claude Code, run:
+
+```text
+/ccx:frontend add a dark mode toggle to the login page
+```
+
+If Gemini gets routed in, the base workflow is working.
+
+### Path B: full collaboration setup
+
+1. Install Codex CLI and Gemini CLI
+2. Configure MCP:
+
+```bash
+npx claude-code-ex config mcp
+```
+
+3. Validate with a plan-driven workflow:
+
+```text
+/ccx:plan implement user authentication
+/ccx:execute .claude/plan/user-auth.md
+```
+
+## Verification steps
+
+### Verify CLI
+
+```bash
+npx claude-code-ex init
+npx claude-code-ex diagnose-mcp
+```
+
+### Verify slash commands
+
+```text
+/ccx:frontend improve the homepage hero area
+/ccx:backend add pagination to the orders endpoint
+```
+
+### Verify Agent Teams flag
+
+If you want `/ccx:team-*`, enable it in `~/.claude/settings.json`:
+
+```json
+{
+  "env": {
+    "CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS": "1"
+  }
+}
+```
+
+## Install `jq`
 
 ::: code-group
 
@@ -64,36 +160,17 @@ scoop install jq
 
 :::
 
-### Installing Claude Code
+## Install Claude Code
 
 ```bash
-npx claude-code-ex menu  # Look for "Install Claude Code"
+npx claude-code-ex menu
 ```
 
-Works with npm, homebrew, curl, powershell, and cmd.
+Then choose **Install Claude Code**. Current menu paths support `npm`, `homebrew`, `curl`, `powershell`, and `cmd`.
 
-## Try it out
+## Next
 
-After installing, type this in Claude Code:
-
-```
-/ccx:frontend add a dark mode toggle to the login page
-```
-
-If you see Gemini being called, you're good.
-
-## Updating and uninstalling
-
-```bash
-# Update
-npx claude-code-ex@latest
-
-# Uninstall
-npx claude-code-ex  # Select "Uninstall"
-```
-
-## What's next
-
-- [Command Reference](/en/guide/commands) — All 28 commands
-- [Workflow Guide](/en/guide/workflows) — Which workflow for which scenario
-- [MCP Configuration](/en/guide/mcp) — Smarter code search
+- [Command reference](./commands.md)
+- [Workflow guide](./workflows.md)
+- [MCP reference](./mcp.md)
+- [Configuration, CLI, layout, migration, troubleshooting](./configuration.md)

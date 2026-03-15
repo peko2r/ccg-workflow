@@ -2,18 +2,18 @@
 layout: home
 
 hero:
-  name: CCG
-  text: Three AIs, fully transparent
-  tagline: Codex analyzes backend. Gemini analyzes frontend. Claude writes the code. You see every line.
+  name: CCX
+  text: Multi-model workflows with transparent code ownership
+  tagline: Gemini handles frontend analysis, Codex handles backend analysis, and Claude stays in charge of orchestration, review, and final delivery.
   image:
     src: /logo.svg
-    alt: CCG
+    alt: CCX
   actions:
     - theme: brand
-      text: Get started in 3 minutes
+      text: Get started
       link: /en/guide/getting-started
     - theme: alt
-      text: See all commands
+      text: Full command reference
       link: /en/guide/commands
     - theme: alt
       text: GitHub
@@ -21,21 +21,21 @@ hero:
 
 features:
   - icon: 🔀
-    title: Automatic task routing
-    details: Say "fix the login page" — Gemini analyzes. Say "add an API endpoint" — Codex analyzes. Claude takes their analysis and writes the code. You see every change.
+    title: Automatic model routing
+    details: Frontend work goes to Gemini, backend work goes to Codex, and Claude integrates the result.
   - icon: 🔒
-    title: Transparent, no black box
-    details: By default, Claude writes the code and you see the full process. Or use codex-exec to let Codex write code, with Claude + Gemini multi-model review. Either way, nothing is hidden.
+    title: Transparent by default
+    details: Claude stays in the write/review loop by default instead of handing your repository to an external model end to end.
   - icon: 📐
-    title: No AI improvisation
-    details: OPSX integration turns requirements into constraints. The AI works within boundaries, not freestyle.
+    title: Spec-driven execution
+    details: OPSX turns requirements into constraints first, then into executable plans.
   - icon: 👥
-    title: Parallel coding with Agent Teams
-    details: Multiple Builders write different modules simultaneously, then dual-model cross-review catches what humans might miss.
-  - icon: ⚡
-    title: One line, ready to go
-    details: npx claude-code-ex — 28 commands, works on macOS, Linux, and Windows.
+    title: Agent Teams for parallel work
+    details: Large tasks can be decomposed into isolated concurrent streams and reviewed afterward.
   - icon: 🧩
-    title: MCP ecosystem built in
-    details: ace-tool, fast-context, Context7 and more — one-click setup, auto-synced to Codex and Gemini.
+    title: MCP ecosystem included
+    details: Works with ace-tool, ace-tool-rs, fast-context, ContextWeaver, grok-search, Context7, and more, with mirror sync to Codex and Gemini.
+  - icon: ✉️
+    title: Email ASK workflow
+    details: Includes the `maild` daemon for email-driven ASK flows.
 ---

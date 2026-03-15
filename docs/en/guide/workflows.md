@@ -1,103 +1,188 @@
 # Workflow Guide
 
-Different tasks call for different workflows. Don't overthink it — use this decision tree.
+This page helps you choose the right CCX workflow by task type. The README stays at the navigation level; this page is the full reference.
 
-## How to choose
+## Selection overview
 
-```
+```text
 Got a task
   │
-  ├─ Simple, one sentence? ──→ /ccx:frontend or /ccx:backend
-  │
-  ├─ Want to review the plan first? → /ccx:plan → /ccx:execute
-  │
-  ├─ Need strict control? ──→ /ccx:spec-* series
-  │
-  ├─ Splits into 3+ modules? → /ccx:team-* series
-  │
-  └─ Full end-to-end? ──────→ /ccx:workflow
+  ├─ Simple, focused, and clear? ─────→ /ccx:frontend or /ccx:backend
+  ├─ Want to review a plan first? ────→ /ccx:plan → /ccx:execute
+  ├─ Plan is clear and tokens matter? → /ccx:plan → /ccx:codex-exec
+  ├─ Need strict constraints/auditability? → /ccx:spec-*
+  ├─ Can split into 3+ isolated modules? → /ccx:team-*
+  └─ Want a full end-to-end path? ────→ /ccx:workflow
 ```
 
-## Plan → Execute (most common)
+## Simple focused tasks
 
-Codex and Gemini each produce an analysis. Claude combines them into a plan. You review it, tweak if needed, then execute.
+Use this when:
 
-```bash
+- the change is local to one page, component, API, or logic path
+- the direction is already clear
+- you do not need a separate plan artifact first
+
+Recommended commands:
+
+```text
+/ccx:frontend improve the dashboard layout
+/ccx:backend add pagination to the orders endpoint
+```
+
+Boundaries:
+
+- not ideal for work spanning multiple modules
+- not ideal when you want to review a plan before coding
+
+## Plan + Execute
+
+This is the most common path.
+
+### Flow
+
+```text
 /ccx:plan implement user authentication
-# Plan saved in .claude/plan/
-# Open it, read it, edit it if you want
-
-# Two ways to execute — pick one:
-/ccx:execute .claude/plan/user-auth.md   # Claude handles each step
-/ccx:codex-exec .claude/plan/user-auth.md  # Codex does everything, Claude just reviews
+/ccx:execute .claude/plan/user-auth.md
 ```
 
-**When to use which?**
+### Best fit
 
-`execute` — Complex tasks where you want Claude steering every step. Uses more tokens.
+- medium to large tasks
+- you want to review a plan before execution
+- you want Claude to stay in control while implementing
 
-`codex-exec` — Clear, well-defined tasks. Codex runs the whole thing, Claude reviews at the end. Much cheaper.
+### Characteristics
 
-## OPSX Spec-Driven (strict control)
+- `plan` produces a reviewable execution plan
+- `execute` follows that plan with Claude still steering implementation
+- well suited to tasks that may need course correction during execution
 
-For when you don't want the AI making stuff up. Like implementing a permission system where every detail needs to be traceable.
+### Preconditions
 
-The idea: **turn requirements into constraints, then turn constraints into a zero-decision plan. During execution, there's nothing to decide — every decision was already made during planning.**
+- Claude Code is working normally
+- `.claude/plan/` is writable
+- install Codex CLI and/or Gemini CLI if you rely on their analysis paths
 
-```bash
+## Codex-Exec
+
+### Flow
+
+```text
+/ccx:plan implement user authentication
+/ccx:codex-exec .claude/plan/user-auth.md
+```
+
+### Best fit
+
+- requirements are well scoped
+- the plan is already explicit enough
+- you want lower Claude token consumption
+- you prefer Codex to push implementation in one pass
+
+### Difference from `execute`
+
+- `execute`: Claude leads execution; better for complex or adaptive tasks
+- `codex-exec`: Codex leads execution; better for clear, low-ambiguity tasks
+
+### Boundaries
+
+- avoid this path when requirements are still fuzzy
+- if you need strict constraint-first execution, use OPSX instead
+
+## OPSX spec-driven workflow
+
+Use this when:
+
+- the work is high-risk or tightly constrained
+- you do not want key implementation decisions happening during execution
+- you want a traceable chain from requirements to constraints to plan to implementation
+
+### Flow
+
+```text
 /ccx:spec-init
-/ccx:spec-research implement RBAC permission system
-# This outputs constraints like:
-# - Must support role inheritance
-# - Permission check latency < 5ms
-# - Must have audit logging
-
+/ccx:spec-research implement RBAC
 /ccx:spec-plan
-# Constraints → zero-decision plan
-# Every step: which file, what change, how to verify
-
 /ccx:spec-impl
-# Execute step by step, no decisions needed
-
 /ccx:spec-review
-# Independent dual-model review, use anytime
 ```
 
-You can `/clear` between phases — state lives in `openspec/`, it won't disappear.
+### Characteristics
 
-## Agent Teams (parallel multi-module)
+- `spec-research`: turns requirements into constraints
+- `spec-plan`: turns constraints into a zero-decision plan
+- `spec-impl`: executes against that plan
+- `spec-review`: independent dual-model review and can be used standalone
 
-Task splits into independent modules? Like "order CRUD + payment integration + email notifications" — three modules with no dependencies. Let three Builders work at once.
+### Boundaries
 
-```bash
-/ccx:team-research implement order system
-# Outputs constraints + success criteria
-# /clear
+- heavyweight for small changes
+- best reserved for high-control work rather than everyday edits
 
+## Agent Teams
+
+Use this when:
+
+- the task can be decomposed into **3+ isolated modules**
+- file ownership boundaries are clear
+- you want to trade coordination overhead for faster delivery through parallel work
+
+### Flow
+
+```text
+/ccx:team-research implement order CRUD + payment + notifications
 /ccx:team-plan order-system
-# Splits into non-overlapping subtasks, each Builder owns their files
-# /clear
-
 /ccx:team-exec
-# Multiple Builders code in parallel
-# /clear
-
 /ccx:team-review
-# Codex reviews + Gemini reviews, Critical = must fix
 ```
 
-**How is this different from the normal workflow?**
+### Characteristics
 
-Normal workflow keeps a continuous conversation — context accumulates. Team series `/clear`s between steps, passing state through files. Upside: context never blows up. Downside: you can't course-correct mid-stream.
+- `team-research`: parallel exploration of codebase and constraints
+- `team-plan`: produces a file-scope-isolated parallel plan
+- `team-exec`: spawns Builder teammates for concurrent implementation
+- `team-review`: Codex + Gemini cross-review the output
 
-Works best when: the task decomposes into 3+ independent modules with no tight coupling.
+### Preconditions
 
-## Full Workflow (autopilot)
+Enable the feature in `~/.claude/settings.json`:
 
-`/ccx:workflow` runs all 6 phases automatically: research → ideate → plan → execute → optimize → review.
-
-```bash
-/ccx:workflow implement full user auth with registration, login, and JWT
+```json
+{
+  "env": {
+    "CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS": "1"
+  }
+}
 ```
 
-Good for when you don't want to babysit the process. For big tasks though, `plan + execute` gives you a checkpoint to review the plan before committing to it.
+### Boundaries
+
+- not a good fit when modules are tightly coupled
+- if you need to frequently steer the work mid-flight, the continuous conversation workflows are usually better
+
+## Full workflow
+
+```text
+/ccx:workflow implement a full authentication flow
+```
+
+Use this when:
+
+- you want one entry point for the whole lifecycle
+- you do not need to manually intervene at each phase
+- you are comfortable letting the system run research → ideate → plan → execute → optimize → review
+
+Boundaries:
+
+- if you want a plan checkpoint before implementation, `plan + execute` is safer
+- if you need hard constraints, OPSX is a better fit
+
+## Recommended decision rules
+
+- **Single focused task**: `frontend` / `backend`
+- **Medium or large task**: `plan + execute`
+- **Medium or large but clearly scoped**: `plan + codex-exec`
+- **High-control / auditable task**: `spec-*`
+- **Parallel multi-module task**: `team-*`
+- **Full automation path**: `workflow`
