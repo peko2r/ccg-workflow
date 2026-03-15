@@ -408,7 +408,7 @@ npm uninstall -g claude-code-ex  # npm 全局用户需额外执行
 
 欢迎贡献！请阅读 [CONTRIBUTING.md](./CONTRIBUTING.md) 了解开发指南。
 
-想找一个入手点？查看标记为 [`good first issue`](https://github.com/fengshao1227/claude-code-ex/labels/good%20first%20issue) 的 Issue。
+想找一个入手点？查看标记为 [`good first issue`](https://github.com/claude-code-ex/claude-code-ex/labels/good%20first%20issue) 的 Issue。
 
 ## 贡献者
 
@@ -433,13 +433,13 @@ npm uninstall -g claude-code-ex  # npm 全局用户需额外执行
 
 ## Star History
 
-[![Star History Chart](https://api.star-history.com/svg?repos=fengshao1227/claude-code-ex&type=timeline&legend=top-left)](https://www.star-history.com/#fengshao1227/claude-code-ex&type=timeline&legend=top-left)
+[![Star History Chart](https://api.star-history.com/svg?repos=peko2r/claude-code-ex&type=timeline&legend=top-left)](https://www.star-history.com/#peko2r/claude-code-ex&type=timeline&legend=top-left)
 
 ## 联系方式
 
-- **邮箱**: [fengshao1227@gmail.com](mailto:fengshao1227@gmail.com) — 赞助、合作洽谈、开发交流
-- **Issues**: [GitHub Issues](https://github.com/fengshao1227/claude-code-ex/issues) — Bug 反馈与功能建议
-- **讨论区**: [GitHub Discussions](https://github.com/fengshao1227/claude-code-ex/discussions) — 问题咨询与社区交流
+- **邮箱**: [wfhsyswd@gmail.com](mailto:wfhsyswd@gmail.com) — 赞助、合作洽谈、开发交流
+- **Issues**: [GitHub Issues](https://github.com/peko2r/claude-code-ex/issues) — Bug 反馈与功能建议
+- **讨论区**: [GitHub Discussions](https://github.com/peko2r/claude-code-ex/discussions) — 问题咨询与社区交流
 
 ## License
 
@@ -447,4 +447,4 @@ MIT
 
 ---
 
-v1.7.85 | [Issues](https://github.com/fengshao1227/claude-code-ex/issues) | [参与贡献](./CONTRIBUTING.md)
+v1.7.85 | [Issues](https://github.com/peko2r/claude-code-ex/issues) | [参与贡献](./CONTRIBUTING.md)
