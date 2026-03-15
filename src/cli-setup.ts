@@ -5,6 +5,7 @@ import { version } from '../package.json'
 import { configMcp } from './commands/config-mcp'
 import { diagnoseMcp, fixMcp } from './commands/diagnose-mcp'
 import { init } from './commands/init'
+import { update } from './commands/update'
 import {
   bridgeAsk,
   bridgeCleanup,
@@ -13,7 +14,7 @@ import {
   bridgePend,
   bridgePing,
 } from './commands/bridge'
-import { showMainMenu } from './commands/menu'
+import { showMainMenu, uninstall as runUninstall } from './commands/menu'
 import { runMaild } from './commands/maild'
 import { i18n, initI18n } from './i18n'
 import { readCcxConfig } from './utils/config'
@@ -29,6 +30,8 @@ function customizeHelp(sections: any[]): any[] {
     body: [
       `  ${ansis.cyan('ccx')}              ${i18n.t('cli:help.commandDescriptions.showMenu')}`,
       `  ${ansis.cyan('ccx init')} | ${ansis.cyan('i')}     ${i18n.t('cli:help.commandDescriptions.initConfig')}`,
+      `  ${ansis.cyan('ccx update')}       ${i18n.t('cli:help.commandDescriptions.update')}`,
+      `  ${ansis.cyan('ccx uninstall')}    ${i18n.t('cli:help.commandDescriptions.uninstall')}`,
       `  ${ansis.cyan('ccx config mcp')}   ${i18n.t('cli:help.commandDescriptions.configMcp')}`,
       `  ${ansis.cyan('ccx diagnose-mcp')} ${i18n.t('cli:help.commandDescriptions.diagnoseMcp')}`,
       `  ${ansis.cyan('ccx fix-mcp')}      ${i18n.t('cli:help.commandDescriptions.fixMcp')}`,
@@ -72,6 +75,9 @@ function customizeHelp(sections: any[]): any[] {
       ansis.gray(`  # ${i18n.t('cli:help.exampleDescriptions.runFullInitialization')}`),
       `  ${ansis.cyan('npx claude-code-ex init')}`,
       `  ${ansis.cyan('npx claude-code-ex i')}`,
+      '',
+      ansis.gray(`  # ${i18n.t('cli:help.exampleDescriptions.fullUninstall')}`),
+      `  ${ansis.cyan('npx claude-code-ex uninstall')}`,
       '',
       ansis.gray(`  # ${i18n.t('cli:help.exampleDescriptions.customModels')}`),
       `  ${ansis.cyan('npx claude-code-ex i --frontend gemini,codex --backend codex,gemini')}`,
@@ -176,6 +182,19 @@ export async function setupCommands(cli: CAC): Promise<void> {
         await initI18n(options.lang)
       }
       await init(options)
+    })
+
+  // Update command
+  cli
+    .command('update', i18n.t('cli:help.commandDescriptions.update'))
+    .action(async () => {
+      await update()
+    })
+
+  cli
+    .command('uninstall', i18n.t('cli:help.commandDescriptions.uninstall'))
+    .action(async () => {
+      await runUninstall()
     })
 
   // Diagnose MCP command

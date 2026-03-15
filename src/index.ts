@@ -18,6 +18,7 @@ export {
   installWorkflows,
   installAceTool,
   installAceToolRs,
+  uninstallCcx,
   uninstallWorkflows,
   uninstallAceTool,
 } from './utils/installer'

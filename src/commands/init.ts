@@ -9,6 +9,7 @@ import { i18n, initI18n } from '../i18n'
 import { createDefaultConfig, ensureCcxDir, getCcxDir, readCcxConfig, writeCcxConfig } from '../utils/config'
 import { getAllCommandIds, installAceTool, installAceToolRs, installContextWeaver, installFastContext, installMcpServer, installWorkflows, syncMcpToCodex, syncMcpToGemini, writeFastContextPrompt } from '../utils/installer'
 import { isWindows } from '../utils/platform'
+import { readSettingsJson, writeSettingsJson } from '../utils/settings'
 import { migrateToV1_4_0, needsMigration } from '../utils/migration'
 
 /**
@@ -45,7 +46,7 @@ async function checkWezTermAvailable(): Promise<boolean> {
 async function installHook(settingsPath: string): Promise<'hook' | 'permission'> {
   let settings: Record<string, any> = {}
   if (await fs.pathExists(settingsPath)) {
-    settings = await fs.readJSON(settingsPath)
+    settings = await readSettingsJson(settingsPath)
   }
 
   // ── Windows: permissions.allow approach ──
@@ -756,7 +757,7 @@ export async function init(options: InitOptions = {}): Promise<void> {
     if (apiUrl && apiKey) {
       let settings: Record<string, any> = {}
       if (await fs.pathExists(settingsPath)) {
-        settings = await fs.readJSON(settingsPath)
+        settings = await readSettingsJson(settingsPath)
       }
       if (!settings.env)
         settings.env = {}

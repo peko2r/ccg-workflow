@@ -1,6 +1,8 @@
 import type { AceToolConfig, FastContextConfig } from '../types'
 import type { McpServerConfig } from './mcp'
 import { homedir } from 'node:os'
+import { exec } from 'node:child_process'
+import { promisify } from 'node:util'
 import fs from 'fs-extra'
 import { join } from 'pathe'
 import { parse as parseToml, stringify as stringifyToml } from 'smol-toml'
@@ -12,6 +14,8 @@ import { isWindows } from './platform'
 // ═══════════════════════════════════════════════════════
 
 type McpInstallResult = { success: boolean, message: string, configPath?: string }
+type SyncResult = { success: boolean, message: string, synced: string[], removed: string[] }
+const execAsync = promisify(exec)
 
 /**
  * Common pipeline for installing an MCP server into ~/.claude.json:
@@ -270,6 +274,7 @@ export async function uninstallMcpServer(id: string): Promise<{ success: boolean
   try {
     const existingConfig = await readClaudeCodeConfig()
     if (existingConfig?.mcpServers?.[id]) {
+      await backupClaudeCodeConfig()
       delete existingConfig.mcpServers[id]
       await writeClaudeCodeConfig(existingConfig)
     }
@@ -280,13 +285,57 @@ export async function uninstallMcpServer(id: string): Promise<{ success: boolean
   }
 }
 
+export async function uninstallAllCcxMcpServers(): Promise<{ success: boolean, removedClaude: string[], removedCodex: string[], removedGemini: string[], message: string }> {
+  try {
+    const existingConfig = await readClaudeCodeConfig()
+    const removedClaude: string[] = []
+
+    if (existingConfig?.mcpServers) {
+      for (const id of CCX_MCP_IDS) {
+        if (existingConfig.mcpServers[id]) {
+          delete existingConfig.mcpServers[id]
+          removedClaude.push(id)
+        }
+      }
+
+      if (removedClaude.length > 0) {
+        await backupClaudeCodeConfig()
+        await writeClaudeCodeConfig(existingConfig)
+      }
+    }
+
+    const [codex, gemini] = await Promise.all([syncMcpToCodex(), syncMcpToGemini()])
+
+    return {
+      success: codex.success && gemini.success,
+      removedClaude,
+      removedCodex: codex.removed,
+      removedGemini: gemini.removed,
+      message: [
+        removedClaude.length > 0 ? `Claude removed: ${removedClaude.join(', ')}` : 'Claude removed: none',
+        codex.message,
+        gemini.message,
+      ].join(' | '),
+    }
+  }
+  catch (error) {
+    return {
+      success: false,
+      removedClaude: [],
+      removedCodex: [],
+      removedGemini: [],
+      message: `Failed to uninstall CCX MCP servers: ${error}`,
+    }
+  }
+}
+
 // ═══════════════════════════════════════════════════════
 // MCP Sync — Mirror CCG-relevant MCP servers
 // to Codex (~/.codex/config.toml) and Gemini (~/.gemini/settings.json)
 // ═══════════════════════════════════════════════════════
 
 /** MCP server IDs that CCG manages and should sync to Codex/Gemini */
-const CCX_MCP_IDS = new Set([
+export const CCX_MCP_IDS = new Set([
   'grok-search',
   'context7',
   'ace-tool',
@@ -295,7 +344,15 @@ const CCX_MCP_IDS = new Set([
   'fast-context',
 ])
 
-type SyncResult = { success: boolean, message: string, synced: string[], removed: string[] }
+export async function checkIfGlobalInstall(): Promise<boolean> {
+  try {
+    const { stdout } = await execAsync('npm list -g claude-code-ex --depth=0', { timeout: 5000 })
+    return stdout.includes('claude-code-ex@')
+  }
+  catch {
+    return false
+  }
+}
 
 /**
  * Read Claude's MCP config and filter to CCG-managed servers.

@@ -1,4 +1,4 @@
-# Claude Code Ex (CCX) 多模型协作
+# Claude Code Ex (CCX)
 
 <div align="center">
 
@@ -11,43 +11,51 @@
 
 </div>
 
-Claude Code 编排 Codex + Gemini 的多模型协作开发系统。前端任务路由至 Gemini，后端任务路由至 Codex，Claude 负责编排决策和代码审核。
+CCX 是运行在 Claude Code 之上的工作流层：前端分析交给 Gemini，后端分析交给 Codex，Claude 负责编排、审阅与最终交付。
 
-## 为什么选择 CCG？
+## 为什么用 CCX
 
-- **零配置模型路由** — 前端任务自动走 Gemini，后端任务自动走 Codex，无需手动切换。
-- **安全设计** — 外部模型无写入权限，仅返回 Patch，由 Claude 审核后应用。
-- **27 个斜杠命令** — 从规划到执行、Git 工作流到代码审查，通过 `/ccx:*` 一站式访问。
-- **规范驱动开发** — 集成 [OPSX](https://github.com/fission-ai/opsx)，将模糊需求变成可验证约束，让 AI 没法自由发挥。
+- **自动模型路由**：前端走 Gemini，后端走 Codex。
+- **代码主权透明**：默认始终由 Claude 保持写入/审阅闭环。
+- **规范驱动执行**：OPSX 把模糊需求转成约束和可执行计划。
+- **支持并行交付**：Agent Teams 可将大任务拆成隔离的并发流程。
+- **工程能力内置**：斜杠命令、CLI、MCP、诊断、bridge helper、`maild` 一起交付。
+
+## 核心能力
+
+- **27 个 `/ccx:*` 斜杠命令**：覆盖工作流、分析、Git、OPSX、Agent Teams、项目管理
+- **`ccx` CLI**：负责安装、更新、彻底卸载、MCP 配置、诊断、bridge/helper 命令与 `maild`
+- **4 个内置 agent**：定义在 `templates/commands/agents/*.md`
+- **MCP 自动镜像同步**：同步到 `~/.codex/config.toml` 和 `~/.gemini/settings.json`
+- **`maild` 邮件工作流**：仅支持 `CCX_MAIL_CONFIG_DIR`
 
 ## 架构
 
-```
-Claude Code (编排)
+```text
+Claude Code（编排者）
        │
    ┌───┴───┐
    ↓       ↓
 Codex   Gemini
-(后端)   (前端)
+（后端） （前端）
    │       │
    └───┬───┘
        ↓
-  Unified Patch
+审阅后的 Patch / 执行结果
+       ↓
+   Claude 最终交付
 ```
-
-外部模型无写入权限，仅返回 Patch，由 Claude 审核后应用。
 
 ## 快速开始
 
 ### 前置条件
 
-| 依赖 | 必需 | 说明 |
-|------|------|------|
-| **Node.js 20+** | 是 | `ora@9.x` 要求 Node >= 20，Node 18 会报 `SyntaxError` |
-| **Claude Code CLI** | 是 | [安装方法](#安装-claude-code) |
-| **jq** | 是 | 用于自动授权 Hook（[安装方法](#安装-jq)） |
-| **Codex CLI** | 否 | 启用后端路由 |
-| **Gemini CLI** | 否 | 启用前端路由 |
+- **Node.js 20+**
+- **Claude Code CLI**
+- **jq**，用于常见 Hook / 自动化场景
+- **Codex CLI**，用于后端路由与 Codex 主导工作流
+- **Gemini CLI**，用于前端路由
+- **Python 3**，仅在使用 `maild` 时需要
 
 ### 安装
 
@@ -55,391 +63,91 @@ Codex   Gemini
 npx claude-code-ex
 ```
 
-首次运行会提示选择语言（简体中文 / English），选择后自动保存，后续无需再选。
-
-### 安装 jq
+### 首次使用建议
 
 ```bash
-# macOS
-brew install jq
-
-# Linux (Debian/Ubuntu)
-sudo apt install jq
-
-# Linux (RHEL/CentOS)
-sudo yum install jq
-
-# Windows
-choco install jq   # 或: scoop install jq
+npx claude-code-ex
+npx claude-code-ex init
+npx claude-code-ex config mcp
 ```
 
-### 安装 Claude Code
-
-```bash
-npx claude-code-ex menu  # 选择「安装 Claude Code」
-```
-
-支持：npm、homebrew、curl、powershell、cmd。
-
-### Mail Daemon（`maild`）
-
-CCX 内置邮箱守护进程，可通过邮件触发 ASK 工作流。
-
-### 运行前提
-
-- 系统可用 Python 3
-- Windows 走 `python`
-- macOS / Linux 走 `python3`
-
-### 入口
-
-```bash
-maild status
-ccx maild status
-```
-
-两种写法等价。
-
-### 配置文件
+然后在 Claude Code 中试一个斜杠命令：
 
 ```text
-# 仓库内模板
-config/mail/config.template.json
-
-# 用户实际配置
-~/.claude/.ccx/mail/config.json
+/ccx:frontend 给登录页加一个暗色模式切换
 ```
 
-如需改配置目录，可设置环境变量：`CCX_MAIL_CONFIG_DIR`。
+## 如何选择工作流
 
-### 初始化
+- **简单聚焦任务** → `/ccx:frontend` 或 `/ccx:backend`
+- **想先审计划再动手** → `/ccx:plan` → `/ccx:execute`
+- **任务边界清晰且想节省 Claude token** → `/ccx:plan` → `/ccx:codex-exec`
+- **需要严格约束与可审计过程** → `/ccx:spec-*`
+- **任务可拆为 3 个以上隔离模块** → `/ccx:team-*`
+- **想走完整端到端流程** → `/ccx:workflow`
+
+## 命令总览
+
+### 斜杠命令分组
+
+- **开发工作流**：`workflow`、`plan`、`execute`、`codex-exec`、`feat`、`frontend`、`backend`
+- **分析与质量**：`analyze`、`debug`、`optimize`、`test`、`review`、`enhance`
+- **OPSX**：`spec-init`、`spec-research`、`spec-plan`、`spec-impl`、`spec-review`
+- **Agent Teams**：`team-research`、`team-plan`、`team-exec`、`team-review`
+- **Git 工具**：`commit`、`rollback`、`clean-branches`、`worktree`
+- **项目管理**：`init`、`context`
+
+### CLI 分组
+
+- **核心 CLI**：`ccx`、`ccx init`、`ccx update`、`ccx uninstall`、`ccx config mcp`、`ccx diagnose-mcp`、`ccx fix-mcp`、`ccx maild ...`
+- **Bridge / helper CLI**：`ccx bridge`、`ccx ask`、`ccx ping`、`ccx pend`、`ccx mounted`、`ccx cleanup`
+
+## 卸载
 
 ```bash
-maild setup
+npx claude-code-ex uninstall
 ```
 
-按提示填写：
+该命令会删除 CCX 在 Claude/Codex/Gemini 生态中明确受管的文件与配置，包括受管 MCP 条目、MCP 镜像、fast-context 注入内容、输出风格文件与 ContextWeaver 本地目录。如通过 npm 全局安装，还需在新终端中执行 `npm uninstall -g claude-code-ex` 完成包级卸载。
 
-- 服务邮箱（`service_account`）
-- 通知目标邮箱（`target_email`）
-- 默认 provider（如 `claude`、`codex`、`gemini`）
-- 默认工作目录（可选）
+## 文档入口
 
-### 常用命令
+完整参考文档位于 `docs/`：
 
-```bash
-maild setup              # 交互式初始化
-maild config             # 查看当前配置
-maild test               # 测试 IMAP / SMTP
-maild start              # 后台启动
-maild start -f           # 前台启动
-maild status             # 查看状态
-maild stop               # 停止守护进程
-```
+- [快速开始](./docs/guide/getting-started.md)
+- [命令参考](./docs/guide/commands.md)
+- [工作流指南](./docs/guide/workflows.md)
+- [MCP 参考](./docs/guide/mcp.md)
+- [配置、CLI、目录结构、迁移与排障](./docs/guide/configuration.md)
 
-### 推荐流程
+## 版本状态
 
-```bash
-maild setup
-maild test
-maild start
-maild status
-```
+当前包版本：**v1.7.85**
 
-### 它能做什么
+近期影响文档口径的关键变更：
 
-- 轮询 IMAP 收件箱
-- 服务端支持时优先用 IMAP IDLE
-- 通过 SMTP 发送回复
-- 将邮件内容路由到配置好的 provider
-- 未显式指定时回退到 `default_provider` 和 `default_work_dir`
-
-### 邮件路由
-
-在邮件正文里可直接写 provider 前缀：
-
-```text
-CLAUDE: fix the bug
-CODEX: analyze this code
-```
-
-未写前缀时，使用配置中的 `default_provider`。
-
-### 测试建议
-
-1. 先用专门测试邮箱，不要直接连生产邮箱
-2. 先确认邮箱服务商已开启 IMAP / SMTP
-3. 优先使用应用专用密码 / 授权码
-4. 只有 `maild test` 通过后，再做真实收发联调
-
-## 命令
-
-### 开发工作流
-
-| 命令 | 说明 | 模型 |
-|------|------|------|
-| `/ccx:workflow` | 6 阶段完整工作流 | Codex + Gemini |
-| `/ccx:plan` | 多模型协作规划 (Phase 1-2) | Codex + Gemini |
-| `/ccx:execute` | 多模型协作执行 (Phase 3-5) | Codex + Gemini + Claude |
-| `/ccx:codex-exec` | Codex 全权执行（计划 → 代码 → 审核） | Codex + 多模型审核 |
-| `/ccx:feat` | 智能功能开发 | 自动路由 |
-| `/ccx:frontend` | 前端任务（快速模式） | Gemini |
-| `/ccx:backend` | 后端任务（快速模式） | Codex |
-
-### 分析与质量
-
-| 命令 | 说明 | 模型 |
-|------|------|------|
-| `/ccx:analyze` | 技术分析 | Codex + Gemini |
-| `/ccx:debug` | 问题诊断 + 修复 | Codex + Gemini |
-| `/ccx:optimize` | 性能优化 | Codex + Gemini |
-| `/ccx:test` | 测试生成 | 自动路由 |
-| `/ccx:review` | 代码审查（自动 git diff） | Codex + Gemini |
-| `/ccx:enhance` | Prompt 增强 | 内置 |
-
-### OPSX 规范驱动
-
-| 命令 | 说明 |
-|------|------|
-| `/ccx:spec-init` | 初始化 OPSX 环境 |
-| `/ccx:spec-research` | 需求 → 约束集 |
-| `/ccx:spec-plan` | 约束 → 零决策计划 |
-| `/ccx:spec-impl` | 按计划执行 + 归档 |
-| `/ccx:spec-review` | 双模型交叉审查 |
-
-### Agent Teams（v1.7.60+）
-
-| 命令 | 说明 |
-|------|------|
-| `/ccx:team-research` | 需求 → 约束集（并行探索） |
-| `/ccx:team-plan` | 约束 → 并行实施计划 |
-| `/ccx:team-exec` | spawn Builder teammates 并行写代码 |
-| `/ccx:team-review` | 双模型交叉审查 |
-
-> **前置条件**：需在 `settings.json` 中启用：`CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS=1`
-
-### Git 工具
-
-| 命令 | 说明 |
-|------|------|
-| `/ccx:commit` | 智能提交（conventional commit 格式） |
-| `/ccx:rollback` | 交互式回滚 |
-| `/ccx:clean-branches` | 清理已合并分支 |
-| `/ccx:worktree` | Worktree 管理 |
-
-### 项目管理
-
-| 命令 | 说明 |
-|------|------|
-| `/ccx:init` | 初始化项目 CLAUDE.md |
-| `/ccx:context` | 项目上下文管理（.context 初始化/日志/压缩/历史） |
-
-## 工作流指南
-
-### 规划与执行分离
-
-```bash
-# 1. 生成实施计划
-/ccx:plan 实现用户认证功能
-
-# 2. 审查计划（可修改）
-# 计划保存至 .claude/plan/user-auth.md
-
-# 3a. 执行计划（Claude 重构）— 精细控制
-/ccx:execute .claude/plan/user-auth.md
-
-# 3b. 执行计划（Codex 全权）— 高效执行，Claude token 极低
-/ccx:codex-exec .claude/plan/user-auth.md
-```
-
-### OPSX 规范驱动工作流
-
-集成 [OPSX 架构](https://github.com/fission-ai/opsx)，把需求变成约束，让 AI 没法自由发挥：
-
-```bash
-/ccx:spec-init                       # 初始化 OPSX 环境
-/ccx:spec-research 实现用户认证        # 研究需求 → 输出约束集
-/ccx:spec-plan                       # 并行分析 → 零决策计划
-/ccx:spec-impl                       # 按计划执行
-/ccx:spec-review                     # 独立审查（随时可用）
-```
-
-> **提示**：`/ccx:spec-*` 命令内部调用 `/opsx:*`。每阶段之间可 `/clear`，状态存在 `openspec/` 目录，不怕上下文爆。
-
-### Agent Teams 并行工作流
-
-利用 Claude Code Agent Teams 实验特性，spawn 多个 Builder teammates 并行写代码：
-
-```bash
-/ccx:team-research 实现实时协作看板 API  # 1. 需求 → 约束集
-# /clear
-/ccx:team-plan kanban-api               # 2. 规划 → 并行计划
-# /clear
-/ccx:team-exec                          # 3. Builder 并行写代码
-# /clear
-/ccx:team-review                        # 4. 双模型交叉审查
-```
-
-> **vs 传统工作流**：Team 系列每步 `/clear` 隔离上下文，通过文件传递状态。适合可拆分为 3+ 独立模块的任务。
-
-## 配置
-
-### 目录结构
-
-```
-~/.claude/
-├── commands/ccx/       # 27 个斜杠命令
-├── agents/ccx/         # 子智能体
-├── skills/ccx/         # 质量关卡 + 多 Agent 协同
-├── bin/codeagent-wrapper
-└── .ccx/
-    ├── config.toml     # CCX 配置
-    └── prompts/
-        ├── codex/      # 6 个 Codex 专家提示词
-        └── gemini/     # 7 个 Gemini 专家提示词
-```
-
-在 Windows 安装中，`~/.claude/bin` 还会包含受管理的辅助命令 `ask`、`pend`、`maild`；`~/.claude/.ccx/bridge/` 用于存放共享 launcher 资源。
-
-### 环境变量
-
-在 `~/.claude/settings.json` 的 `"env"` 中配置：
-
-| 变量 | 说明 | 默认值 | 何时修改 |
-|------|------|--------|----------|
-| `CODEAGENT_POST_MESSAGE_DELAY` | Codex 完成后等待时间（秒） | `5` | Codex 进程挂起时设为 `1` |
-| `CODEX_TIMEOUT` | wrapper 执行超时（秒） | `7200` | 超长任务时增大 |
-| `BASH_DEFAULT_TIMEOUT_MS` | Claude Code Bash 超时（毫秒） | `120000` | 命令超时时增大 |
-| `BASH_MAX_TIMEOUT_MS` | Claude Code Bash 最大超时（毫秒） | `600000` | 长时间构建时增大 |
-
-<details>
-<summary>settings.json 示例</summary>
-
-```json
-{
-  "env": {
-    "CODEAGENT_POST_MESSAGE_DELAY": "1",
-    "CODEX_TIMEOUT": "7200",
-    "BASH_DEFAULT_TIMEOUT_MS": "600000",
-    "BASH_MAX_TIMEOUT_MS": "3600000"
-  }
-}
-```
-
-</details>
-
-### MCP 配置
-
-```bash
-npx claude-code-ex menu  # 选择「配置 MCP」
-```
-
-**代码检索**（多选一）：
-- **ace-tool**（推荐）— 代码检索 `search_context` 可用。[官方](https://augmentcode.com/) | [第三方中转](https://acemcp.heroman.wtf/)
-- **fast-context**（推荐）— Windsurf Fast Context，AI 驱动搜索，无需全量索引。需 Windsurf 账号
-- **ContextWeaver**（备选）— 本地混合搜索，需要硅基流动 API Key（免费）
-
-**辅助工具**（可选）：
-- **Context7** — 获取最新库文档（自动安装）
-- **Playwright** — 浏览器自动化 / 测试
-- **DeepWiki** — 知识库查询
-- **Exa** — 搜索引擎（需 API Key）
-
-### 自动授权 Hook
-
-CCG 安装时自动写入 Hook，自动授权 `codeagent-wrapper` 命令（需 [jq](#安装-jq)）。
-
-<details>
-<summary>手动配置（v1.7.71 之前的版本）</summary>
-
-在 `~/.claude/settings.json` 中添加：
-
-```json
-{
-  "hooks": {
-    "PreToolUse": [
-      {
-        "matcher": "Bash",
-        "hooks": [
-          {
-            "type": "command",
-            "command": "jq -r '.tool_input.command' 2>/dev/null | grep -q 'codeagent-wrapper' && echo '{\"hookSpecificOutput\": {\"hookEventName\": \"PreToolUse\", \"permissionDecision\": \"allow\", \"permissionDecisionReason\": \"codeagent-wrapper auto-approved\"}}' || true",
-            "timeout": 1
-          }
-        ]
-      }
-    ]
-  }
-}
-```
-
-</details>
-
-## 实用工具
-
-```bash
-npx claude-code-ex menu  # 选择「实用工具」
-```
-
-- **ccusage** — Claude Code 用量分析
-- **CCometixLine** — 状态栏工具（Git + 用量跟踪）
-
-## 更新 / 卸载
-
-```bash
-# 更新
-npx claude-code-ex@latest            # npx 用户
-npm install -g claude-code-ex@latest  # npm 全局用户
-
-# 卸载
-npx claude-code-ex  # 选择「卸载工作流」
-npm uninstall -g claude-code-ex  # npm 全局用户需额外执行
-```
-
-## 常见问题
-
-### Codex CLI 0.80.0 进程不退出
-
-`--json` 模式下 Codex 完成输出后进程不会自动退出。
-
-**解决**：将 `CODEAGENT_POST_MESSAGE_DELAY` 设为 `1`，详见[环境变量](#环境变量)。
+- 品牌统一为 **CCX**
+- `maild` 并入主仓库
+- `fast-context` 增加并同步到 Codex / Gemini
+- `/ccx:context` 加入斜杠命令集合
+- `maild` 现仅支持 **`CCX_MAIL_CONFIG_DIR`**
 
 ## 参与贡献
 
-欢迎贡献！请阅读 [CONTRIBUTING.md](./CONTRIBUTING.md) 了解开发指南。
-
-想找一个入手点？查看标记为 [`good first issue`](https://github.com/claude-code-ex/claude-code-ex/labels/good%20first%20issue) 的 Issue。
-
-## 贡献者
-
-<!-- readme: contributors,claude/-,bots/- -start -->
-<table>
-<tr>
-</tr>
-</table>
-<!-- readme: contributors,claude/-,bots/- -end -->
-
-## 致谢
-
-- [cexll/myclaude](https://github.com/cexll/myclaude) — codeagent-wrapper
-- [UfoMiao/zcf](https://github.com/UfoMiao/zcf) — Git 工具
-- [GudaStudio/skills](https://github.com/GuDaStudio/skills) — 路由设计
-- [ace-tool](https://linux.do/t/topic/1344562) — MCP 工具
-
-## Star History
-
-[![Star History Chart](https://api.star-history.com/svg?repos=peko2r/claude-code-ex&type=timeline&legend=top-left)](https://www.star-history.com/#peko2r/claude-code-ex&type=timeline&legend=top-left)
+- [贡献指南](./CONTRIBUTING.md)
+- [GitHub Issues](https://github.com/fengshao1227/claude-code-ex/issues)
+- [GitHub Discussions](https://github.com/fengshao1227/claude-code-ex/discussions)
 
 ## 联系方式
 
-- **邮箱**: [wfhsyswd@gmail.com](mailto:wfhsyswd@gmail.com) — 赞助、合作洽谈、开发交流
-- **Issues**: [GitHub Issues](https://github.com/peko2r/claude-code-ex/issues) — Bug 反馈与功能建议
-- **讨论区**: [GitHub Discussions](https://github.com/peko2r/claude-code-ex/discussions) — 问题咨询与社区交流
+- **邮箱**: [fengshao1227@gmail.com](mailto:fengshao1227@gmail.com)
+- **Issues**: [GitHub Issues](https://github.com/fengshao1227/claude-code-ex/issues)
+- **Discussions**: [GitHub Discussions](https://github.com/fengshao1227/claude-code-ex/discussions)
 
 ## License
 
-MIT
+[MIT](./LICENSE)
 
 ---
 
-v1.7.85 | [Issues](https://github.com/peko2r/claude-code-ex/issues) | [参与贡献](./CONTRIBUTING.md)
+v1.7.85 | [Issues](https://github.com/fengshao1227/claude-code-ex/issues) | [参与贡献](./CONTRIBUTING.md)

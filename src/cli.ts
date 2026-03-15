@@ -3,6 +3,23 @@ import cac from 'cac'
 import { setupCommands } from './cli-setup'
 import { looksLikeBridgeInvocation } from './utils/bridge'
 
+const ROOT_COMMANDS = new Set([
+  'ask',
+  'bridge',
+  'cleanup',
+  'config',
+  'diagnose-mcp',
+  'fix-mcp',
+  'i',
+  'init',
+  'maild',
+  'mounted',
+  'pend',
+  'ping',
+  'uninstall',
+  'update',
+])
+
 function rewriteBridgeArgv(argv: string[]): string[] {
   const cliArgs = argv.slice(2)
   if (!looksLikeBridgeInvocation(cliArgs)) {

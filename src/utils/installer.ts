@@ -1,6 +1,9 @@
 import type { InstallResult } from '../types'
 import fs from 'fs-extra'
 import { basename, join } from 'pathe'
+import { cleanupCcxManagedSettings, readSettingsJson, writeSettingsJson } from './settings'
+import { checkIfGlobalInstall, uninstallAllCcxMcpServers } from './installer-mcp'
+import { removeFastContextPrompt } from './installer-prompt'
 import { getWorkflowById } from './installer-data'
 import { PACKAGE_ROOT, injectConfigVariables, replaceHomePathsInTemplate } from './installer-template'
 
@@ -21,6 +24,7 @@ export type { WorkflowPreset } from './installer-data'
 export { injectConfigVariables } from './installer-template'
 
 export {
+  checkIfGlobalInstall,
   installAceTool,
   installAceToolRs,
   installContextWeaver,
@@ -29,6 +33,7 @@ export {
   syncMcpToCodex,
   syncMcpToGemini,
   uninstallAceTool,
+  uninstallAllCcxMcpServers,
   uninstallContextWeaver,
   uninstallFastContext,
   uninstallMcpServer,
@@ -77,6 +82,20 @@ const BRIDGE_COMPAT_SHIMS = [
 ] as const
 const BRIDGE_SEMANTIC_COMMANDS = BRIDGE_COMPAT_SHIMS.map(({ name }) => name)
 const LEGACY_BRIDGE_COMPAT_SHIMS = ['ccb', 'ccb-ping', 'ccb-mounted', 'ccb-cleanup'] as const
+const CCX_MANAGED_RULE_FILES = [
+  'ccg-skills.md',
+  'ccg-grok-search.md',
+  'ccx-skills.md',
+  'ccx-grok-search.md',
+  'ccg-fast-context.md',
+] as const
+const CCX_MANAGED_OUTPUT_STYLES = [
+  'engineer-professional',
+  'nekomata-engineer',
+  'laowang-engineer',
+  'ojousama-engineer',
+  'abyss-cultivator',
+] as const
 
 /**
  * Download codeagent-wrapper binary from GitHub Release.
@@ -661,15 +680,22 @@ export interface UninstallResult {
   removedAgents: string[]
   removedSkills: string[]
   removedBridgeShims: string[]
-  removedRules: boolean
+  removedRules: string[]
   removedBin: boolean
+  removedMcpServers: string[]
+  removedCodexMirror: string[]
+  removedGeminiMirror: string[]
+  removedSettingsEntries: string[]
+  removedOutputStyles: string[]
+  removedContextWeaver: boolean
+  removedGlobalPackageHint: boolean
   errors: string[]
 }
 
 /**
- * Uninstall workflows by removing their command files
+ * Uninstall CCX managed files and mirrored configuration.
  */
-export async function uninstallWorkflows(installDir: string): Promise<UninstallResult> {
+export async function uninstallCcx(installDir: string): Promise<UninstallResult> {
   const result: UninstallResult = {
     success: true,
     removedCommands: [],
@@ -677,8 +703,15 @@ export async function uninstallWorkflows(installDir: string): Promise<UninstallR
     removedAgents: [],
     removedSkills: [],
     removedBridgeShims: [],
-    removedRules: false,
+    removedRules: [],
     removedBin: false,
+    removedMcpServers: [],
+    removedCodexMirror: [],
+    removedGeminiMirror: [],
+    removedSettingsEntries: [],
+    removedOutputStyles: [],
+    removedContextWeaver: false,
+    removedGlobalPackageHint: false,
     errors: [],
   }
 
@@ -689,8 +722,10 @@ export async function uninstallWorkflows(installDir: string): Promise<UninstallR
   const binDir = join(installDir, 'bin')
   const ccxConfigDir = join(installDir, '.ccx')
   const bridgeResourceDir = getBridgeResourceDir(installDir)
+  const settingsPath = join(installDir, 'settings.json')
+  const outputStylesDir = join(installDir, 'output-styles')
+  const contextWeaverDir = join(process.env.HOME || process.env.USERPROFILE || '', '.contextweaver')
 
-  // Remove CCX commands directory
   try {
     result.removedCommands = await removeDirCollectMdNames(commandsDir)
   }
@@ -699,7 +734,6 @@ export async function uninstallWorkflows(installDir: string): Promise<UninstallR
     result.success = false
   }
 
-  // Remove CCG agents directory
   try {
     result.removedAgents = await removeDirCollectMdNames(agentsDir)
   }
@@ -708,7 +742,6 @@ export async function uninstallWorkflows(installDir: string): Promise<UninstallR
     result.success = false
   }
 
-  // Remove CCG skills directory only (skills/ccx/) — preserves user's own skills
   if (await fs.pathExists(skillsDir)) {
     try {
       result.removedSkills = await collectSkillNames(skillsDir)
@@ -720,23 +753,22 @@ export async function uninstallWorkflows(installDir: string): Promise<UninstallR
     }
   }
 
-  // Remove CCG rules files
   if (await fs.pathExists(rulesDir)) {
     try {
-      for (const ruleFile of ['ccg-skills.md', 'ccg-grok-search.md', 'ccx-skills.md', 'ccx-grok-search.md']) {
+      for (const ruleFile of CCX_MANAGED_RULE_FILES) {
         const rulePath = join(rulesDir, ruleFile)
         if (await fs.pathExists(rulePath)) {
           await fs.remove(rulePath)
-          result.removedRules = true
+          result.removedRules.push(ruleFile)
         }
       }
     }
     catch (error) {
       result.errors.push(`Failed to remove rules: ${error}`)
+      result.success = false
     }
   }
 
-  // Remove semantic helper commands from bin/
   if (await fs.pathExists(binDir)) {
     try {
       for (const { name } of BRIDGE_COMPAT_SHIMS) {
@@ -781,7 +813,6 @@ export async function uninstallWorkflows(installDir: string): Promise<UninstallR
     }
   }
 
-  // Remove codeagent-wrapper binary
   if (await fs.pathExists(binDir)) {
     try {
       const wrapperName = process.platform === 'win32' ? 'codeagent-wrapper.exe' : 'codeagent-wrapper'
@@ -797,16 +828,93 @@ export async function uninstallWorkflows(installDir: string): Promise<UninstallR
     }
   }
 
-  // Remove .ccg config directory
   if (await fs.pathExists(ccxConfigDir)) {
     try {
       await fs.remove(ccxConfigDir)
       result.removedPrompts.push('ALL_PROMPTS_AND_CONFIGS')
     }
     catch (error) {
-      result.errors.push(`Failed to remove .ccg directory: ${error}`)
+      result.errors.push(`Failed to remove .ccx directory: ${error}`)
+      result.success = false
     }
   }
 
+  try {
+    await removeFastContextPrompt()
+  }
+  catch (error) {
+    result.errors.push(`Failed to remove fast-context prompt injection: ${error}`)
+    result.success = false
+  }
+
+  try {
+    const mcpResult = await uninstallAllCcxMcpServers()
+    result.removedMcpServers = mcpResult.removedClaude
+    result.removedCodexMirror = mcpResult.removedCodex
+    result.removedGeminiMirror = mcpResult.removedGemini
+    if (!mcpResult.success) {
+      result.errors.push(mcpResult.message)
+      result.success = false
+    }
+  }
+  catch (error) {
+    result.errors.push(`Failed to remove MCP servers: ${error}`)
+    result.success = false
+  }
+
+  if (await fs.pathExists(settingsPath)) {
+    try {
+      const settings = await readSettingsJson(settingsPath)
+      const cleanup = cleanupCcxManagedSettings(settings, { removeOutputStyle: true })
+      result.removedSettingsEntries.push(...cleanup.removedPermissions)
+      result.removedSettingsEntries.push(...cleanup.removedHookCommands)
+      if (cleanup.removedOutputStyleSetting) {
+        result.removedSettingsEntries.push('outputStyle')
+      }
+      if (cleanup.changed) {
+        await writeSettingsJson(settingsPath, settings)
+      }
+    }
+    catch (error) {
+      result.errors.push(`Failed to clean settings.json: ${error}`)
+      result.success = false
+    }
+  }
+
+  if (await fs.pathExists(outputStylesDir)) {
+    try {
+      for (const style of CCX_MANAGED_OUTPUT_STYLES) {
+        const stylePath = join(outputStylesDir, `${style}.md`)
+        if (await fs.pathExists(stylePath)) {
+          await fs.remove(stylePath)
+          result.removedOutputStyles.push(`${style}.md`)
+        }
+      }
+    }
+    catch (error) {
+      result.errors.push(`Failed to remove output styles: ${error}`)
+      result.success = false
+    }
+  }
+
+  if (contextWeaverDir && await fs.pathExists(contextWeaverDir)) {
+    try {
+      await fs.remove(contextWeaverDir)
+      result.removedContextWeaver = true
+    }
+    catch (error) {
+      result.errors.push(`Failed to remove ContextWeaver directory: ${error}`)
+      result.success = false
+    }
+  }
+
+  result.removedGlobalPackageHint = await checkIfGlobalInstall()
   return result
+}
+
+/**
+ * Backward-compatible wrapper. Prefer uninstallCcx for full uninstall semantics.
+ */
+export async function uninstallWorkflows(installDir: string): Promise<UninstallResult> {
+  return uninstallCcx(installDir)
 }

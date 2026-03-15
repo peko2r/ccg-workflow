@@ -10,7 +10,8 @@ import { parse as parseTOML } from 'smol-toml'
 import { version } from '../../package.json'
 import { configMcp } from './config-mcp'
 import { i18n } from '../i18n'
-import { uninstallWorkflows } from '../utils/installer'
+import { checkIfGlobalInstall, uninstallCcx } from '../utils/installer'
+import { readSettingsJson, writeSettingsJson } from '../utils/settings'
 import { readCcxConfig } from '../utils/config'
 import { init } from './init'
 import { update } from './update'
@@ -319,7 +320,7 @@ async function configApi(): Promise<void> {
   let settings: Record<string, any> = {}
 
   if (await fs.pathExists(settingsPath)) {
-    settings = await fs.readJson(settingsPath)
+    settings = await readSettingsJson(settingsPath)
   }
 
   // Show current config
@@ -417,7 +418,7 @@ async function configOutputStyle(): Promise<void> {
   const settingsPath = join(homedir(), '.claude', 'settings.json')
   let settings: Record<string, any> = {}
   if (await fs.pathExists(settingsPath)) {
-    settings = await fs.readJson(settingsPath)
+    settings = await readSettingsJson(settingsPath)
   }
 
   const currentStyle = settings.outputStyle || 'default'
@@ -580,39 +581,20 @@ async function handleInstallClaude(): Promise<void> {
 // Uninstall
 // ═══════════════════════════════════════════════════════
 
-/**
- * Check if CCG is installed globally via npm
- */
-async function checkIfGlobalInstall(): Promise<boolean> {
-  try {
-    const { stdout } = await execAsync('npm list -g claude-code-ex --depth=0', { timeout: 5000 })
-    return stdout.includes('claude-code-ex@')
-  }
-  catch {
-    return false
-  }
-}
-
-async function uninstall(): Promise<void> {
+export async function uninstall(): Promise<void> {
   console.log()
 
-  // Check if installed globally via npm
   const isGlobalInstall = await checkIfGlobalInstall()
 
   if (isGlobalInstall) {
     console.log(ansis.yellow(`  ⚠️  ${i18n.t('menu:uninstall.globalDetected')}`))
     console.log()
-    console.log(`  ${i18n.t('menu:uninstall.twoSteps')}`)
-    console.log(`    ${ansis.cyan(`1. ${i18n.t('menu:uninstall.step1')}`)} ${ansis.gray(`(${i18n.t('menu:uninstall.step1Hint')})`)}`)
-    console.log(`    ${ansis.cyan(`2. ${i18n.t('menu:uninstall.step2')}`)} ${ansis.gray(`(${i18n.t('menu:uninstall.step2Hint')})`)}`)
-    console.log()
   }
 
-  // Confirm uninstall
   const { confirm } = await inquirer.prompt([{
     type: 'confirm',
     name: 'confirm',
-    message: isGlobalInstall ? i18n.t('menu:uninstall.continuePrompt') : i18n.t('menu:uninstall.confirm'),
+    message: i18n.t('menu:uninstall.confirm'),
     default: false,
   }])
 
@@ -624,9 +606,8 @@ async function uninstall(): Promise<void> {
   console.log()
   console.log(ansis.yellow(`  ${i18n.t('menu:uninstall.uninstalling')}`))
 
-  // Uninstall workflows
   const installDir = join(homedir(), '.claude')
-  const result = await uninstallWorkflows(installDir)
+  const result = await uninstallCcx(installDir)
 
   if (result.success) {
     console.log(ansis.green(`  ✅ ${i18n.t('menu:uninstall.success')}`))
@@ -650,7 +631,25 @@ async function uninstall(): Promise<void> {
     if (result.removedSkills.length > 0) {
       console.log()
       console.log(ansis.cyan(`  ${i18n.t('menu:uninstall.removedSkills')}`))
-      console.log(`    ${ansis.gray('•')} multi-model-collaboration`)
+      for (const skill of result.removedSkills) {
+        console.log(`    ${ansis.gray('•')} ${skill}`)
+      }
+    }
+
+    if (result.removedBridgeShims.length > 0) {
+      console.log()
+      console.log(ansis.cyan(`  ${i18n.t('menu:uninstall.removedBridgeShims')}`))
+      for (const shim of result.removedBridgeShims) {
+        console.log(`    ${ansis.gray('•')} ${shim}`)
+      }
+    }
+
+    if (result.removedRules.length > 0) {
+      console.log()
+      console.log(ansis.cyan(`  ${i18n.t('menu:uninstall.removedRules')}`))
+      for (const rule of result.removedRules) {
+        console.log(`    ${ansis.gray('•')} ${rule}`)
+      }
     }
 
     if (result.removedBin) {
@@ -659,7 +658,52 @@ async function uninstall(): Promise<void> {
       console.log(`    ${ansis.gray('•')} codeagent-wrapper`)
     }
 
-    // If globally installed, show instructions to uninstall npm package
+    if (result.removedMcpServers.length > 0) {
+      console.log()
+      console.log(ansis.cyan(`  ${i18n.t('menu:uninstall.removedMcpServers')}`))
+      for (const id of result.removedMcpServers) {
+        console.log(`    ${ansis.gray('•')} ${id}`)
+      }
+    }
+
+    if (result.removedCodexMirror.length > 0) {
+      console.log()
+      console.log(ansis.cyan(`  ${i18n.t('menu:uninstall.removedCodexMirror')}`))
+      for (const id of result.removedCodexMirror) {
+        console.log(`    ${ansis.gray('•')} ${id}`)
+      }
+    }
+
+    if (result.removedGeminiMirror.length > 0) {
+      console.log()
+      console.log(ansis.cyan(`  ${i18n.t('menu:uninstall.removedGeminiMirror')}`))
+      for (const id of result.removedGeminiMirror) {
+        console.log(`    ${ansis.gray('•')} ${id}`)
+      }
+    }
+
+    if (result.removedSettingsEntries.length > 0) {
+      console.log()
+      console.log(ansis.cyan(`  ${i18n.t('menu:uninstall.removedSettingsEntries')}`))
+      for (const entry of result.removedSettingsEntries) {
+        console.log(`    ${ansis.gray('•')} ${entry}`)
+      }
+    }
+
+    if (result.removedOutputStyles.length > 0) {
+      console.log()
+      console.log(ansis.cyan(`  ${i18n.t('menu:uninstall.removedOutputStyles')}`))
+      for (const style of result.removedOutputStyles) {
+        console.log(`    ${ansis.gray('•')} ${style}`)
+      }
+    }
+
+    if (result.removedContextWeaver) {
+      console.log()
+      console.log(ansis.cyan(`  ${i18n.t('menu:uninstall.removedContextWeaver')}`))
+      console.log(`    ${ansis.gray('•')} ~/.contextweaver/`)
+    }
+
     if (isGlobalInstall) {
       console.log()
       console.log(ansis.yellow.bold(`  🔸 ${i18n.t('menu:uninstall.lastStep')}`))
@@ -766,7 +810,7 @@ async function installCCometixLine(): Promise<void> {
     let settings: Record<string, any> = {}
 
     if (await fs.pathExists(settingsPath)) {
-      settings = await fs.readJson(settingsPath)
+      settings = await readSettingsJson(settingsPath)
     }
 
     settings.statusLine = {
@@ -796,7 +840,7 @@ async function uninstallCCometixLine(): Promise<void> {
   try {
     const settingsPath = join(homedir(), '.claude', 'settings.json')
     if (await fs.pathExists(settingsPath)) {
-      const settings = await fs.readJson(settingsPath)
+      const settings = await readSettingsJson(settingsPath)
       delete settings.statusLine
       await fs.writeJson(settingsPath, settings, { spaces: 2 })
       console.log(ansis.green(`  ✓ ${i18n.t('menu:tools.cclineConfigRemoved')}`))
