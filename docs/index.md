@@ -2,18 +2,18 @@
 layout: home
 
 hero:
-  name: CCG
-  text: 三个 AI 协作，代码你看得见
-  tagline: Codex 分析后端，Gemini 分析前端，Claude 写代码。全程透明，没有黑盒。
+  name: CCX
+  text: 多模型协作，但代码主权仍在你手里
+  tagline: Gemini 负责前端分析，Codex 负责后端分析，Claude 负责编排、审阅与最终交付。
   image:
     src: /logo.svg
-    alt: CCG
+    alt: CCX
   actions:
     - theme: brand
       text: 三分钟上手
       link: /guide/getting-started
     - theme: alt
-      text: 看看有哪些命令
+      text: 完整命令参考
       link: /guide/commands
     - theme: alt
       text: GitHub
@@ -21,42 +21,21 @@ hero:
 
 features:
   - icon: 🔀
-    title: 前端后端自动分流
-    details: 你说"改登录页"，Gemini 分析方案；你说"加个接口"，Codex 分析方案。Claude 拿到分析结果后写代码——你能看到每一行改动。
+    title: 自动模型路由
+    details: 前端任务走 Gemini，后端任务走 Codex，Claude 统一整合结果并交付。
   - icon: 🔒
-    title: 代码透明，没有黑盒
-    details: 默认模式下 Claude 写代码，你看得见过程。也可以用 codex-exec 让 Codex 写代码，最后 Claude + Gemini 多模型审查。怎么选都不是黑盒。
+    title: 默认透明闭环
+    details: 默认由 Claude 保持写入与审阅闭环，不把你的仓库完全交给外部模型。
   - icon: 📐
-    title: 不让 AI 自由发挥
-    details: 集成 OPSX 规范驱动，需求先变成约束条件，AI 只能在框框里干活。
+    title: 规范驱动开发
+    details: 通过 OPSX 先约束、再规划、再执行，减少 AI 自由发挥。
   - icon: 👥
-    title: 多人干活，一起写
-    details: Agent Teams 模式下，多个 Builder 同时写不同模块的代码，完了还有双模型交叉审查。
-  - icon: ⚡
-    title: 一行装完，开箱即用
-    details: npx claude-code-ex，28 个命令直接可用。macOS、Linux、Windows 都行。
+    title: Agent Teams 并行实施
+    details: 大任务可以拆成隔离子任务并行执行，再做双模型交叉审查。
   - icon: 🧩
-    title: MCP 生态打通
-    details: ace-tool、fast-context、Context7 等 MCP 工具一键配置，Codex 和 Gemini 自动同步。
+    title: MCP 生态集成
+    details: 支持 ace-tool、ace-tool-rs、fast-context、ContextWeaver、grok-search、Context7 等工具，并同步到 Codex 与 Gemini。
+  - icon: ✉️
+    title: 邮件 ASK 工作流
+    details: 内置 `maild` 守护进程，支持通过邮件触发工作流。
 ---
-
-<style>
-:root {
-  --vp-home-hero-name-color: transparent;
-  --vp-home-hero-name-background: -webkit-linear-gradient(120deg, #bd34fe 30%, #41d1ff);
-  --vp-home-hero-image-background-image: linear-gradient(-45deg, #bd34fe50 50%, #47caff50 50%);
-  --vp-home-hero-image-filter: blur(44px);
-}
-
-@media (min-width: 640px) {
-  :root {
-    --vp-home-hero-image-filter: blur(56px);
-  }
-}
-
-@media (min-width: 960px) {
-  :root {
-    --vp-home-hero-image-filter: blur(68px);
-  }
-}
-</style>

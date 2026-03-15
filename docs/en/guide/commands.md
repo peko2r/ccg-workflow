@@ -1,118 +1,106 @@
 # Command Reference
 
-28 commands, all prefixed with `/ccx:`. Grouped by purpose.
+This page covers **`/ccx:*` slash commands only**. For CLI commands, bridge/helper commands, and the `maild` entry points, see [Configuration](./configuration.md).
 
-## The workhorses
+The current implementation installs **27 `/ccx:*` commands**.
 
-The ones you'll use most. Frontend tasks go to Gemini, backend tasks to Codex, automatically.
+## Development workflows
 
-| Command | What it does | Who does it |
-|---------|-------------|-------------|
-| `/ccx:workflow` | Full cycle: research → ideate → plan → execute → optimize → review | Codex + Gemini |
-| `/ccx:plan` | Just plan, don't touch code | Codex + Gemini |
-| `/ccx:execute` | Run a plan file, Claude leads | Codex + Gemini + Claude |
-| `/ccx:codex-exec` | Run a plan file, Codex leads, Claude only reviews | Codex |
-| `/ccx:feat` | Figures out whether to plan or just do it | Auto |
-| `/ccx:frontend` | Frontend work | Gemini |
-| `/ccx:backend` | Backend work | Codex |
+| Command | Purpose | Main path |
+|---------|---------|-----------|
+| `/ccx:workflow` | Full 6-phase workflow | Codex + Gemini |
+| `/ccx:plan` | Planning only, no code changes | Codex + Gemini |
+| `/ccx:execute` | Execute from a plan with Claude in control | Codex + Gemini + Claude |
+| `/ccx:codex-exec` | Execute from a plan with Codex in control | Codex + multi-model review |
+| `/ccx:feat` | Smart feature entry point | Auto-routed |
+| `/ccx:frontend` | Frontend task | Gemini |
+| `/ccx:backend` | Backend task | Codex |
 
-```bash
-# Simplest usage
-/ccx:frontend change the card component to grid layout
+Examples:
+
+```text
+/ccx:frontend improve the homepage card layout
 /ccx:backend add pagination to /api/users
-
-# Plan first, execute later
-/ccx:plan implement JWT auth
-# Plan saved to .claude/plan/ — review and edit it
-/ccx:execute .claude/plan/jwt-auth.md
+/ccx:plan implement user authentication
 ```
 
-## The investigators
+## Analysis and quality
 
-Don't write code, just analyze. Two models cross-verify each other.
-
-| Command | What it does |
-|---------|-------------|
+| Command | Purpose |
+|---------|---------|
 | `/ccx:analyze` | Technical analysis |
-| `/ccx:debug` | Diagnose bugs + suggest fixes |
-| `/ccx:optimize` | Find performance bottlenecks |
-| `/ccx:test` | Generate tests |
-| `/ccx:review` | Code review — no args means review latest git diff |
+| `/ccx:debug` | Diagnosis and fix suggestions |
+| `/ccx:optimize` | Performance optimization |
+| `/ccx:test` | Test generation |
+| `/ccx:review` | Code review; with no args it reviews recent git diff |
 | `/ccx:enhance` | Turn vague requests into structured task descriptions |
 
-```bash
-# Review recent changes
-/ccx:review
+Examples:
 
-# Diagnose a specific issue
-/ccx:debug why does the WebSocket connection drop after 30 seconds
+```text
+/ccx:review
+/ccx:debug why does the WebSocket drop after 30 seconds
+/ccx:enhance I want a better settings page UX
 ```
 
-## OPSX spec-driven
+## OPSX spec-driven workflow
 
-Don't want the AI to improvise? This group turns requirements into constraints first, then executes within those constraints.
+| Command | Purpose |
+|---------|---------|
+| `/ccx:spec-init` | Initialize OPSX |
+| `/ccx:spec-research` | Requirements → constraints |
+| `/ccx:spec-plan` | Constraints → zero-decision execution plan |
+| `/ccx:spec-impl` | Execute against the spec |
+| `/ccx:spec-review` | Independent dual-model review |
 
-| Command | What it does |
-|---------|-------------|
-| `/ccx:spec-init` | Set up OPSX environment |
-| `/ccx:spec-research` | Research requirements, output constraints |
-| `/ccx:spec-plan` | Turn constraints into a zero-decision plan |
-| `/ccx:spec-impl` | Execute the plan |
-| `/ccx:spec-review` | Dual-model review (can use anytime) |
+Examples:
 
-```bash
+```text
 /ccx:spec-init
-/ccx:spec-research implement RBAC permission system
+/ccx:spec-research implement RBAC
 /ccx:spec-plan
 /ccx:spec-impl
 ```
 
-::: tip
-State lives in `openspec/`. You can `/clear` between phases without losing anything.
-:::
+## Agent Teams
 
-## Agent Teams (parallel)
+| Command | Purpose |
+|---------|---------|
+| `/ccx:team-research` | Parallel research into requirements and constraints |
+| `/ccx:team-plan` | Produce a parallelizable execution plan |
+| `/ccx:team-exec` | Spawn Builder teammates for concurrent implementation |
+| `/ccx:team-review` | Cross-review concurrent output |
 
-Task splits into 3+ independent modules? Multiple Builders work at the same time.
-
-| Command | What it does |
-|---------|-------------|
-| `/ccx:team-research` | Explore codebase in parallel, output constraints |
-| `/ccx:team-plan` | Split into tasks that don't step on each other |
-| `/ccx:team-exec` | Builders code in parallel |
-| `/ccx:team-review` | Codex + Gemini cross-review |
-
-```bash
-/ccx:team-research implement order system with CRUD, payment, and notifications
-# /clear
-/ccx:team-plan order-system
-# /clear
-/ccx:team-exec
-# /clear
-/ccx:team-review
-```
-
-::: warning
-Requires experimental feature flag: `"CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS": "1"` in settings.json.
-:::
+> Prerequisite: enable `CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS=1` in `~/.claude/settings.json`.
 
 ## Git tools
 
-| Command | What it does |
-|---------|-------------|
-| `/ccx:commit` | Analyzes diff, generates conventional commit message |
+| Command | Purpose |
+|---------|---------|
+| `/ccx:commit` | Smart conventional commit generation |
 | `/ccx:rollback` | Interactive rollback |
-| `/ccx:clean-branches` | Clean merged branches (dry-run by default, safe to try) |
+| `/ccx:clean-branches` | Clean merged / stale branches |
 | `/ccx:worktree` | Worktree management |
 
 ## Project management
 
-| Command | What it does |
-|---------|-------------|
-| `/ccx:init` | Generate CLAUDE.md for the project |
-| `/ccx:context` | Manage .context directory: log decisions, compress, view history |
+| Command | Purpose |
+|---------|---------|
+| `/ccx:init` | Initialize project CLAUDE.md |
+| `/ccx:context` | Manage `.context/` initialization, logging, compression, and history |
 
-```bash
-/ccx:context init
-/ccx:context log "Chose PostgreSQL for JSONB support"
-```
+## Selection guide
+
+- **Simple focused task**: `/ccx:frontend` or `/ccx:backend`
+- **Plan first**: `/ccx:plan`
+- **Execute with Claude in control**: `/ccx:execute`
+- **Execute with Codex leading**: `/ccx:codex-exec`
+- **Need strict constraints**: `/ccx:spec-*`
+- **Need parallel work across 3+ modules**: `/ccx:team-*`
+- **Want the full end-to-end path**: `/ccx:workflow`
+
+## Related docs
+
+- [Workflow guide](./workflows.md)
+- [MCP reference](./mcp.md)
+- [Configuration and CLI reference](./configuration.md)

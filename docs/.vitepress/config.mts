@@ -1,15 +1,15 @@
 import { defineConfig } from 'vitepress'
 
 export default defineConfig({
-  title: 'CCG',
-  description: 'Claude + Codex + Gemini 多模型协作开发系统',
+  title: 'CCX',
+  description: 'Claude Code Ex multi-model collaboration system',
 
-  base: '/ccg-workflow/',
+  base: '/claude-code-ex/',
   lastUpdated: true,
   cleanUrls: true,
 
   head: [
-    ['link', { rel: 'icon', type: 'image/svg+xml', href: '/ccg-workflow/logo.svg' }],
+    ['link', { rel: 'icon', type: 'image/svg+xml', href: '/claude-code-ex/logo.svg' }],
   ],
 
   locales: {
@@ -18,41 +18,41 @@ export default defineConfig({
       lang: 'zh-CN',
       themeConfig: {
         nav: [
-          { text: '指南', link: '/guide/getting-started' },
-          { text: '命令', link: '/guide/commands' },
+          { text: '快速开始', link: '/guide/getting-started' },
+          { text: '命令参考', link: '/guide/commands' },
           {
-            text: '更多',
+            text: '深入使用',
             items: [
-              { text: '工作流', link: '/guide/workflows' },
-              { text: 'MCP 配置', link: '/guide/mcp' },
-              { text: '配置', link: '/guide/configuration' },
+              { text: '工作流选择', link: '/guide/workflows' },
+              { text: 'MCP 与搜索能力', link: '/guide/mcp' },
+              { text: '配置、CLI 与排障', link: '/guide/configuration' },
             ],
           },
         ],
         sidebar: [
           {
-            text: '入门',
+            text: '开始使用 CCX',
             items: [
               { text: '快速开始', link: '/guide/getting-started' },
               { text: '命令参考', link: '/guide/commands' },
             ],
           },
           {
-            text: '进阶',
+            text: '按场景深入',
             items: [
-              { text: '工作流指南', link: '/guide/workflows' },
-              { text: 'MCP 配置', link: '/guide/mcp' },
-              { text: '配置说明', link: '/guide/configuration' },
+              { text: '工作流选择', link: '/guide/workflows' },
+              { text: 'MCP 与搜索能力', link: '/guide/mcp' },
+              { text: '配置、CLI 与排障', link: '/guide/configuration' },
             ],
           },
         ],
         editLink: {
-          pattern: 'https://github.com/fengshao1227/ccg-workflow/edit/main/docs/:path',
+          pattern: 'https://github.com/fengshao1227/claude-code-ex/edit/main/docs/:path',
           text: '在 GitHub 上编辑此页',
         },
         footer: {
           message: '基于 MIT 许可发布',
-          copyright: 'Copyright © 2025-present CCG Contributors',
+          copyright: 'Copyright © 2025-present CCX Contributors',
         },
         docFooter: {
           prev: '上一页',
@@ -72,44 +72,44 @@ export default defineConfig({
     en: {
       label: 'English',
       lang: 'en',
-      description: 'Claude + Codex + Gemini Multi-Model Collaboration System',
+      description: 'Claude Code Ex multi-model collaboration system',
       themeConfig: {
         nav: [
-          { text: 'Guide', link: '/en/guide/getting-started' },
-          { text: 'Commands', link: '/en/guide/commands' },
+          { text: 'Get Started', link: '/en/guide/getting-started' },
+          { text: 'Command Reference', link: '/en/guide/commands' },
           {
-            text: 'More',
+            text: 'Go Deeper',
             items: [
-              { text: 'Workflows', link: '/en/guide/workflows' },
-              { text: 'MCP Config', link: '/en/guide/mcp' },
-              { text: 'Configuration', link: '/en/guide/configuration' },
+              { text: 'Workflow Selection', link: '/en/guide/workflows' },
+              { text: 'MCP and Search', link: '/en/guide/mcp' },
+              { text: 'Configuration, CLI, and Troubleshooting', link: '/en/guide/configuration' },
             ],
           },
         ],
         sidebar: [
           {
-            text: 'Getting Started',
+            text: 'Start with CCX',
             items: [
               { text: 'Quick Start', link: '/en/guide/getting-started' },
               { text: 'Command Reference', link: '/en/guide/commands' },
             ],
           },
           {
-            text: 'Advanced',
+            text: 'Go Deeper by Task',
             items: [
-              { text: 'Workflow Guide', link: '/en/guide/workflows' },
-              { text: 'MCP Configuration', link: '/en/guide/mcp' },
-              { text: 'Configuration', link: '/en/guide/configuration' },
+              { text: 'Workflow Selection', link: '/en/guide/workflows' },
+              { text: 'MCP and Search', link: '/en/guide/mcp' },
+              { text: 'Configuration, CLI, and Troubleshooting', link: '/en/guide/configuration' },
             ],
           },
         ],
         editLink: {
-          pattern: 'https://github.com/fengshao1227/ccg-workflow/edit/main/docs/:path',
+          pattern: 'https://github.com/fengshao1227/claude-code-ex/edit/main/docs/:path',
           text: 'Edit this page on GitHub',
         },
         footer: {
           message: 'Released under the MIT License',
-          copyright: 'Copyright © 2025-present CCG Contributors',
+          copyright: 'Copyright © 2025-present CCX Contributors',
         },
       },
     },
@@ -117,7 +117,7 @@ export default defineConfig({
 
   themeConfig: {
     socialLinks: [
-      { icon: 'github', link: 'https://github.com/fengshao1227/ccg-workflow' },
+      { icon: 'github', link: 'https://github.com/fengshao1227/claude-code-ex' },
     ],
     search: {
       provider: 'local',
